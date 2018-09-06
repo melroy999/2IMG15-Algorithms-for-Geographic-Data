@@ -1,4 +1,4 @@
-package vsgridmaps;
+package agd;
 
 import java.io.IOException;
 
@@ -26,7 +26,7 @@ public class VSGridMaps {
                 // and work on that one...
                 
                 // TODO: uncomment and fill in your groupnumber
-                //saver.addSolution(inst, groupnumber);
+                saver.addSolution(inst, 7);
             }
 
             // NB: if you interrupt the program, the saver doesn't close and 

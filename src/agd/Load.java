@@ -1,4 +1,4 @@
-package vsgridmaps;
+package agd;
 
 import java.io.File;
 import java.io.IOException;

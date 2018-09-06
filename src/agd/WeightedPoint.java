@@ -1,4 +1,4 @@
-package vsgridmaps;
+package agd;
 
 public class WeightedPoint {
 

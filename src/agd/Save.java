@@ -1,4 +1,4 @@
-package vsgridmaps;
+package agd;
 
 import java.io.BufferedWriter;
 import java.io.File;
