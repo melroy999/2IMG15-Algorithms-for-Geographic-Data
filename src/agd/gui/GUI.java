@@ -22,6 +22,12 @@ public class GUI {
     private JPanel rootPanel;
     private JPanel displayPanel;
     private JButton openFileButton;
+    private JPanel controlPanel;
+    private JPanel filePanel;
+    private JPanel settingsPanel;
+    private JButton saveFileButton;
+    private JCheckBox magic1CheckBox;
+    private JCheckBox magic2CheckBox;
 
     private GUI(Core core) {
         this.core = core;

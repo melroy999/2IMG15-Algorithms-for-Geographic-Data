@@ -4,6 +4,13 @@ import java.util.ArrayList;
 
 public class WeightedPointList extends ArrayList<WeightedPoint> {
 
+    public WeightedPointList() {
+    }
+
+    public WeightedPointList(WeightedPointList points) {
+        super(points);
+    }
+
     /**
      * Add a point to the weighted point list.
      *

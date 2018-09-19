@@ -5,6 +5,7 @@ import agd.store.gui.Point;
 import agd.store.gui.Rectangle;
 import agd.store.gui.Square;
 import agd.store.instance.ProblemInstance;
+import agd.store.instance.WeightedPointList;
 import agd.store.math.Point2d;
 
 import javax.swing.*;
@@ -47,12 +48,16 @@ public class DrawPanel extends JPanel {
 
         // TODO draw the objects of interest
         if(gui.core.instance != null) {
+            // Gather the information we require.
+            ProblemInstance instance = gui.core.instance;
+            WeightedPointList points = instance.getPoints();
+
             // Save the old transform.
             AffineTransform old = g2.getTransform();
 
             // The scaling factor we should use.
             Dimension dimensions = gui.getDisplayPanelDimensions();
-            double scale = (dimensions.height - 2 * clearance) / (double) (gui.core.instance.maxy - gui.core.instance.miny);
+            double scale = (dimensions.height - 2 * clearance) / (double) (instance.maxy - instance.miny);
 
             // Translate to an inverted y-axis.
             g2.translate(0, getHeight() - 1);
@@ -64,32 +69,32 @@ public class DrawPanel extends JPanel {
             g2.translate(clearance, clearance);
 
             // Draw what we need.
-            drawRectangles(g2, scale);
-            drawErrorLines(g2, scale);
-            drawPoints(g2, scale);
+            drawRectangles(g2, scale, points);
+            drawErrorLines(g2, scale, points);
+            drawPoints(g2, scale, points);
 
             // Restore the transform.
             g2.setTransform(old);
         }
     }
 
-    private void drawPoints(Graphics2D g, double s) {
-        gui.core.instance.points.forEach(p -> new Point(p.scale(s)).draw(g));
-        gui.core.instance.points.forEach(p -> new Point(p.c.scale(s), Color.red).draw(g));
+    private void drawPoints(Graphics2D g, double s, WeightedPointList points) {
+        points.forEach(p -> new Point(p.scale(s), s * 0.07).draw(g));
+        points.forEach(p -> new Point(p.c.scale(s), Color.red, s * 0.07).draw(g));
     }
 
-    private void drawRectangles(Graphics2D g, double s) {
+    private void drawRectangles(Graphics2D g, double s, WeightedPointList points) {
         ProblemInstance i = gui.core.instance;
 
         new Rectangle(s * i.minx, s * i.miny, s * (i.maxx - i.minx), s * (i.maxy - i.miny)).draw(g);
-        i.points.forEach(p ->
+        points.forEach(p ->
         {
             Point2d q = new Point2d(p.bl.x, p.bl.y).scale(s);
             new Square(q.x, q.y, s * p.weight).draw(g);
         });
     }
 
-    private void drawErrorLines(Graphics2D g, double s) {
-        gui.core.instance.points.forEach(p -> new Line(p.scale(s), p.c.scale(s)).draw(g));
+    private void drawErrorLines(Graphics2D g, double s, WeightedPointList points) {
+        points.forEach(p -> new Line(p.scale(s), p.c.scale(s)).draw(g));
     }
 }

@@ -18,20 +18,14 @@ public class FileHandler {
 
     public void importFile(File file) {
         try(Scanner scanner = new Scanner(file)) {
-            // Create a wrapper that will hold all the data about the problem to solve.
-            ProblemInstance instance = new ProblemInstance();
 
-            // Read the header of the file to find the id of the instance, viewport bounds and number of points.
-            instance.id = scanner.nextInt();
-            instance.minx = scanner.nextInt();
-            instance.maxx = scanner.nextInt();
-            instance.miny = scanner.nextInt();
-            instance.maxy = scanner.nextInt();
+            // Create a wrapper that will hold all the data about the problem to solve.
+            ProblemInstance instance = new ProblemInstance(scanner.nextInt(), scanner.nextInt(), scanner.nextInt(), scanner.nextInt(), scanner.nextInt());
 
             // Add all of the new points.
             int n = scanner.nextInt();
             while(n > 0) {
-                instance.points.add(scanner.nextDouble(), scanner.nextDouble(), scanner.nextInt());
+                instance.addPoint(scanner.nextDouble(), scanner.nextDouble(), scanner.nextInt());
                 n--;
             }
 
