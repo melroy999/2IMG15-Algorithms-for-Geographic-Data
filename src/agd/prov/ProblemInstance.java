@@ -1,4 +1,4 @@
-package agd;
+package agd.prov;
 
 public class ProblemInstance {
 
