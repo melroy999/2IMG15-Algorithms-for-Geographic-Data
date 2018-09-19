@@ -31,6 +31,8 @@ public class Core {
     public void updateProblemInstance(ProblemInstance instance) {
         this.instance = instance;
         gui.redrawDisplayPanel();
+        gui.setMinError();
+        gui.setError();
     }
 
     /**

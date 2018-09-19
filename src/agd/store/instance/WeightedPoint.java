@@ -14,6 +14,9 @@ public class WeightedPoint extends Point2d {
     public final Point2i bl, br, tl, tr;
     public final Point2d c;
 
+    // The centroid of the final placement.
+    public Point2d assigned;
+
     /**
      * Create a point in 2d space with a weight and id.
      *
@@ -33,5 +36,22 @@ public class WeightedPoint extends Point2d {
         tl = bl.add(new Point2i(0, weight));
         tr = bl.add(new Point2i(weight, weight));
         c = new Point2d(bl.x + 0.5d * weight, bl.y + 0.5d * weight);
+
+        // For now, we make the assigned point the closest grid point.
+        assigned = new Point2d(c.x, c.y);
+    }
+
+    /**
+     * Check whether the chosen assignment for the centroid leads to overlap with another point.
+     *
+     * @param t The point to check overlap with.
+     * @return Whether the two regions associated with the points overlap.
+     */
+    public boolean hasOverlap(WeightedPoint t) {
+        Point2d a = assigned.add(new Point2d(weight, weight).scale(-0.5d));
+        Point2d b = t.assigned.add(new Point2d(t.weight, t.weight).scale(-0.5d));
+        int w = a.x <= b.x ? weight : t.weight;
+
+        return Math.abs(a.x - b.x) < w && Math.abs(a.y - b.y) < w;
     }
 }

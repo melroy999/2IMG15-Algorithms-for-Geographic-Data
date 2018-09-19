@@ -84,7 +84,17 @@ public abstract class Tuple2d<T> {
      * @return The euclidean distance between this tuple and the tuple t.
      */
     public double distance(Tuple2d t) {
-        return Math.sqrt(Math.pow(this.x - t.x, 2) + Math.pow(this.y - t.y, 2));
+        return Math.sqrt(distance2(t));
+    }
+
+    /**
+     * Calculate the square of the euclidean distance between this tuple and the given tuple.
+     *
+     * @param t The tuple we want to measure the euclidean distance to from this tuple.
+     * @return The euclidean distance between this tuple and the tuple t.
+     */
+    public double distance2(Tuple2d t) {
+        return Math.pow(this.x - t.x, 2) + Math.pow(this.y - t.y, 2);
     }
 
     /**

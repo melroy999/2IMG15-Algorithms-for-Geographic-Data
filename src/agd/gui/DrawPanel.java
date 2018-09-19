@@ -11,6 +11,7 @@ import agd.store.math.Point2d;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
+import java.util.Set;
 
 /**
  * The panel in which the result and intermediate steps of our algorithm can be displayed.
@@ -20,7 +21,7 @@ public class DrawPanel extends JPanel {
     private final GUI gui;
 
     // The clearance we want at the borders.
-    private int clearance = 120;
+    private static final int clearance = 120;
 
     /**
      * Creates a new <code>JPanel</code> with a double buffer and a flow layout.
@@ -44,13 +45,12 @@ public class DrawPanel extends JPanel {
         Graphics2D g2 = (Graphics2D) g;
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-
-
-        // TODO draw the objects of interest
+        // Only draw the following if an instance is set in the core.
         if(gui.core.instance != null) {
             // Gather the information we require.
             ProblemInstance instance = gui.core.instance;
             WeightedPointList points = instance.getPoints();
+            Set<Integer> invalids = instance.getInvalidPoints();
 
             // Save the old transform.
             AffineTransform old = g2.getTransform();
@@ -69,7 +69,7 @@ public class DrawPanel extends JPanel {
             g2.translate(clearance, clearance);
 
             // Draw what we need.
-            drawRectangles(g2, scale, points);
+            drawRectangles(g2, scale, points, invalids);
             drawErrorLines(g2, scale, points);
             drawPoints(g2, scale, points);
 
@@ -83,14 +83,14 @@ public class DrawPanel extends JPanel {
         points.forEach(p -> new Point(p.c.scale(s), Color.red, s * 0.07).draw(g));
     }
 
-    private void drawRectangles(Graphics2D g, double s, WeightedPointList points) {
+    private void drawRectangles(Graphics2D g, double s, WeightedPointList points, Set<Integer> invalids) {
         ProblemInstance i = gui.core.instance;
 
         new Rectangle(s * i.minx, s * i.miny, s * (i.maxx - i.minx), s * (i.maxy - i.miny)).draw(g);
         points.forEach(p ->
         {
             Point2d q = new Point2d(p.bl.x, p.bl.y).scale(s);
-            new Square(q.x, q.y, s * p.weight).draw(g);
+            new Square(q.x, q.y, s * p.weight, invalids.contains(p.id) ? Color.red : Color.black).draw(g);
         });
     }
 

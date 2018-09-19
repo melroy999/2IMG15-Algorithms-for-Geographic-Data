@@ -7,6 +7,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.Locale;
 
 public class GUI {
     // Reference to the singleton instance.
@@ -28,6 +29,8 @@ public class GUI {
     private JButton saveFileButton;
     private JCheckBox magic1CheckBox;
     private JCheckBox magic2CheckBox;
+    private JLabel minErrorLabel;
+    private JLabel errorLabel;
 
     private GUI(Core core) {
         this.core = core;
@@ -92,6 +95,22 @@ public class GUI {
     private void createUIComponents() {
         // Obviously, we have to initialize our drawing panel.
         displayPanel = new DrawPanel(this);
+    }
+
+    public void setMinError() {
+        if(core.instance != null) {
+            minErrorLabel.setText(String.format(Locale.ROOT, "%.3f", core.instance.getMinimumError()));
+        } else {
+            minErrorLabel.setText("0");
+        }
+    }
+
+    public void setError() {
+        if(core.instance != null) {
+            errorLabel.setText(String.format(Locale.ROOT, "%.3f", core.instance.getTotalError()));
+        } else {
+            errorLabel.setText("0");
+        }
     }
 
     /**
