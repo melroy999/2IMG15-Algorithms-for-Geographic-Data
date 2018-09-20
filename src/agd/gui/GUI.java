@@ -19,6 +19,9 @@ public class GUI {
     // The frame of the GUI.
     private static JFrame frame;
 
+    // A static file chooser, to avoid slow loading issues.
+    private static JFileChooser fc = new JFileChooser(); //now declared globally
+
     // Components of the GUI.
     private JPanel rootPanel;
     private JPanel displayPanel;
@@ -39,7 +42,6 @@ public class GUI {
 
     private void init() {
         openFileButton.addActionListener(e -> {
-            JFileChooser fc = new JFileChooser();
             int status = fc.showOpenDialog(rootPanel);
 
             if(status == JFileChooser.APPROVE_OPTION) {
