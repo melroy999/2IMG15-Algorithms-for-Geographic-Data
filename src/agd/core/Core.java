@@ -1,8 +1,10 @@
 package agd.core;
 
+import agd.data.output.ProblemSolution;
 import agd.file.FileHandler;
 import agd.gui.GUI;
-import agd.state.util.ProblemInstance;
+import agd.data.input.ProblemInstance;
+import agd.solver.TestSolver;
 
 public class Core {
     // The singleton instance of the core.
@@ -17,6 +19,9 @@ public class Core {
     // The current instance we are attempting to solve.
     public ProblemInstance instance;
 
+    // The solution of the current problem instance.
+    public ProblemSolution solution;
+
     private Core() {
         // Create the GUI.
         gui = GUI.createAndShow(this);
@@ -28,8 +33,10 @@ public class Core {
      *
      * @param instance The new problem instance.
      */
-    public void updateProblemInstance(ProblemInstance instance) {
+    public void solveProblemInstance(ProblemInstance instance) {
         this.instance = instance;
+        this.solution = new ProblemSolution(instance, new TestSolver());
+
         gui.redrawDisplayPanel();
         gui.setMinError();
         gui.setError();

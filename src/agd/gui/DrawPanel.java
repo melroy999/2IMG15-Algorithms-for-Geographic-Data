@@ -1,16 +1,19 @@
 package agd.gui;
 
+import agd.data.input.WeightedPoint;
+import agd.data.output.HalfGridPoint;
+import agd.data.output.ProblemSolution;
 import agd.gui.util.Line;
 import agd.gui.util.Point;
 import agd.gui.util.Rectangle;
 import agd.gui.util.Square;
-import agd.state.util.ProblemInstance;
-import agd.state.util.WeightedPointList;
+import agd.data.input.ProblemInstance;
 import agd.math.Point2d;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -46,18 +49,20 @@ public class DrawPanel extends JPanel {
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         // Only draw the following if an instance is set in the core.
-        if(gui.core.instance != null) {
+        if(gui.core.instance != null && gui.core.solution != null) {
             // Gather the information we require.
             ProblemInstance instance = gui.core.instance;
-            WeightedPointList points = instance.getPoints();
-            Set<Integer> invalids = instance.getInvalidPoints();
+
+            ProblemSolution solution = gui.core.solution;
+            List<HalfGridPoint> placedPoints = solution.getPoints();
+            Set<Integer> invalids = solution.getInvalidPoints();
 
             // Save the old transform.
             AffineTransform old = g2.getTransform();
 
             // The scaling factor we should use.
             Dimension dimensions = gui.getDisplayPanelDimensions();
-            double scale = (dimensions.height - 2 * clearance) / (double) (instance.maxy - instance.miny);
+            double scale = (dimensions.height - 2 * clearance) / (double) (instance.max_y - instance.min_y);
 
             // Translate to an inverted y-axis.
             g2.translate(0, getHeight() - 1);
@@ -69,32 +74,54 @@ public class DrawPanel extends JPanel {
             g2.translate(clearance, clearance);
 
             // Draw what we need.
-            drawRectangles(g2, scale, points, invalids);
-            drawErrorLines(g2, scale, points);
-            drawPoints(g2, scale, points);
+            drawRectangles(g2, scale, placedPoints, invalids);
+            drawErrorLines(g2, scale, placedPoints);
+            drawPoints(g2, scale, placedPoints);
 
             // Restore the transform.
             g2.setTransform(old);
         }
     }
 
-    private void drawPoints(Graphics2D g, double s, WeightedPointList points) {
-        points.forEach(p -> new Point(p.scale(s), s * 0.07).draw(g));
-        points.forEach(p -> new Point(p.c.scale(s), Color.red, s * 0.07).draw(g));
+    /**
+     * Draw the points in our program as circles.
+     *
+     * @param g The graphics object to draw the object with.
+     * @param s The scale at which the objects should be drawn.
+     * @param points The list of points that are given in the problem solution.
+     */
+    private void drawPoints(Graphics2D g, double s, List<HalfGridPoint> points) {
+        points.forEach(p -> new Point(p.o.scale(s), s * 0.07).draw(g));
+        points.forEach(p -> new Point(p.point().scale(s), Color.red, s * 0.07).draw(g));
     }
 
-    private void drawRectangles(Graphics2D g, double s, WeightedPointList points, Set<Integer> invalids) {
+    /**
+     * Draw the points in our program as circles.
+     *
+     * @param g The graphics object to draw the object with.
+     * @param s The scale at which the objects should be drawn.
+     * @param points The list of points that are given in the problem solution.
+     * @param invalids The points that are marked as invalid.
+     */
+    private void drawRectangles(Graphics2D g, double s, List<HalfGridPoint> points, Set<Integer> invalids) {
         ProblemInstance i = gui.core.instance;
 
-        new Rectangle(s * i.minx, s * i.miny, s * (i.maxx - i.minx), s * (i.maxy - i.miny)).draw(g);
+        new Rectangle(s * i.min_x, s * i.min_y, s * (i.max_x - i.min_x), s * (i.max_y - i.min_y)).draw(g);
         points.forEach(p ->
         {
-            Point2d q = new Point2d(p.bl.x, p.bl.y).scale(s);
-            new Square(q.x, q.y, s * p.weight, invalids.contains(p.id) ? Color.red : Color.black).draw(g);
+            Point2d q = p.point().sub(new Point2d(0.5 * p.o.w, 0.5 * p.o.w)).scale(s);
+            new Square(q.x, q.y, s * p.o.w, invalids.contains(p.o.i) ? Color.red : Color.black).draw(g);
         });
     }
 
-    private void drawErrorLines(Graphics2D g, double s, WeightedPointList points) {
-        points.forEach(p -> new Line(p.scale(s), p.c.scale(s)).draw(g));
+    /**
+     * Draw the points in our program as circles.
+     *
+     * @param g The graphics object to draw the object with.
+     * @param s The scale at which the objects should be drawn.
+     * @param points The list of points that are given in the problem solution.
+     */
+    private void drawErrorLines(Graphics2D g, double s, List<HalfGridPoint> points) {
+        points.forEach(p -> new Line(p.point().scale(s), p.o.scale(s)).draw(g));
     }
 }

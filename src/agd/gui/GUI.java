@@ -100,16 +100,16 @@ public class GUI {
     }
 
     public void setMinError() {
-        if(core.instance != null) {
-            minErrorLabel.setText(String.format(Locale.ROOT, "%.3f", core.instance.getMinimumError()));
+        if(core.solution != null) {
+            minErrorLabel.setText(String.format(Locale.ROOT, "%.3f", core.solution.getMinimumError()));
         } else {
             minErrorLabel.setText("0");
         }
     }
 
     public void setError() {
-        if(core.instance != null) {
-            errorLabel.setText(String.format(Locale.ROOT, "%.3f", core.instance.getTotalError()));
+        if(core.solution != null) {
+            errorLabel.setText(String.format(Locale.ROOT, "%.3f", core.solution.getTotalError()));
         } else {
             errorLabel.setText("0");
         }

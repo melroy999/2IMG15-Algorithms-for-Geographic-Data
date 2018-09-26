@@ -11,7 +11,7 @@ public class LeftRight {
      */
     private void translatePoints (){
 
-        // p(x, y)→round(p(x, y)−0.5wx)
+        // point(x, y)→round(point(x, y)−0.5wx)
 
     }
 
