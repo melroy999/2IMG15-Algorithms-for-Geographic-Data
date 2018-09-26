@@ -1,6 +1,6 @@
-package agd.store.gui;
+package agd.gui.util;
 
-import agd.store.math.Point2d;
+import agd.math.Point2d;
 
 import java.awt.*;
 import java.awt.geom.Ellipse2D;

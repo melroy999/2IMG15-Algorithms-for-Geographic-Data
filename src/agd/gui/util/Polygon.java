@@ -1,7 +1,7 @@
-package agd.store.gui;
+package agd.gui.util;
 
-import agd.store.math.Point2d;
-import agd.store.math.Tuple2d;
+import agd.math.Point2d;
+import agd.math.Tuple2d;
 
 import java.awt.*;
 

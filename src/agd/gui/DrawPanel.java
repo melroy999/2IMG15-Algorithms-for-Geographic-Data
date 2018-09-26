@@ -1,12 +1,12 @@
 package agd.gui;
 
-import agd.store.gui.Line;
-import agd.store.gui.Point;
-import agd.store.gui.Rectangle;
-import agd.store.gui.Square;
-import agd.store.instance.ProblemInstance;
-import agd.store.instance.WeightedPointList;
-import agd.store.math.Point2d;
+import agd.gui.util.Line;
+import agd.gui.util.Point;
+import agd.gui.util.Rectangle;
+import agd.gui.util.Square;
+import agd.state.util.ProblemInstance;
+import agd.state.util.WeightedPointList;
+import agd.math.Point2d;
 
 import javax.swing.*;
 import java.awt.*;

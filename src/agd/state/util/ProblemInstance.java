@@ -1,6 +1,6 @@
-package agd.store.instance;
+package agd.state.util;
 
-import agd.store.math.Point2d;
+import agd.math.Point2d;
 
 import java.util.HashSet;
 import java.util.Set;

@@ -2,7 +2,7 @@ package agd.core;
 
 import agd.file.FileHandler;
 import agd.gui.GUI;
-import agd.store.instance.ProblemInstance;
+import agd.state.util.ProblemInstance;
 
 public class Core {
     // The singleton instance of the core.

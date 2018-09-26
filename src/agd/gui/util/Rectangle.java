@@ -1,4 +1,4 @@
-package agd.store.gui;
+package agd.gui.util;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;

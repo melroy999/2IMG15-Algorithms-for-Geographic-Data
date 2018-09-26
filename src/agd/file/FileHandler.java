@@ -1,7 +1,7 @@
 package agd.file;
 
 import agd.core.Core;
-import agd.store.instance.ProblemInstance;
+import agd.state.util.ProblemInstance;
 
 import java.io.File;
 import java.io.FileNotFoundException;

@@ -1,7 +1,7 @@
-package agd.store.instance;
+package agd.state.util;
 
-import agd.store.math.Point2d;
-import agd.store.math.Point2i;
+import agd.math.Point2d;
+import agd.math.Point2i;
 
 public class WeightedPoint extends Point2d {
     // The index of the point.

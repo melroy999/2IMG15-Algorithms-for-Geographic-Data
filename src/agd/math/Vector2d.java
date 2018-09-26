@@ -1,4 +1,4 @@
-package agd.store.math;
+package agd.math;
 
 /**
  * A class representing a 2d vector.
