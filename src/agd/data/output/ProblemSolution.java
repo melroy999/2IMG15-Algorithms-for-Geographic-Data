@@ -1,13 +1,11 @@
 package agd.data.output;
 
 import agd.data.input.ProblemInstance;
+import agd.data.input.WeightedPoint;
 import agd.math.Point2d;
 import agd.solver.AbstractSolver;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * A data structure that contains the solution for the given problem instance.
@@ -76,7 +74,21 @@ public class ProblemSolution {
             }
         }
 
-        // TODO: Check whether we have all points covered...?
+        // Check whether each point is represented in the solution.
+        List<WeightedPoint> originalPoints = instance.getPoints();
+
+        if(points.size() != instance.getPoints().size()) {
+            throw new RuntimeException("There are points missing in the solution (or there are too many points)!");
+        } else {
+            List<HalfGridPoint> sortedPoints = getPoints();
+            sortedPoints.sort(Comparator.comparingInt(a -> a.o.i));
+
+            for(int i = 0; i < points.size(); i++) {
+                if(originalPoints.get(i).i != sortedPoints.get(i).o.i) {
+                    throw new RuntimeException("The " + i + "th point is not present in the solution!");
+                }
+            }
+        }
 
         return errors;
     }
