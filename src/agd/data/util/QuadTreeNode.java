@@ -3,6 +3,7 @@ package agd.data.util;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * An efficient data structure for rectangle collision detection.
@@ -77,13 +78,28 @@ public class QuadTreeNode {
      * Query the given rectangular area for intersecting rectangles.
      *
      * @param r The rectangular area to query.
+     */
+    public List<EntryRectangle> query(Rectangle r) {
+        Set<EntryRectangle> intersections = new HashSet<>();
+
+        // Using the recursive definition to find all potential intersecting rectangles.
+        query(r, intersections);
+
+        // Find which rectangles intersect.
+        return intersections.stream().filter(c -> c.intersects(r)).collect(Collectors.toList());
+    }
+
+    /**
+     * Query the given rectangular area for intersecting rectangles.
+     *
+     * @param r The rectangular area to query.
      * @param intersections A set holding rectangles in the quad tree that intersect with the given area.
      */
-    public void query(Rectangle r, Set<EntryRectangle> intersections) {
+    private void query(Rectangle r, Set<EntryRectangle> intersections) {
         if(box.intersects(r)) {
             if(Arrays.stream(children).noneMatch(Objects::nonNull)) {
                 // We are querying a leaf node. Do a naive check.
-                entries.stream().filter(t -> t.intersects(r)).forEach(intersections::add);
+                intersections.addAll(entries);
             } else {
                 // We have to find which of the children the rectangle overlaps with.
                 Arrays.stream(children).forEach(c -> c.query(r, intersections));
@@ -128,6 +144,8 @@ public class QuadTreeNode {
 
         // Push the current list of entries to the children through insertions.
         entries.forEach(this::insert);
+
+        // TODO it might still be better to store certain nodes in internal nodes in case they are in more than one cell.
 
         // Clear the list of entries.
         entries.clear();
