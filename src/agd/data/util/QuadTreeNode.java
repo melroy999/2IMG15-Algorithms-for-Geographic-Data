@@ -62,7 +62,6 @@ public class QuadTreeNode {
      * @param r The rectangle that should be deleted from the quad tree.
      */
     public void delete(EntryRectangle r) {
-        //TODO implement deletion.
         if(box.intersects(r)) {
             if(Arrays.stream(children).noneMatch(Objects::nonNull)) {
                 // We are querying a leaf node. Delete it if it is here.

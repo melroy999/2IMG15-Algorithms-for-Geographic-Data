@@ -33,4 +33,6 @@ public class WeightedPoint extends Point2d {
         Point2i bottomLeft = new Point2i((int) Math.round(x - 0.5d * w), (int) Math.round(y - 0.5d * w));
         c = new Point2d(bottomLeft.x + 0.5d * w, bottomLeft.y + 0.5d * w);
     }
+
+    // TODO possibly add a better equality and hashcode.
 }
