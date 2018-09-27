@@ -1,7 +1,5 @@
 package agd.data.util;
 
-import org.w3c.dom.css.Rect;
-
 import java.awt.*;
 import java.util.*;
 import java.util.List;
@@ -21,7 +19,7 @@ public class QuadTreeNode {
     private final Rectangle box;
 
     // The rectangles that are stored within the node (if the node is a leaf).
-    private final List<Rectangle> entries = new ArrayList<>();
+    private final List<EntryRectangle> entries = new ArrayList<>();
 
     /**
      * Create a new quad tree node with the given bounding box.
@@ -38,7 +36,7 @@ public class QuadTreeNode {
      *
      * @param r The rectangle to insert into the quad tree.
      */
-    public void insert(Rectangle r) {
+    public void insert(EntryRectangle r) {
         // First, check whether r has overlap with the bounding box.
         if(box.intersects(r)) {
             if(Arrays.stream(children).noneMatch(Objects::nonNull)) {
@@ -63,8 +61,17 @@ public class QuadTreeNode {
      *
      * @param r The rectangle that should be deleted from the quad tree.
      */
-    public void delete(Rectangle r) {
+    public void delete(EntryRectangle r) {
         //TODO implement deletion.
+        if(box.intersects(r)) {
+            if(Arrays.stream(children).noneMatch(Objects::nonNull)) {
+                // We are querying a leaf node. Delete it if it is here.
+                entries.remove(r);
+            } else {
+                // We have to find which of the children the rectangle overlaps with.
+                Arrays.stream(children).forEach(c -> c.delete(r));
+            }
+        }
     }
 
     /**
@@ -73,7 +80,7 @@ public class QuadTreeNode {
      * @param r The rectangular area to query.
      * @param intersections A set holding rectangles in the quad tree that intersect with the given area.
      */
-    public void query(Rectangle r, Set<Rectangle> intersections) {
+    public void query(Rectangle r, Set<EntryRectangle> intersections) {
         if(box.intersects(r)) {
             if(Arrays.stream(children).noneMatch(Objects::nonNull)) {
                 // We are querying a leaf node. Do a naive check.
@@ -81,6 +88,22 @@ public class QuadTreeNode {
             } else {
                 // We have to find which of the children the rectangle overlaps with.
                 Arrays.stream(children).forEach(c -> c.query(r, intersections));
+            }
+        }
+    }
+
+    /**
+     * Clear the data in the quad tree.
+     */
+    public void clear() {
+        // Clear whatever data we have in this node.
+        entries.clear();
+
+        // Clear all the children recursively.
+        for (int i = 0; i < children.length; i++) {
+            if (children[i] != null) {
+                children[i].clear();
+                children[i] = null;
             }
         }
     }
