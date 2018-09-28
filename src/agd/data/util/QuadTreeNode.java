@@ -9,18 +9,18 @@ import java.util.stream.Collectors;
  * An efficient data structure for rectangle collision detection.
  */
 // TODO make our own implementation of a rectangle holding the id of the associated point, with enhanced equality checks.
-public class QuadTreeNode {
+public class QuadTreeNode<T extends EntryRectangle> {
     // The maximum number of nodes that are allowed to be inside of the node before splitting.
     private static final int NO_MAX_ENTRIES = 5;
 
     // The children of the node in the quad tree.
-    private final QuadTreeNode[] children;
+    private final QuadTreeNode<T>[] children;
 
     // The rectangular bounding box of the node.
     private final Rectangle box;
 
     // The rectangles that are stored within the node (if the node is a leaf).
-    private final List<EntryRectangle> entries = new ArrayList<>();
+    private final List<T> entries = new ArrayList<>();
 
     /**
      * Create a new quad tree node with the given bounding box.
@@ -37,7 +37,7 @@ public class QuadTreeNode {
      *
      * @param r The rectangle to insert into the quad tree.
      */
-    public void insert(EntryRectangle r) {
+    public void insert(T r) {
         // First, check whether r has overlap with the bounding box.
         if(box.intersects(r)) {
             if(Arrays.stream(children).noneMatch(Objects::nonNull)) {
@@ -62,7 +62,7 @@ public class QuadTreeNode {
      *
      * @param r The rectangle that should be deleted from the quad tree.
      */
-    public void delete(EntryRectangle r) {
+    public void delete(T r) {
         if(box.intersects(r)) {
             if(Arrays.stream(children).noneMatch(Objects::nonNull)) {
                 // We are querying a leaf node. Delete it if it is here.
@@ -80,7 +80,7 @@ public class QuadTreeNode {
      * @param r The rectangular area to query.
      */
     public List<EntryRectangle> query(Rectangle r) {
-        Set<EntryRectangle> intersections = new HashSet<>();
+        Set<T> intersections = new HashSet<>();
 
         // Using the recursive definition to find all potential intersecting rectangles.
         query(r, intersections);
@@ -95,7 +95,7 @@ public class QuadTreeNode {
      * @param r The rectangular area to query.
      * @param intersections A set holding rectangles in the quad tree that intersect with the given area.
      */
-    private void query(Rectangle r, Set<EntryRectangle> intersections) {
+    private void query(Rectangle r, Set<T> intersections) {
         if(box.intersects(r)) {
             if(Arrays.stream(children).noneMatch(Objects::nonNull)) {
                 // We are querying a leaf node. Do a naive check.
@@ -137,10 +137,10 @@ public class QuadTreeNode {
         int y = box.y;
 
         // Create the child nodes.
-        children[0] = new QuadTreeNode(new Rectangle(x, y, halfWidth, halfHeight));
-        children[1] = new QuadTreeNode(new Rectangle(x + halfWidth, y, halfWidth2, halfHeight));
-        children[2] = new QuadTreeNode(new Rectangle(x, y + halfHeight, halfWidth, halfHeight2));
-        children[3] = new QuadTreeNode(new Rectangle(x + halfWidth, y + halfHeight, halfWidth2, halfHeight2));
+        children[0] = new QuadTreeNode<>(new Rectangle(x, y, halfWidth, halfHeight));
+        children[1] = new QuadTreeNode<>(new Rectangle(x + halfWidth, y, halfWidth2, halfHeight));
+        children[2] = new QuadTreeNode<>(new Rectangle(x, y + halfHeight, halfWidth, halfHeight2));
+        children[3] = new QuadTreeNode<>(new Rectangle(x + halfWidth, y + halfHeight, halfWidth2, halfHeight2));
 
         // Push the current list of entries to the children through insertions.
         entries.forEach(this::insert);
