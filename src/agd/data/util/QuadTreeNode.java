@@ -14,7 +14,7 @@ public class QuadTreeNode<T extends EntryRectangle> {
     private static final int NO_MAX_ENTRIES = 5;
 
     // The children of the node in the quad tree.
-    private final QuadTreeNode<T>[] children;
+    private final List<QuadTreeNode<T>> children;
 
     // The rectangular bounding box of the node.
     private final Rectangle box;
@@ -29,7 +29,7 @@ public class QuadTreeNode<T extends EntryRectangle> {
      */
     public QuadTreeNode(Rectangle box) {
         this.box = box;
-        this.children = new QuadTreeNode[4];
+        this.children = new ArrayList<>(4);
     }
 
     /**
@@ -40,7 +40,7 @@ public class QuadTreeNode<T extends EntryRectangle> {
     public void insert(T r) {
         // First, check whether r has overlap with the bounding box.
         if(box.intersects(r)) {
-            if(Arrays.stream(children).noneMatch(Objects::nonNull)) {
+            if(children.stream().noneMatch(Objects::nonNull)) {
                 // We are attempting to insert r into a leaf node.
                 entries.add(r);
 
@@ -52,7 +52,7 @@ public class QuadTreeNode<T extends EntryRectangle> {
                 }
             } else {
                 // We have to find which of the children the rectangle overlaps with.
-                Arrays.stream(children).forEach(c -> c.insert(r));
+                children.forEach(c -> c.insert(r));
             }
         }
     }
@@ -64,12 +64,12 @@ public class QuadTreeNode<T extends EntryRectangle> {
      */
     public void delete(T r) {
         if(box.intersects(r)) {
-            if(Arrays.stream(children).noneMatch(Objects::nonNull)) {
+            if(children.stream().noneMatch(Objects::nonNull)) {
                 // We are querying a leaf node. Delete it if it is here.
                 entries.remove(r);
             } else {
                 // We have to find which of the children the rectangle overlaps with.
-                Arrays.stream(children).forEach(c -> c.delete(r));
+                children.forEach(c -> c.delete(r));
             }
         }
     }
@@ -97,12 +97,12 @@ public class QuadTreeNode<T extends EntryRectangle> {
      */
     private void query(Rectangle r, Set<T> intersections) {
         if(box.intersects(r)) {
-            if(Arrays.stream(children).noneMatch(Objects::nonNull)) {
+            if(children.stream().noneMatch(Objects::nonNull)) {
                 // We are querying a leaf node. Do a naive check.
                 intersections.addAll(entries);
             } else {
                 // We have to find which of the children the rectangle overlaps with.
-                Arrays.stream(children).forEach(c -> c.query(r, intersections));
+                children.forEach(c -> c.query(r, intersections));
             }
         }
     }
@@ -115,10 +115,10 @@ public class QuadTreeNode<T extends EntryRectangle> {
         entries.clear();
 
         // Clear all the children recursively.
-        for (int i = 0; i < children.length; i++) {
-            if (children[i] != null) {
-                children[i].clear();
-                children[i] = null;
+        for (int i = 0; i < children.size(); i++) {
+            if (children.get(i) != null) {
+                children.get(i).clear();
+                children.set(i, null);
             }
         }
     }
@@ -137,10 +137,10 @@ public class QuadTreeNode<T extends EntryRectangle> {
         int y = box.y;
 
         // Create the child nodes.
-        children[0] = new QuadTreeNode<>(new Rectangle(x, y, halfWidth, halfHeight));
-        children[1] = new QuadTreeNode<>(new Rectangle(x + halfWidth, y, halfWidth2, halfHeight));
-        children[2] = new QuadTreeNode<>(new Rectangle(x, y + halfHeight, halfWidth, halfHeight2));
-        children[3] = new QuadTreeNode<>(new Rectangle(x + halfWidth, y + halfHeight, halfWidth2, halfHeight2));
+        children.set(0, new QuadTreeNode<>(new Rectangle(x, y, halfWidth, halfHeight)));
+        children.set(1, new QuadTreeNode<>(new Rectangle(x + halfWidth, y, halfWidth2, halfHeight)));
+        children.set(2, new QuadTreeNode<>(new Rectangle(x, y + halfHeight, halfWidth, halfHeight2)));
+        children.set(3, new QuadTreeNode<>(new Rectangle(x + halfWidth, y + halfHeight, halfWidth2, halfHeight2)));
 
         // Push the current list of entries to the children through insertions.
         entries.forEach(this::insert);
