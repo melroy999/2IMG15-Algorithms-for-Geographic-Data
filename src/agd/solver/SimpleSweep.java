@@ -1,14 +1,13 @@
-package agd.sweepline;
+package agd.solver;
 
 import agd.data.input.ProblemInstance;
 import agd.data.output.HalfGridPoint;
-import agd.solver.AbstractSolver;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 
 // Sweep line algorithm that handles points from left to right
-public class LeftRight extends AbstractSolver {
+public class SimpleSweep extends AbstractSolver {
     // Variables
 
     /**
@@ -26,15 +25,7 @@ public class LeftRight extends AbstractSolver {
                 points.add(new HalfGridPoint(Math.round(p.x - 0.5*p.w), Math.round(p.y - 0.5*p.w), p)));
 
         // Sort the points by x-coord
-        // Moet ik nog kijken of ze terug kunnen naar de orignele volgorde aangezien ze een referentie hebben naar het orignele punt?
         points.sort(new SortByX());
-    }
-
-    /**
-     * Sort the translated points by x-coord, making sure that the order can be reverted to the original
-     */
-    private void sortPoints () {
-
     }
 
     /**
@@ -49,15 +40,14 @@ public class LeftRight extends AbstractSolver {
         translatePoints(instance, points);
 
         // TODO: Create events
-
-        // TODO: Use a sweep line algorithm to start placing square regions, tracking the regions that have been placed
-        // TODO: Figure out the above
-
-        // Status: Coords of corners of currently placed squares
-
         // Events: -Lower left region corner reached. Place square if possible or move to the right until possible to place
         //          and add square corner coords to status
         //         -Lower right region corner reached. Remove square corner coords from status
+
+
+        // TODO: Use a sweep line algorithm to start placing square regions, tracking the regions that have been placed
+        // TODO: Figure out the above
+        // Status: Coords of corners of currently placed squares in quadtree
     }
 }
 
@@ -66,6 +56,6 @@ class SortByX implements Comparator<HalfGridPoint>
     // Sort HalfGridPoints by their x-coords
     public int compare(HalfGridPoint a, HalfGridPoint b)
     {
-        return (int)a.point().x - (int)b.point().x;
+        return Double.compare(a.point().x, b.point().x);
     }
 }
