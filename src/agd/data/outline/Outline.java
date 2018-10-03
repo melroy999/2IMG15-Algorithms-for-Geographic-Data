@@ -19,6 +19,15 @@ public class Outline {
     }
 
     /**
+     * Get an access point to the edge cycle in the outline.
+     *
+     * @return The lowest edge in the outline.
+     */
+    public OutlineEdge getEdge() {
+        return edge;
+    }
+
+    /**
      * Insert the given rectangle into the outline.
      *
      * @param rectangle The rectangle to insert into the outline.

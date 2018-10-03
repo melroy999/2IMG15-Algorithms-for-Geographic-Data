@@ -99,7 +99,7 @@ public class OutlineEdge implements Iterable<OutlineEdge> {
      * @param conflict An edge perpendicular to this edge.
      * @return The intersection point of the two edges.
      */
-    private Point2d getIntersection(OutlineEdge conflict) {
+    public Point2d getIntersection(OutlineEdge conflict) {
         // Based on the orientation of the edge, find the correct intersection point.
         if(direction.isHorizontal) {
             return new Point2d(conflict.origin.x, origin.y);
@@ -217,6 +217,49 @@ public class OutlineEdge implements Iterable<OutlineEdge> {
                 case DOWN: return UP;
                 case LEFT: return RIGHT;
                 default: return LEFT;
+            }
+        }
+
+        /**
+         * Get the offset directional vector associated with the direction.
+         *
+         * @return A vector with components length one indicating the direction in which a point should be translated.
+         */
+        public Point2d bufferVector() {
+            switch (this) {
+                case UP: return new Point2d(-1, -1);
+                case RIGHT: return new Point2d(-1, 1);
+                case DOWN: return new Point2d(1, 1);
+                default: return new Point2d(1, -1);
+            }
+        }
+
+        /**
+         * Get the offset directional vector associated with a left corner cutoff.
+         *
+         * @return A vector with components length one indicating the direction in which a point should be translated.
+         */
+        public Point2d leftTurnVector() {
+            switch (this) {
+                case UP: return new Point2d(0, 1);
+                case RIGHT: return new Point2d(1, 0);
+                case DOWN: return new Point2d(0, -1);
+                default: return new Point2d(-1, 0);
+            }
+        }
+
+        /**
+         * Check whether the current direction followed by the given direction is a left turn.
+         *
+         * @param direction The direction to check the relative position of.
+         * @return True if the direction moves to the left, false otherwise.
+         */
+        public boolean isLeftTurn(Direction direction) {
+            switch (this) {
+                case UP: return direction == LEFT;
+                case RIGHT: return direction == UP;
+                case DOWN: return direction == RIGHT;
+                default: return direction == DOWN;
             }
         }
     }
