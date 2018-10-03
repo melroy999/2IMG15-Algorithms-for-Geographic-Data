@@ -25,7 +25,7 @@ public class RightEndpointEvent extends AbstractEvent {
         status.remove(segment);
 
         // Check whether the line segment intersects with one of its neighbors.
-        if(above.intersects(below)) events.add(new IntersectionEvent(above, below));
+        if(above != null && above.intersects(below)) events.add(new IntersectionEvent(above, below));
     }
 
     @Override

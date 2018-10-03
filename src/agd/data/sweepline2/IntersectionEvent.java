@@ -29,13 +29,20 @@ public class IntersectionEvent extends AbstractEvent {
         status.remove(above);
         status.remove(below);
 
-        // TODO what the hell is swapping?
-        // Shorten the one that is below, such that it is now above.
-        // This is difficult.
+        // Swap the two positions.
+        above.swap(below);
 
-        // http://geomalgorithms.com/a09-_intersect-3.html
+        // Add them again to the status.
+        status.insert(above);
+        status.insert(below);
 
+        // Note that the original above is now below. Above is segE1, below is SegE2.
+        LineSegment s1 = status.above(below);
+        LineSegment s2 = status.below(above);
 
+        // Check whether the line segment intersects with one of its neighbors.
+        if(s1 != null && s1.intersects(below)) events.add(new IntersectionEvent(s1, below));
+        if(s2 != null && s2.intersects(above)) events.add(new IntersectionEvent(above, s2));
     }
 
     @Override
