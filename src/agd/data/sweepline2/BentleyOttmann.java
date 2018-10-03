@@ -21,6 +21,8 @@ public class BentleyOttmann {
             events.add(new RightEndpointEvent(segment));
         });
 
+        // TODO Add sorting/comparator to abstract events.
+
         // The status of the sweep.
         SweepStatus status = new SweepStatus();
 
