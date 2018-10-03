@@ -2,8 +2,6 @@ package agd.data.outline;
 
 import agd.math.Point2d;
 
-import java.util.Iterator;
-
 /**
  * A buffered version of an original outline.
  */
@@ -59,6 +57,14 @@ public class BufferedOutline {
         last.setNext(edge);
     }
 
+    /**
+     * Get an access point to the edge cycle in the outline.
+     *
+     * @return The lowest edge in the outline.
+     */
+    public OutlineEdge getEdge() {
+        return edge;
+    }
 
     /**
      * Remove the intersections within the outline.

@@ -2,6 +2,9 @@ package agd.data.sweepline2;
 
 import java.util.TreeSet;
 
+/**
+ * A data structure in which the status of the sweep is kept.
+ */
 public class SweepStatus {
     // The status, represented as a tree set.
     private TreeSet<LineSegment> status = new TreeSet<>();
