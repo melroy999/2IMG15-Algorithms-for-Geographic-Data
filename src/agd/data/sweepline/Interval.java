@@ -67,6 +67,6 @@ public class Interval implements Comparable<Interval> {
 
     @Override
     public int compareTo(Interval o) {
-        return 0;
+        return this.start == o.start ? Integer.compare(this.end, o.end) : Integer.compare(this.start, o.start);
     }
 }
