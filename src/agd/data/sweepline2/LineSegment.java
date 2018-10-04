@@ -44,42 +44,18 @@ public class LineSegment implements Comparable<LineSegment> {
 
         if(edge.getDirection().isHorizontal != ls.edge.getDirection().isHorizontal) {
 
-            Point2d o1 = edge.getOrigin();
-            Point2d t1 = edge.getNext().getOrigin();
-
-            Point2d o2 = ls.edge.getOrigin();
-            Point2d t2 = ls.edge.getNext().getOrigin();
-
             if(edge.getDirection().isHorizontal) {
-                // The x value is a range, y is constant.
-                double min_x = Math.min(o1.x, t1.x);
-                double max_x = Math.max(o1.x, t1.x);
-                double x = o2.x;
-
-                if(x <= min_x || x >= max_x) {
-                    return false;
-                }
-
-                double min_y = Math.min(o2.y, t2.y);
-                double max_y = Math.max(o2.y, t2.y);
-                double y = o1.y;
-
-                return !(y <= min_y) && !(y >= max_y);
+                // By construction of a line segment, the left will have the lowest x and y.
+                double x = ls.left.x;
+                if(x <= left.x || x >= right.x) return false;
+                double y = left.y;
+                return !(y <= ls.left.y) && !(y >= ls.right.y);
             } else {
                 // The y value is a range, x is constant.
-                double min_x = Math.min(o2.x, t2.x);
-                double max_x = Math.max(o2.x, t2.x);
-                double x = o1.x;
-
-                if(x <= min_x || x >= max_x) {
-                    return false;
-                }
-
-                double min_y = Math.min(o1.y, t1.y);
-                double max_y = Math.max(o1.y, t1.y);
-                double y = o2.y;
-
-                return !(y <= min_y) && !(y >= max_y);
+                double x = left.x;
+                if(x <= ls.left.x || x >= ls.right.x) return false;
+                double y = ls.left.y;
+                return !(y <= left.y) && !(y >= right.y);
             }
         }
 
