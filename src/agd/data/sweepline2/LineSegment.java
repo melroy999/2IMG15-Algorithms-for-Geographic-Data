@@ -21,6 +21,7 @@ public class LineSegment implements Comparable<LineSegment> {
     public LineSegment(OutlineEdge edge) {
         this.edge = edge;
 
+        // Make sure that the left and right endpoints are oriented correctly.
         if(edge.getDirection() == OutlineEdge.Direction.UP || edge.getDirection() == OutlineEdge.Direction.RIGHT) {
             left = edge.getOrigin();
             right = edge.getTarget();
@@ -157,6 +158,23 @@ public class LineSegment implements Comparable<LineSegment> {
     @Override
     public int compareTo(LineSegment o) {
         return Double.compare(y, o.y);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        LineSegment segment = (LineSegment) o;
+
+        return left.equals(segment.left) && right.equals(segment.right);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = left.hashCode();
+        result = 31 * result + right.hashCode();
+        return result;
     }
 }
 

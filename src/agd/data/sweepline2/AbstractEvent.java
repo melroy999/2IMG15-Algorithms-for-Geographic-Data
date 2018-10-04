@@ -7,17 +7,37 @@ import javafx.util.Pair;
 import java.util.PriorityQueue;
 import java.util.Set;
 
+/**
+ * Representation of the events in the sweep line algorithm.
+ */
 public abstract class AbstractEvent implements Comparable<AbstractEvent> {
 
     // The type of the event.
     private final EventType type;
 
+    /**
+     * Create a new abstract event of the given type.
+     *
+     * @param type The type of the event, which should be constant.
+     */
     public AbstractEvent(EventType type) {
         this.type = type;
     }
 
+    /**
+     * Resolve the event using the sweep line data.
+     *
+     * @param events The current queue of sweep line events.
+     * @param status The status of the sweep line.
+     * @param intersections The set of currently found intersections.
+     */
     public abstract void resolve(PriorityQueue<AbstractEvent> events, SweepStatus status, Set<Pair<OutlineEdge, OutlineEdge>> intersections);
 
+    /**
+     * Get the point the event ordering should be based on.
+     *
+     * @return The relative locations at which the event should be fired.
+     */
     public abstract Point2d getPoint();
 
     /**
@@ -77,6 +97,9 @@ public abstract class AbstractEvent implements Comparable<AbstractEvent> {
         }
     }
 
+    /**
+     * The different types of events that may occur.
+     */
     public enum EventType {
         LE, I, RE
     }
