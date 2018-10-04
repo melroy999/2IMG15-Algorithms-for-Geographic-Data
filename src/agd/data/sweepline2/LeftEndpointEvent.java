@@ -12,6 +12,7 @@ public class LeftEndpointEvent extends AbstractEvent {
     private final LineSegment segment;
 
     public LeftEndpointEvent(LineSegment segment) {
+        super(EventType.LE);
         this.segment = segment;
     }
 

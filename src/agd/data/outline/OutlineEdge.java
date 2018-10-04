@@ -145,17 +145,20 @@ public class OutlineEdge implements Iterable<OutlineEdge> {
             OutlineEdge start = OutlineEdge.this;
 
             // The current edge that we are observing.
-            OutlineEdge current = start;
+            OutlineEdge current = null;
 
             @Override
             public boolean hasNext() {
-                return current.next != start;
+                return current != start;
             }
 
             @Override
             public OutlineEdge next() {
+                if(current == null) current = start;
+
+                OutlineEdge target = current;
                 current = current.next;
-                return current;
+                return target;
             }
 
             @Override

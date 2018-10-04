@@ -15,6 +15,7 @@ public class IntersectionEvent extends AbstractEvent {
     private final Point2d i;
 
     public IntersectionEvent(LineSegment above, LineSegment below) {
+        super(EventType.I);
         this.above = above;
         this.below = below;
         i = above.intersectionPoint(below);

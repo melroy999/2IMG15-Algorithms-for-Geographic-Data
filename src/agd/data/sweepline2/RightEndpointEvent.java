@@ -12,6 +12,7 @@ public class RightEndpointEvent extends AbstractEvent {
     private final LineSegment segment;
 
     public RightEndpointEvent(LineSegment segment) {
+        super(EventType.RE);
         this.segment = segment;
     }
 

@@ -8,6 +8,14 @@ import java.util.PriorityQueue;
 import java.util.Set;
 
 public abstract class AbstractEvent implements Comparable<AbstractEvent> {
+
+    // The type of the event.
+    private final EventType type;
+
+    public AbstractEvent(EventType type) {
+        this.type = type;
+    }
+
     public abstract void resolve(PriorityQueue<AbstractEvent> events, SweepStatus status, Set<Pair<OutlineEdge, OutlineEdge>> intersections);
 
     public abstract Point2d getPoint();
@@ -55,6 +63,21 @@ public abstract class AbstractEvent implements Comparable<AbstractEvent> {
         Point2d a = getPoint();
         Point2d b = o.getPoint();
 
-        return Math.abs(Math.abs(a.x - b.x) < 1e-4 ? Double.compare(a.y, b.y) : Double.compare(a.x, b.x));
+        if(Math.abs(a.x - b.x) < 1e-4) {
+            if(Math.abs(a.y - b.y) < 1e-4) {
+                // Suppose that x and y are both equal.
+                // In such a case, we want to base our order on the event type.
+                // The order is as follows: LE < I < RE.
+                return type.compareTo(o.type);
+            } else {
+                return Double.compare(a.y, b.y);
+            }
+        } else {
+            return Double.compare(a.x, b.x);
+        }
+    }
+
+    public enum EventType {
+        LE, I, RE
     }
 }
