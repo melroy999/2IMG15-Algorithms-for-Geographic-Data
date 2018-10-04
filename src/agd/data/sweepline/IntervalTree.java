@@ -1,6 +1,6 @@
 package agd.data.sweepline;
 
-import java.util.List;
+import java.util.ArrayList;
 
 public class IntervalTree {
 
@@ -10,7 +10,7 @@ public class IntervalTree {
     // Possibly needed functions: Remove interval, update interval
 
     /**
-     * addInterval function that adds a given interval to the tree
+     * addInterval, function that adds a given interval to the tree
      *
      * @param root : The interval representing the root of the tree
      * @param node : The interval we want to add
@@ -32,15 +32,6 @@ public class IntervalTree {
         // Placed on the left when root interval == node interval
         // Or when root.start > node.start or root.end > node.end
         if (root.compareTo(node) >= 0) {
-            if (root.getRight() == null) {
-                root.setRight(node);
-            } else {
-                addInterval(root.getRight(), node);
-            }
-        }
-
-        // Else, place the interval on the right
-        else {
             if (root.getLeft() == null) {
                 root.setLeft(node);
             } else {
@@ -48,12 +39,46 @@ public class IntervalTree {
             }
         }
 
+        // Else, place the interval on the right
+        else {
+            if (root.getRight() == null) {
+                root.setRight(node);
+            } else {
+                addInterval(root.getRight(), node);
+            }
+        }
+
         return root;
     }
 
-    public static List<Interval> checkInterval(Interval tree, Interval interval){
+    /**
+     * checkInterval, function that finds all intersections of intervals in the interval tree with a given interval
+     *
+     * @param tree: The interval tree to with overlap with
+     * @param interval: The given interval to check against @tree with
+     * @return : Returns an arraylist containing all intervals in @tree that overlap with @interval
+     */
+    public static ArrayList<Interval> checkInterval(Interval tree, Interval interval){
 
+        ArrayList<Interval> overlap = new ArrayList<>();
+        // If the root of a (sub)tree is null, we return an empty list
+        if (tree == null) {
+            return overlap;
+        }
 
-        return null;
+        // Check if we have an overlap with current interval in interval tree add to list if we do
+        if (!((tree.getEnd() < interval.getStart()) || (tree.getStart() > interval.getEnd()))) {
+            overlap.add(tree);
+        }
+
+        // Check if we need to recurse to the left, max of left subtree is greater than the start of the interval
+        if ((tree.getLeft() != null) && (tree.getLeft().getMax() >= interval.getStart())) {
+            overlap.addAll(checkInterval(tree.getLeft(), interval));
+        }
+
+        // Recurse to the right
+        overlap.addAll(checkInterval(tree.getRight(), interval));
+
+        return overlap;
     }
 }
