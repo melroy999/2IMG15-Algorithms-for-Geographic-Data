@@ -3,6 +3,9 @@ package agd.data.sweepline2;
 import agd.data.outline.OutlineEdge;
 import agd.math.Point2d;
 
+import java.util.Arrays;
+import java.util.stream.Stream;
+
 public class LineSegment implements Comparable<LineSegment> {
     // The edge object that is associated with this line segment.
     public final OutlineEdge edge;
@@ -43,19 +46,29 @@ public class LineSegment implements Comparable<LineSegment> {
         if(ls == null) return false;
 
         if(edge.getDirection().isHorizontal != ls.edge.getDirection().isHorizontal) {
+            // Get the intersection point of the two infinite lines of which this and ls are segments.
+            Point2d i = intersectionPoint(ls);
 
+            // The intersection point should not be equivalent to two of the endpoints.
+            long noEquals = Stream.of(i.epsilonEquals(left, 1e-4), i.epsilonEquals(right, 1e-4),
+                    i.epsilonEquals(ls.left, 1e-4), i.epsilonEquals(ls.right, 1e-4)).filter(b -> b).count();
+            if(noEquals > 1) {
+                return false;
+            }
+
+            // Check if the point is on one of the lines.
             if(edge.getDirection().isHorizontal) {
                 // By construction of a line segment, the left will have the lowest x and y.
                 double x = ls.left.x;
-                if(x <= left.x || x >= right.x) return false;
+                if(x < left.x || x > right.x) return false;
                 double y = left.y;
-                return !(y <= ls.left.y) && !(y >= ls.right.y);
+                return !(y < ls.left.y) && !(y > ls.right.y);
             } else {
                 // The y value is a range, x is constant.
                 double x = left.x;
-                if(x <= ls.left.x || x >= ls.right.x) return false;
+                if(x < ls.left.x || x > ls.right.x) return false;
                 double y = ls.left.y;
-                return !(y <= left.y) && !(y >= right.y);
+                return !(y < left.y) && !(y > right.y);
             }
         }
 
@@ -90,7 +103,11 @@ public class LineSegment implements Comparable<LineSegment> {
      * @return The intersection point between the two line segments.
      */
     public Point2d intersectionPoint(LineSegment ls) {
-        return edge.getIntersection(ls.edge);
+        if(edge.getDirection().isHorizontal) {
+            return new Point2d(ls.left.x, left.y);
+        } else {
+            return new Point2d(left.x, ls.left.y);
+        }
     }
 
     /**
