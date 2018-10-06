@@ -1,5 +1,6 @@
 package agd.data.outline;
 
+import agd.data.sweepline2.LineSegment;
 import agd.math.Point2d;
 
 import java.util.Iterator;
@@ -99,7 +100,7 @@ public class OutlineEdge implements Iterable<OutlineEdge> {
      * @param conflict An edge perpendicular to this edge.
      * @return The intersection point of the two edges.
      */
-    public Point2d getIntersection(OutlineEdge conflict) {
+    private Point2d getIntersection(OutlineEdge conflict) {
         // Based on the orientation of the edge, find the correct intersection point.
         if(direction.isHorizontal) {
             return new Point2d(conflict.origin.x, origin.y);
@@ -109,28 +110,147 @@ public class OutlineEdge implements Iterable<OutlineEdge> {
     }
 
     /**
+     * Decide which edge is first, given two edges in the same direction that intersect each other.
+     * @param conflict The edge that we should check the relative position of.
+     * @return Whether this occurs before the other in the direction of the edges.
+     */
+    private boolean isFirst(OutlineEdge conflict) {
+        switch(this.direction) {
+            case RIGHT: return this.origin.x <= conflict.origin.x;
+            case LEFT: return this.origin.x >= conflict.origin.x;
+            case UP: return this.origin.y <= conflict.origin.y;
+            case DOWN:
+            default: return this.origin.y >= conflict.origin.y;
+        }
+    }
+
+    /**
+     * Check whether the given edge has an intersection with this edge.
+     *
+     * @param conflict The edge that potentially intersects this edge.
+     * @return Whether there exists an intersection between the two line segments.
+     */
+    public boolean hasIntersection(OutlineEdge conflict) {
+        // What is the relative orientation of the two lines? Are they parallel?
+        if(direction.isHorizontal == conflict.direction.isHorizontal) {
+            // If they are, we might get the opportunity of eliminating one of the edges if the direction is the same.
+            if(direction == conflict.direction) {
+                // Do the line segments have an overlap? I.e., is one of the endpoints in between the other?
+                double a1, a2, b1, b2;
+
+                // Are they actually on the same height?
+                if(direction.isHorizontal) {
+                    if(Math.abs(origin.y - conflict.origin.y) > 1e-5) {
+                        return false;
+                    }
+                } else {
+                    if(Math.abs(origin.x - conflict.origin.x) > 1e-5) {
+                        return false;
+                    }
+
+                }
+
+                // Determine the intervals such that a1 <= a2 and b1 <= b2.
+                //region interval switch
+                switch (direction) {
+                    case RIGHT:
+                        a1 = origin.x;
+                        a2 = next.origin.x;
+                        b1 = conflict.origin.x;
+                        b2 = conflict.next.origin.x;
+                        break;
+                    case LEFT:
+                        a1 = next.origin.x;
+                        a2 = origin.x;
+                        b1 = conflict.next.origin.x;
+                        b2 = conflict.origin.x;
+                        break;
+                    case UP:
+                        a1 = origin.y;
+                        a2 = next.origin.y;
+                        b1 = conflict.origin.y;
+                        b2 = conflict.next.origin.y;
+                        break;
+                    case DOWN:
+                    default:
+                        a1 = next.origin.y;
+                        a2 = origin.y;
+                        b1 = conflict.next.origin.y;
+                        b2 = conflict.origin.y;
+                }
+                //endregion
+
+                // Check if the intervals overlap.
+                return a1 < b2 && b1 < a2;
+            }
+        } else {
+            // Extend the two lines, and find the intersection points of those two lines.
+            Point2d i = getIntersection(conflict);
+            double a1, a2, b1, b2, a, b;
+
+            // Determine whether we have an intersection by looking at the lengths of the line segments.
+            if(direction.isHorizontal) {
+                a1 = Math.abs(origin.x - i.x);
+                a2 = Math.abs(next.origin.x - i.x);
+                a = Math.abs(origin.x - next.origin.x);
+                b1 = Math.abs(conflict.origin.y - i.y);
+                b2 = Math.abs(conflict.next.origin.y - i.y);
+                b = Math.abs(conflict.origin.y - conflict.next.origin.y);
+            } else {
+                a1 = Math.abs(origin.y - i.y);
+                a2 = Math.abs(next.origin.y - i.y);
+                a = Math.abs(origin.y - next.origin.y);
+                b1 = Math.abs(conflict.origin.x - i.x);
+                b2 = Math.abs(conflict.next.origin.x - i.x);
+                b = Math.abs(conflict.origin.x - conflict.next.origin.x);
+            }
+
+            if(a1 < 1e-5 || a2 < 1e-5 || b1 < 1e-5 || b2 < 1e-5) {
+                return false;
+            }
+
+            // use triangle inequality to find whether we are on the lines or not.
+            return Math.abs(a1 + a2 - a) < 1e-5 && Math.abs(b1 + b2 - b) < 1e-5;
+        }
+
+        return false;
+    }
+
+    /**
      * Resolve an intersection between two edges by adding a new point and splitting the edges in two.
      *
      * @param conflict The edge that intersects with this edge.
      */
     public void resolveIntersection(OutlineEdge conflict) {
-        if(direction.isHorizontal == conflict.direction.isHorizontal) {
-            throw new IllegalArgumentException("Intersections between edges with the same direction is unsupported");
+        // Is the intersection between edges of the same orientation?
+        if(direction == conflict.direction) {
+            System.out.println("Merging " + this + " and " + conflict);
+            // We should do a simple merge, eliminating the latter edge.
+            if(this.isFirst(conflict)) {
+                this.setNext(conflict.next);
+                conflict.previous = null;
+                conflict.next = null;
+                System.out.println("#1 Merged to " + this);
+            } else {
+                conflict.setNext(this.next);
+                this.previous = null;
+                this.next = null;
+                System.out.println("#2 Merged to " + conflict);
+            }
+        } else {
+            System.out.println("Solving intersection between " + this + " and " + conflict);
+            // We have an intersection between horizontal and vertical line segments.
+            Point2d i = getIntersection(conflict);
+            OutlineEdge s1 = new OutlineEdge(i, direction);
+            OutlineEdge s2 = new OutlineEdge(i, conflict.direction);
+
+            // Resolve the intersection.
+            // Note that the starting segment is always followed by the new segment of the other direction.
+            setNext(s2);
+            conflict.setNext(s1);
+            next.setPrevious(s1);
+            conflict.next.setPrevious(s2);
         }
-
-        // Find the intersection point.
-        Point2d i = getIntersection(conflict);
-
-        // Create the new edges that originate from the intersection point.
-        OutlineEdge s1 = new OutlineEdge(i, direction);
-        OutlineEdge s2 = new OutlineEdge(i, conflict.direction);
-
-        // Resolve the intersection.
-        // Note that the starting segment is always followed by the new segment of the other direction.
-        setNext(s2);
-        conflict.setNext(s1);
-        next.setPrevious(s1);
-        conflict.next.setPrevious(s2);
     }
 
     /**
@@ -149,16 +269,18 @@ public class OutlineEdge implements Iterable<OutlineEdge> {
 
             @Override
             public boolean hasNext() {
-                return current != start;
+                return current == null || current.next != start;
             }
 
             @Override
             public OutlineEdge next() {
-                if(current == null) current = start;
+                if(current == null) {
+                    current = start;
+                } else {
+                    current = current.next;
+                }
 
-                OutlineEdge target = current;
-                current = current.next;
-                return target;
+                return current;
             }
 
             @Override

@@ -82,10 +82,20 @@ public class BufferedOutline {
      * Remove the intersections within the outline.
      */
     public void sanitizeOutline() {
-        // Find all the intersections.
-        Set<Pair<OutlineEdge, OutlineEdge>> intersections = BentleyOttmann.solve(this);
+        // Iterate over all edges, and find the line segments that intersect (O(n^2)).
+        for(OutlineEdge source : edge) {
+//            System.out.println("source: " + source);
+            for(OutlineEdge target : source.getNext()) {
+                // Stop when we are back at our source again.
+                if(source.equals(target)) break;
+//                System.out.println("target: " + target);
 
-        // Resolve all the intersections.
-        intersections.forEach(pair -> pair.getKey().resolveIntersection(pair.getValue()));
+                // Check whether an intersection exists.
+                if(source.hasIntersection(target)) {
+                    source.resolveIntersection(target);
+                    break;
+                }
+            }
+        }
     }
 }

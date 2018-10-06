@@ -124,7 +124,7 @@ class BufferedOutlineTest {
      */
     @Test
     void constructWidthThreeBufferedOutline() {
-        BufferedOutline bOutline = new BufferedOutline(outline, 2);
+        BufferedOutline bOutline = new BufferedOutline(outline, 3);
         bOutline.sanitizeOutline();
 
         OutlineEdge[] edges = new OutlineEdge[] {
