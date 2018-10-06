@@ -190,6 +190,49 @@ public class OutlineEdge implements Iterable<OutlineEdge> {
 
     // TODO add new edges based on a neighboring rectangle.
 
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        OutlineEdge that = (OutlineEdge) o;
+
+        if (!origin.equals(that.origin)) return false;
+        if (direction != that.direction) return false;
+        if (previous != null ? !previous.shallowEquals(that.previous) : that.previous != null) return false;
+        return next != null ? next.shallowEquals(that.next) : that.next == null;
+    }
+
+    private boolean shallowEquals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        OutlineEdge that = (OutlineEdge) o;
+
+        return origin.equals(that.origin) && direction == that.direction;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = origin.hashCode();
+        result = 31 * result + direction.hashCode();
+        result = 31 * result + (previous != null ? previous.shallowHashCode() : 0);
+        result = 31 * result + (next != null ? next.shallowHashCode() : 0);
+        return result;
+    }
+
+    private int shallowHashCode() {
+        int result = origin.hashCode();
+        result = 31 * result + direction.hashCode();
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "" + origin + "-" + direction + "->" + (next == null ? "null" : next.origin.toString());
+    }
+
     /**
      * The direction of the outline edge.
      */

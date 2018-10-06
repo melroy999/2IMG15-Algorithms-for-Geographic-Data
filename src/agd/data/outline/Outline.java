@@ -19,6 +19,15 @@ public class Outline {
     }
 
     /**
+     * A constructor used for testing purposes.
+     *
+     * @param edge The root of the outline.
+     */
+    public Outline(OutlineEdge edge) {
+        this.edge = edge;
+    }
+
+    /**
      * Get an access point to the edge cycle in the outline.
      *
      * @return The lowest edge in the outline.

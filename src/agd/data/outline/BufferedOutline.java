@@ -1,6 +1,10 @@
 package agd.data.outline;
 
+import agd.data.sweepline2.BentleyOttmann;
 import agd.math.Point2d;
+import javafx.util.Pair;
+
+import java.util.Set;
 
 /**
  * A buffered version of an original outline.
@@ -17,7 +21,15 @@ public class BufferedOutline {
      */
     public BufferedOutline(Outline outline, double w) {
         createOutline(outline, w);
-        sanitizeOutline();
+    }
+
+    /**
+     * A constructor used for testing purposes.
+     *
+     * @param edge The root of the outline.
+     */
+    public BufferedOutline(OutlineEdge edge) {
+        this.edge = edge;
     }
 
     /**
@@ -69,7 +81,11 @@ public class BufferedOutline {
     /**
      * Remove the intersections within the outline.
      */
-    private void sanitizeOutline() {
-        // TODO sanitization through an intersection algorithm.
+    public void sanitizeOutline() {
+        // Find all the intersections.
+        Set<Pair<OutlineEdge, OutlineEdge>> intersections = BentleyOttmann.solve(this);
+
+        // Resolve all the intersections.
+        intersections.forEach(pair -> pair.getKey().resolveIntersection(pair.getValue()));
     }
 }
