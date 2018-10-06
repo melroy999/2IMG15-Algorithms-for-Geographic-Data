@@ -23,7 +23,7 @@ public class LeftEndpointEvent extends AbstractEvent {
      * @param intersections The set of currently found intersections.
      */
     @Override
-    public void resolve(PriorityQueue<AbstractEvent> events, TreeMap<DoubleWrapper, Set<LeftEndpointEvent>> status, Set<Pair<OutlineEdge, OutlineEdge>> intersections) {
+    public void resolve(PriorityQueue<AbstractEvent> events, TreeMap<DoubleWrapper, Set<LeftEndpointEvent>> status, List<Pair<OutlineEdge, OutlineEdge>> intersections) {
         // Insert the line segment into the status.
         DoubleWrapper key = new DoubleWrapper(p.y);
         Set<LeftEndpointEvent> entries = status.getOrDefault(key, new TreeSet<>());

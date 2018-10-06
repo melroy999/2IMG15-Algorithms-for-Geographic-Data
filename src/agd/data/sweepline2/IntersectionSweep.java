@@ -13,7 +13,7 @@ import java.util.*;
 public class IntersectionSweep {
 
 
-    public static Set<Pair<OutlineEdge, OutlineEdge>> findIntersections(OutlineEdge edge) {
+    public static List<Pair<OutlineEdge, OutlineEdge>> findIntersections(OutlineEdge edge) {
         // The queue of events.
         PriorityQueue<AbstractEvent> events = new PriorityQueue<>();
 
@@ -22,7 +22,7 @@ public class IntersectionSweep {
         TreeMap<DoubleWrapper, Set<LeftEndpointEvent>> status = new TreeMap<>();
 
         // The set of resulting intersections.
-        Set<Pair<OutlineEdge, OutlineEdge>> intersections = new HashSet<>();
+        List<Pair<OutlineEdge, OutlineEdge>> intersections = new ArrayList<>();
 
         // Populate the queue with events.
         edge.forEach(e -> createEvent(events, e));

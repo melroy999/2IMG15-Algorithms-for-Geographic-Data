@@ -27,7 +27,7 @@ public class VerticalLineEvent extends AbstractEvent {
      * @param intersections The set of currently found intersections.
      */
     @Override
-    public void resolve(PriorityQueue<AbstractEvent> events, TreeMap<DoubleWrapper, Set<LeftEndpointEvent>> status, Set<Pair<OutlineEdge, OutlineEdge>> intersections) {
+    public void resolve(PriorityQueue<AbstractEvent> events, TreeMap<DoubleWrapper, Set<LeftEndpointEvent>> status, List<Pair<OutlineEdge, OutlineEdge>> intersections) {
         // Do a range search on the tree map.
         Map<DoubleWrapper, Set<LeftEndpointEvent>> range = status.subMap(new DoubleWrapper(p.y), new DoubleWrapper(upper.y));
 

@@ -4,6 +4,7 @@ import agd.data.outline.OutlineEdge;
 import agd.math.Point2d;
 import javafx.util.Pair;
 
+import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.TreeMap;
@@ -31,7 +32,7 @@ public class IntersectionEvent extends AbstractEvent {
      * @param intersections The set of currently found intersections.
      */
     @Override
-    public void resolve(PriorityQueue<AbstractEvent> events, TreeMap<DoubleWrapper, Set<LeftEndpointEvent>> status, Set<Pair<OutlineEdge, OutlineEdge>> intersections) {
+    public void resolve(PriorityQueue<AbstractEvent> events, TreeMap<DoubleWrapper, Set<LeftEndpointEvent>> status, List<Pair<OutlineEdge, OutlineEdge>> intersections) {
         intersections.add(new Pair<>(e1, e2));
     }
 }

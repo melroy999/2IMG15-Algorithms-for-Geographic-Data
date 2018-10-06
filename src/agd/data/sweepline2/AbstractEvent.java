@@ -4,6 +4,7 @@ import agd.data.outline.OutlineEdge;
 import agd.math.Point2d;
 import javafx.util.Pair;
 
+import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.TreeMap;
@@ -36,7 +37,7 @@ public abstract class AbstractEvent implements Comparable<AbstractEvent> {
      * @param status The status of the sweep line.
      * @param intersections The set of currently found intersections.
      */
-    public abstract void resolve(PriorityQueue<AbstractEvent> events, TreeMap<DoubleWrapper, Set<LeftEndpointEvent>> status, Set<Pair<OutlineEdge,OutlineEdge>> intersections);
+    public abstract void resolve(PriorityQueue<AbstractEvent> events, TreeMap<DoubleWrapper, Set<LeftEndpointEvent>> status, List<Pair<OutlineEdge,OutlineEdge>> intersections);
 
     @Override
     public int compareTo(AbstractEvent o) {
