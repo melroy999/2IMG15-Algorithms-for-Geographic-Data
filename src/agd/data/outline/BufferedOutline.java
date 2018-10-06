@@ -1,10 +1,9 @@
 package agd.data.outline;
 
-import agd.data.sweepline2.BentleyOttmann;
+import agd.data.sweepline2.IntersectionSweep;
+import agd.data.sweepline2.LeftEndpointEvent;
 import agd.math.Point2d;
 import javafx.util.Pair;
-
-import java.util.Set;
 
 /**
  * A buffered version of an original outline.
@@ -82,6 +81,16 @@ public class BufferedOutline {
      * Remove the intersections within the outline.
      */
     public void sanitizeOutline() {
+        // Find all intersections, and resolve them.
+        for(Pair<OutlineEdge, OutlineEdge> pair : IntersectionSweep.findIntersections(edge)) {
+            pair.getKey().resolveIntersection(pair.getValue());
+        }
+    }
+
+    /**
+     * Remove the intersections within the outline.
+     */
+    public void sanitizeOutlineBruteForce() {
         // Iterate over all edges, and find the line segments that intersect (O(n^2)).
         for(OutlineEdge source : edge) {
 //            System.out.println("source: " + source);

@@ -4,54 +4,45 @@ import agd.data.outline.OutlineEdge;
 import agd.math.Point2d;
 import javafx.util.Pair;
 
-import java.util.PriorityQueue;
-import java.util.Set;
+import java.util.*;
 
-/**
- * Representation of the left endpoint events in the sweep line algorithm.
- */
 public class LeftEndpointEvent extends AbstractEvent {
-    // The line segment associated with this point.
-    private final LineSegment segment;
+    // The outline edge that this event belongs to.
+    public final OutlineEdge e;
 
-    /**
-     * Create a left endpoint even for the given line segment.
-     *
-     * @param segment The line segment the event should be based upon.
-     */
-    public LeftEndpointEvent(LineSegment segment) {
-        super(EventType.LE);
-        this.segment = segment;
+    public LeftEndpointEvent(OutlineEdge e) {
+        super(e.getDirection() == OutlineEdge.Direction.RIGHT ? e.getOrigin() : e.getTarget(), EventType.LeftEndpoint);
+        this.e = e;
     }
 
     /**
      * Resolve the event using the sweep line data.
      *
-     * @param events The current queue of sweep line events.
-     * @param status The status of the sweep line.
+     * @param events        The current queue of sweep line events.
+     * @param status        The status of the sweep line.
      * @param intersections The set of currently found intersections.
      */
     @Override
-    public void resolve(PriorityQueue<AbstractEvent> events, SweepStatus status, Set<Pair<OutlineEdge, OutlineEdge>> intersections) {
-        // Update the status.
-        status.insert(segment);
-
-        // Find the closest two edges.
-        LineSegment above = status.above(segment);
-        LineSegment below = status.below(segment);
-
-        // Check whether the line segment intersects with one of its neighbors.
-        if(segment.intersects(above)) events.add(new IntersectionEvent(above, segment));
-        if(segment.intersects(below)) events.add(new IntersectionEvent(segment, below));
+    public void resolve(PriorityQueue<AbstractEvent> events, TreeMap<DoubleWrapper, Set<LeftEndpointEvent>> status, Set<Pair<OutlineEdge, OutlineEdge>> intersections) {
+        // Insert the line segment into the status.
+        DoubleWrapper key = new DoubleWrapper(p.y);
+        Set<LeftEndpointEvent> entries = status.getOrDefault(key, new TreeSet<>());
+        entries.add(this);
+        status.put(key, entries);
     }
 
-    /**
-     * Get the point the event ordering should be based on.
-     *
-     * @return The left side of the line segment.
-     */
     @Override
-    public Point2d getPoint() {
-        return segment.left;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        LeftEndpointEvent that = (LeftEndpointEvent) o;
+
+        return e.equals(that.e);
+    }
+
+    @Override
+    public int hashCode() {
+        return e.hashCode();
     }
 }
