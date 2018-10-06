@@ -246,10 +246,11 @@ public class OutlineEdge implements Iterable<OutlineEdge> {
 
             // Resolve the intersection.
             // Note that the starting segment is always followed by the new segment of the other direction.
-            setNext(s2);
-            conflict.setNext(s1);
-            next.setPrevious(s1);
+            this.next.setPrevious(s1);
             conflict.next.setPrevious(s2);
+
+            this.setNext(s2);
+            conflict.setNext(s1);
         }
     }
 
