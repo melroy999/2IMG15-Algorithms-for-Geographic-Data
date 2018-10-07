@@ -65,6 +65,10 @@ public class Interval implements Comparable<Interval> {
         return depth;
     }
 
+    public void setDepth(int depth) {
+        this.depth = depth;
+    }
+
     @Override
     public int compareTo(Interval o) {
         return this.start == o.start ? Integer.compare(this.end, o.end) : Integer.compare(this.start, o.start);

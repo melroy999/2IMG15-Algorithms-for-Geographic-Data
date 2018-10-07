@@ -5,6 +5,7 @@ import agd.data.output.HalfGridPoint;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 
 // Sweep line algorithm that handles points from left to right
 public class SimpleSweep extends AbstractSolver {
@@ -37,13 +38,15 @@ public class SimpleSweep extends AbstractSolver {
     @Override
     public void solve(ProblemInstance instance, ArrayList<HalfGridPoint> points) {
 
-        translatePoints(instance, points);
+        ArrayList<HalfGridPoint> eventPoints = new ArrayList<>();
+        translatePoints(instance, eventPoints);
 
         // TODO: Create events
         // Events: -Lower left region corner reached. Place square if possible or move to the right until possible to place
         //          and add square corner coords to status
         //         -Lower right region corner reached. Remove square corner coords from status
 
+        // Get events from list, or other data structure, use .execute() on event
 
         // TODO: Use a sweep line algorithm to start placing square regions, tracking the regions that have been placed
         // TODO: Figure out the above
@@ -53,9 +56,9 @@ public class SimpleSweep extends AbstractSolver {
 
 class SortByX implements Comparator<HalfGridPoint>
 {
-    // Sort HalfGridPoints by their x-coords
+    // Sort HalfGridPoints by their x-coords with y-coord
     public int compare(HalfGridPoint a, HalfGridPoint b)
     {
-        return Double.compare(a.point().x, b.point().x);
+        return a.point().x == b.point().x ? Double.compare(a.point().y, b.point().y) : Double.compare(a.point().x, b.point().x);
     }
 }

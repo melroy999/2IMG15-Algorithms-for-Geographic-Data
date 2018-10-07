@@ -1,10 +1,19 @@
 package agd.data.sweepline;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class IntervalTree {
 
     private Interval root;
+
+    public Interval getRoot() {
+        return root;
+    }
+
+    public void setRoot(Interval root) {
+        this.root = root;
+    }
 
     // Needed functions: Add interval, check intersection
     // Possibly needed functions: Remove interval, update interval
@@ -16,7 +25,7 @@ public class IntervalTree {
      * @param node : The interval we want to add
      * @return : Returns the chain of intervals representing the tree
      */
-    public static Interval addInterval(Interval root, Interval node){
+    public Interval addInterval(Interval root, Interval node){
 
         // If the root of a (sub)tree is null, we return the node
         if (root == null) {
@@ -54,11 +63,11 @@ public class IntervalTree {
     /**
      * checkInterval, function that finds all intersections of intervals in the interval tree with a given interval
      *
-     * @param tree: The interval tree to with overlap with
-     * @param interval: The given interval to check against @tree with
+     * @param tree : The interval tree to with overlap with
+     * @param interval : The given interval to check against @tree with
      * @return : Returns an arraylist containing all intervals in @tree that overlap with @interval
      */
-    public static ArrayList<Interval> checkInterval(Interval tree, Interval interval){
+    public ArrayList<Interval> checkInterval(Interval tree, Interval interval){
 
         ArrayList<Interval> overlap = new ArrayList<>();
         // If the root of a (sub)tree is null, we return an empty list
@@ -76,9 +85,25 @@ public class IntervalTree {
             overlap.addAll(checkInterval(tree.getLeft(), interval));
         }
 
-        // Recurse to the right
-        overlap.addAll(checkInterval(tree.getRight(), interval));
+        // Check if we need to recurse to the right, start of root is greater than the end of the interval
+        if (!(tree.getRight() == null) || (tree.getStart() > interval.getMax())) {
+            overlap.addAll(checkInterval(tree.getRight(), interval));
+        }
 
         return overlap;
+    }
+
+    /**
+     * deleteInterval, function that deletes a given interval, @target, from the intervaltree, @tree, if present
+     *
+     * @param tree : The interval tree
+     * @param target : The given interval to delete from @tree
+     * @return : Returns the interval tree where @target has been deleted from @tree if present
+     */
+    public Interval deleteInterval(Interval tree, Interval target){
+
+
+
+        return tree;
     }
 }
