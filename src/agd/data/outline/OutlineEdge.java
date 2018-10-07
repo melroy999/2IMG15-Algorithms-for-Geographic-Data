@@ -2,6 +2,7 @@ package agd.data.outline;
 
 import agd.math.Point2d;
 import agd.math.Tuple2d;
+import com.sun.org.apache.regexp.internal.RE;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -364,6 +365,27 @@ public class OutlineEdge implements Iterable<OutlineEdge> {
     }
 
     /**
+     * Get the relative position of a point p to the origin of this edge, following the direction of the edge.
+     *
+     * @param p The point to check the relative position of.
+     * @return ON if the points are equal, LEFT or RIGHT otherwise, depending on the position.
+     */
+    public Relative getRelativePositionToOrigin(Point2d p) {
+        if(origin.epsilonEquals(p, 1e-4)) {
+            return Relative.ON;
+        } else {
+            // Note that a point is right of the origin if it is past the origin on the line.
+            switch (direction) {
+                case RIGHT: return origin.x < p.x ? Relative.RIGHT : Relative.LEFT;
+                case LEFT: return origin.x > p.x ? Relative.RIGHT : Relative.LEFT;
+                case UP: return origin.y < p.y ? Relative.RIGHT : Relative.LEFT;
+                case DOWN:
+                default: return origin.y > p.y ? Relative.RIGHT : Relative.LEFT;
+            }
+        }
+    }
+
+    /**
      * Get a reliable access point to the curve that determines the outside of the outline.
      *
      * @return The lowest edge in the plane that is part of the outline.
@@ -426,6 +448,13 @@ public class OutlineEdge implements Iterable<OutlineEdge> {
     @Override
     public String toString() {
         return "" + origin + "-" + direction + "->" + (next == null ? "null" : next.origin.toString());
+    }
+
+    /**
+     * Relative position of a point to the origin, following the direction of the line.
+     */
+    public enum Relative {
+        LEFT, ON, RIGHT
     }
 
     /**
