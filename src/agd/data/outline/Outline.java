@@ -1,8 +1,6 @@
 package agd.data.outline;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -57,12 +55,72 @@ public class Outline {
         // Note that an edge may only touch edges of the opposite direction.
         OutlineEdge rectangleEdge = rectangle.createOutline(OutlineEdge.Direction.LEFT);
         Map<OutlineEdge.Direction, OutlineEdge> mapping = rectangleEdge.toList().stream().collect(Collectors.toMap(OutlineEdge::getDirection, e -> e));
+        Map<OutlineEdge.Direction, List<OutlineEdge>> touchMap = findTouchingEdges(mapping);
+
+        // Notes:
+        // - One single edge should never touch two consecutive edges, since these consecutive edges should have been merged beforehand.
 
 
+        // Merge edges that can be merged.
+        mergeEdges();
 
+        // Set references to the correct outline.
         rectangle.setOutline(this);
         rectangles.add(rectangle);
     }
+
+    /**
+     * Merge edges that have the same direction and follow one another.
+     */
+    private void mergeEdges() {
+        // Make sure that we do not have two consecutive edges in the same direction; they should be merged otherwise.
+        List<OutlineEdge> edges = edge.toList();
+        OutlineEdge prev = edges.get(0);
+
+        for(int i = 0; i < edges.size(); i++) {
+            OutlineEdge e2 = edges.get((i + 1) % edges.size());
+
+            if(prev.getDirection() == e2.getDirection()) {
+                // Merge the two directions.
+                prev.setNext(e2.getNext());
+
+                // Be careful if edges.size() - 1 == i, since we might have removed our handle!
+                if(i == edges.size() - 1) {
+                    // Set e1 as our handle instead.
+                    edge = prev;
+                }
+
+                // Skip ahead one iteration.
+                i++;
+            } else {
+                // Set the new previous.
+                prev = e2;
+            }
+        }
+    }
+
+    /**
+     * Find all the edges that touch a side of the given rectangle sides.
+     *
+     * @param sides The collection of outline edges surrounding the rectangle.
+     * @return A mapping that maps a side of the rectangle to the edges that touch it.
+     */
+    private Map<OutlineEdge.Direction, List<OutlineEdge>> findTouchingEdges(Map<OutlineEdge.Direction, OutlineEdge> sides) {
+        // Note that the key corresponds to the side of the rectangle, not to the side of the conflicting edge!
+        Map<OutlineEdge.Direction, List<OutlineEdge>> result = new HashMap<>();
+        Arrays.stream(OutlineEdge.Direction.values()).forEach(d -> result.put(d, new ArrayList<>()));
+
+        for(OutlineEdge e : edge) {
+            OutlineEdge.Direction rectangleDirection = e.getDirection().opposite();
+            if(sides.get(rectangleDirection).doTouch(e)) {
+                // if they do touch, add the edge to the mapping.
+                result.get(rectangleDirection).add(e);
+            }
+        }
+
+        return result;
+    }
+
 
     private static final String LATEX_POINT = "\\node[circle,fill,red,inner sep=1pt] (v%d) at (%f, %f) {};\n";
     private static final String LATEX_RECTANGLE = "\\draw (%d, %d) rectangle (%d, %d);\n";
