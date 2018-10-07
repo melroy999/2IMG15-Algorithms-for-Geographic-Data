@@ -155,7 +155,9 @@ public class Outline {
 
         for(OutlineEdge e : edge) {
             Direction rectangleDirection = e.getDirection().opposite();
-            if(sides.get(rectangleDirection).doTouch(e)) {
+
+            OutlineEdge rectangleEdge = sides.get(rectangleDirection);
+            if(rectangleEdge.doTouch(e)) {
                 // if they do touch, add the edge to the mapping.
                 result.get(rectangleDirection).add(e);
             }

@@ -134,12 +134,20 @@ public class OutlineEdge implements Iterable<OutlineEdge> {
      * @return True if the two lines share a line segment, false otherwise.
      */
     public boolean doTouch(OutlineEdge conflict) {
+        if(origin.epsilonEquals(new Point2d(12.0, 3.0), 1e-4)) {
+            System.out.println();
+        }
+
+        //TODO this is not working as it should.
+
         // Are they upon the same line?
         if(direction.isHorizontal) {
             if(Math.abs(origin.y - conflict.origin.y) > 1e-4) return false;
         } else {
             if(Math.abs(origin.x - conflict.origin.x) > 1e-4) return false;
         }
+
+        Point2d diff1, diff2;
 
         // Note that we should include endpoints here, since we could only have the corner points in common.
         if(direction == Direction.RIGHT || direction == Direction.UP) {
@@ -150,11 +158,13 @@ public class OutlineEdge implements Iterable<OutlineEdge> {
              * this.origin -------- this.target              conflict.target -------- conflict.origin
              *
              * this.origin -------- conflict.target -------- this.target -------- conflict.origin
+             *
+             * conflict.target -------- conflict.origin      this.origin -------- this.target
              */
 
             // Check if the distance between the two points in the plane of choice is positive.
-            Point2d diff = getTarget().sub(conflict.getTarget());
-            return direction.isHorizontal ? diff.x > -1e04 : diff.y > -1e04;
+            diff1 = getTarget().sub(conflict.getTarget());
+            diff2 = conflict.getOrigin().sub(getOrigin());
         } else {
             /*
              * This edge has the rightmost/topmost point.
@@ -163,10 +173,13 @@ public class OutlineEdge implements Iterable<OutlineEdge> {
              * conflict.origin -------- conflict.target      this.target -------- this.origin
              *
              * conflict.origin -------- this.target -------- conflict.target -------- this.origin
+             *
+             * this.target -------- this.origin              conflict.origin -------- conflict.target
              */
-            Point2d diff = conflict.getTarget().sub(getTarget());
-            return direction.isHorizontal ? diff.x > -1e04 : diff.y > -1e04;
+            diff1 = conflict.getTarget().sub(getTarget());
+            diff2 = getOrigin().sub(conflict.getOrigin());
         }
+        return direction.isHorizontal ? diff1.x > -1e-4 && diff2.x > -1e-4 : diff1.y > -1e-4 && diff2.y > -1e-4;
     }
 
     /**
