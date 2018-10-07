@@ -1,9 +1,10 @@
 package agd.data.outline;
 
-import agd.data.sweepline2.LineSegment;
 import agd.math.Point2d;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * A data structure that consists of edges linked to one another through next and previous pointers.
@@ -255,6 +256,23 @@ public class OutlineEdge implements Iterable<OutlineEdge> {
     }
 
     /**
+     * Project the given point onto the line segment.
+     *
+     * @param p The point to project on the line segment.
+     * @return A point on the line segment that has the shortest euclidean distance to p.
+     */
+    public Point2d project(Point2d p) {
+        // Find the bounds of the projection.
+        double xmin = Math.min(getOrigin().x, getTarget().x);
+        double xmax = Math.max(getOrigin().x, getTarget().x);
+        double ymin = Math.min(getOrigin().y, getTarget().y);
+        double ymax = Math.max(getOrigin().y, getTarget().y);
+
+        // Project the point.
+        return new Point2d(Math.max(xmin, Math.min(xmax, p.x)), Math.max(ymin, Math.min(ymax, p.y)));
+    }
+
+    /**
      * Returns an iterator over elements of type {@code T}.
      *
      * @return an Iterator.
@@ -289,6 +307,17 @@ public class OutlineEdge implements Iterable<OutlineEdge> {
                 throw new UnsupportedOperationException("Remove not implemented.");
             }
         };
+    }
+
+    /**
+     * Get the collection of edges in the form of a list.
+     *
+     * @return A list containing all the edges in clockwise order.
+     */
+    public List<OutlineEdge> toList() {
+        List<OutlineEdge> list = new ArrayList<>();
+        iterator().forEachRemaining(list::add);
+        return list;
     }
 
     /**

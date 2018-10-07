@@ -221,4 +221,19 @@ class BufferedOutlineTest {
             Assertions.assertEquals(edges[i], bEdges.get(i));
         }
     }
+
+    @Test
+    void printLatexFigure() {
+        BufferedOutline bOutline = new BufferedOutline(outline2, 2);
+        System.out.println(outline.toLatexFigure());
+        System.out.println(bOutline.toLatexFigure());
+        bOutline.sanitizeOutline();
+        System.out.println(bOutline.toLatexFigure());
+    }
+
+    @Test
+    void printLatexFigure2() {
+        Outline o = new Outline(new OutlineRectangle(0, 0, 3, null));
+        System.out.println(o.toLatexFigure());
+    }
 }

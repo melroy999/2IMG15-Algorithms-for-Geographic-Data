@@ -1,9 +1,11 @@
 package agd.data.outline;
 
 import agd.data.sweepline2.IntersectionSweep;
-import agd.data.sweepline2.LeftEndpointEvent;
 import agd.math.Point2d;
 import javafx.util.Pair;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A buffered version of an original outline.
@@ -88,6 +90,26 @@ public class BufferedOutline {
     }
 
     /**
+     * Project the point p onto the outline and find the position that has the smallest euclidean distance.
+     *
+     * @param p The point to find the closest position on the outline to.
+     * @return A point on the line segments of the outline such that the distance is minimal.
+     */
+    public Point2d projectAndSelect(Point2d p) {
+        double min = Double.MAX_VALUE;
+        Point2d position = null;
+
+        for(OutlineEdge e : edge) {
+            Point2d projection = e.project(p);
+            if(projection.distance2(p) < min) {
+                position = projection;
+            }
+        }
+
+        return position;
+    }
+
+    /**
      * Remove the intersections within the outline.
      */
     public void sanitizeOutlineBruteForce() {
@@ -106,5 +128,38 @@ public class BufferedOutline {
                 }
             }
         }
+    }
+
+    private static final String LATEX_POINT = "\\node[circle,fill,red,inner sep=1pt] (u%d) at (%f, %f) {};\n";
+    private static final String LATEX_RECTANGLE = "\\draw (%d, %d) rectangle (%d, %d);\n";
+
+    /**
+     * Convert the outline to a figure in latex.
+     *
+     * @return A string representing a tikz figure in latex.
+     */
+    public String toLatexFigure() {
+        List<OutlineEdge> edges = edge.toList();
+
+        // Draw the edges and nodes.
+        List<String> latexNodes = new ArrayList<>();
+        StringBuilder latexEdges = new StringBuilder("\\draw[red] ");
+        for(int i = 0; i < edges.size(); i++) {
+            OutlineEdge e = edges.get(i);
+            latexNodes.add(String.format(LATEX_POINT, i, e.getOrigin().x, e.getOrigin().y));
+            latexEdges.append("(u").append(i).append(") -- ");
+        }
+        latexEdges.append("(u").append(0).append(");\n");
+
+        // Combine everything into one figure.
+        StringBuilder result = new StringBuilder();
+        result.append("\\begin{tikzpicture}[x=5mm, y=5mm, baseline]\n");
+        result.append("\\tikz {\n");
+        latexNodes.forEach(result::append);
+        result.append(latexEdges);
+        result.append("}\n");
+        result.append("\\end{tikzpicture}");
+
+        return result.toString();
     }
 }
