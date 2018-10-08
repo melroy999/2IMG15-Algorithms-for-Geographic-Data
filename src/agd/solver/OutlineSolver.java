@@ -14,6 +14,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class OutlineSolver extends AbstractSolver {
@@ -61,9 +62,14 @@ public class OutlineSolver extends AbstractSolver {
             Point2d placement;
 
             if(!intersections.isEmpty()) {
+                // Which outlines do we intersect with?
+                List<Outline> outlines = intersections.stream().map(
+                        OutlineRectangle::getOutline).distinct().collect(Collectors.toList());
+
                 // Find the associated outline.
-                Outline outline = intersections.get(0).getOutline();
+                Outline outline = outlines.get(0);
                 BufferedOutline bOutline = new BufferedOutline(outline, 0.5 * p.w);
+//                placement = bOutline.projectAndSelect(p, centre);
                 placement = bOutline.projectAndSelect(p);
                 result = p.getOutlineRectangle(placement);
                 outline.insert(result);

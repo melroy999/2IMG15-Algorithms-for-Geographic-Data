@@ -1,11 +1,16 @@
 package agd.data.outline;
 
+import agd.data.outline.OutlineEdge.Direction;
 import agd.data.sweepline2.IntersectionSweep;
 import agd.math.Point2d;
 import javafx.util.Pair;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
+
+import static agd.data.outline.OutlineEdge.Direction.*;
 
 /**
  * A buffered version of an original outline.
@@ -96,6 +101,7 @@ public class BufferedOutline {
      * @return A point on the line segments of the outline such that the distance is minimal.
      */
     public Point2d projectAndSelect(Point2d p) {
+        // For each of the edges, find the best position and the associated score.
         double min = Double.MAX_VALUE;
         Point2d position = null;
 
@@ -105,6 +111,36 @@ public class BufferedOutline {
             if(distance < min) {
                 position = projection;
                 min = distance;
+            }
+        }
+
+        return position;
+    }
+
+    /**
+     * Project the point p onto the outline and find the position that has the smallest euclidean distance.
+     * Points that are aimed towards the center of mass are marked as invalid.
+     *
+     * @param p The point to find the closest position on the outline to.
+     * @param c The center of mass of all the points.
+     * @return A point on the line segments of the outline such that the distance is minimal.
+     */
+    public Point2d projectAndSelect(Point2d p, Point2d c) {
+        // For each of the edges, find the best position and the associated score.
+        double min = Double.MAX_VALUE;
+        Point2d position = null;
+
+        // Get the relative position.
+        Quadrant q = Quadrant.getQuadrant(p, c);
+
+        for(OutlineEdge e : edge) {
+            if(q.isValid(e.getDirection())) {
+                Point2d projection = e.project(p);
+                double distance = projection.distance2(p);
+                if(distance < min) {
+                    position = projection;
+                    min = distance;
+                }
             }
         }
 
@@ -163,5 +199,50 @@ public class BufferedOutline {
         result.append("\\end{tikzpicture}");
 
         return result.toString();
+    }
+
+    /**
+     * The different quadrants of the plane.
+     */
+    public enum Quadrant {
+        NW(EnumSet.of(UP, RIGHT)),
+        SW(EnumSet.of(UP, LEFT)),
+        SE(EnumSet.of(DOWN, LEFT)),
+        NE(EnumSet.of(DOWN, RIGHT)),
+        ON(EnumSet.of(UP, RIGHT, LEFT, DOWN));
+
+        private final EnumSet<Direction> valid;
+
+        Quadrant(EnumSet<Direction> valid) {
+            this.valid = valid;
+        }
+
+        public static Quadrant getQuadrant(Point2d p, Point2d c) {
+            if(p.distance2(c) < -1e04) {
+                return ON;
+            } else {
+                if(p.x <= c.x) {
+                    // West.
+                    if(p.y <= c.y) {
+                        // South.
+                        return SW;
+                    } else {
+                        return NW;
+                    }
+                } else {
+                    // East.
+                    if(p.y <= c.y) {
+                        // South.
+                        return SE;
+                    } else {
+                        return NE;
+                    }
+                }
+            }
+        }
+
+        public boolean isValid(Direction d) {
+            return valid.contains(d);
+        }
     }
 }
