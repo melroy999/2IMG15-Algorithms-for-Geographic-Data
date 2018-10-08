@@ -103,4 +103,25 @@ public class ProblemSolution {
     public List<HalfGridPoint> getPoints() {
         return new ArrayList<>(points);
     }
+
+    /**
+     * Output the configuration to text.
+     *
+     * @return A string containing the entire contents of the file.
+     */
+    public String output() {
+        StringBuilder builder = new StringBuilder();
+        builder.append(7).append("\n");
+        builder.append(instance.id);
+
+        // Sort the points on the id.
+        points.sort(Comparator.comparingInt(a -> a.o.i));
+
+        for(HalfGridPoint p : points) {
+            Point2d t = p.point();
+            builder.append("\n").append(t.x).append(" ").append(t.y);
+        }
+
+        return builder.toString();
+    }
 }
