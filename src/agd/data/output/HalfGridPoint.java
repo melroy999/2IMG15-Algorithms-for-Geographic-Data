@@ -65,6 +65,6 @@ public class HalfGridPoint {
     }
 
     public String toString() {
-        return "[" + this.point().x + " " + this.point().y + " " + this.o.i + " " + this.o.w +  "]";
+        return "[" + this.point().x + ", " + this.point().y + ", " + this.o.i + ", " + this.o.w +  "]";
     }
 }

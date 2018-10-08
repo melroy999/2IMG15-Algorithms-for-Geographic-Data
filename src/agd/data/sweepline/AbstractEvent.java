@@ -5,6 +5,7 @@ import agd.data.output.HalfGridPoint;
 import agd.math.Point2i;
 
 import java.util.ArrayList;
+import java.util.PriorityQueue;
 
 public abstract class AbstractEvent implements Comparable<AbstractEvent>{
     // Events: -Lower left region corner reached. Place square if possible or move to the right until possible to place
@@ -36,5 +37,5 @@ public abstract class AbstractEvent implements Comparable<AbstractEvent>{
         return "[" + this.p.x + " " + this.p.y + " " + this.owner.i +  "]";
     }
 
-    public abstract void execute(IntervalTree intervalTree, ArrayList<HalfGridPoint> points);
+    public abstract void execute(IntervalTree intervalTree, ArrayList<HalfGridPoint> points, PriorityQueue<AbstractEvent> events);
 }

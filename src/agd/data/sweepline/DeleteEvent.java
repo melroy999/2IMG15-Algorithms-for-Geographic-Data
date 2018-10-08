@@ -5,6 +5,7 @@ import agd.data.output.HalfGridPoint;
 import agd.math.Point2i;
 
 import java.util.ArrayList;
+import java.util.PriorityQueue;
 
 public class DeleteEvent extends AbstractEvent {
 
@@ -20,8 +21,8 @@ public class DeleteEvent extends AbstractEvent {
      * @param points
      */
     @Override
-    public void execute(IntervalTree intervalTree, ArrayList<HalfGridPoint> points) {
-        Interval interval = new Interval(getP().y, (getP().y + getOwner().w), getP().x, getOwner().i);
+    public void execute(IntervalTree intervalTree, ArrayList<HalfGridPoint> points, PriorityQueue<AbstractEvent> events) {
+        Interval interval = new Interval(getP().y, (getP().y + getOwner().w), getP().x + getOwner().w, getOwner().i);
         intervalTree.setRoot(intervalTree.deleteInterval(intervalTree.getRoot(), interval));
     }
 }

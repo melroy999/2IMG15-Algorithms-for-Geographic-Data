@@ -138,4 +138,20 @@ public class IntervalTree {
         }
         return tree;
     }
+
+    public void printTree(Interval tmp) {
+        if (tmp == null) {
+            return;
+        }
+
+        if (tmp.getLeft() != null) {
+            printTree(tmp.getLeft());
+        }
+
+        System.out.print(tmp);
+
+        if (tmp.getRight() != null) {
+            printTree(tmp.getRight());
+        }
+    }
 }
