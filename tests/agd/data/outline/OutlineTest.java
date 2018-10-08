@@ -44,4 +44,17 @@ class OutlineTest {
         rectangles.stream().skip(1).forEach(outline::insert);
         System.out.println(outline.toLatexFigure());
     }
+
+    @Test
+    void simpleTest4() {
+        List<OutlineRectangle> rectangles = new ArrayList<>();
+        for(int i = 0; i < 4; i++) {
+            rectangles.add(new OutlineRectangle(0, -i * 3, 3, new WeightedPoint(0, -i * 3, 3, 0)));
+        }
+
+        Outline outline = new Outline(rectangles.get(0));
+        rectangles.stream().skip(1).forEach(outline::insert);
+        System.out.println(outline.toLatexFigure());
+    }
+
 }

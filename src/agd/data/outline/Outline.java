@@ -60,6 +60,7 @@ public class Outline {
         // Notes:
         // - One single edge should never touch two consecutive edges, since these consecutive edges should have been merged beforehand.
 
+
         for(Direction d : Direction.values()) {
             // The edge we are trying to add to the shape.
             OutlineEdge e1 = mapping.get(d);
@@ -77,6 +78,20 @@ public class Outline {
                 // What is the relative position of e1.t compared to e2.o?
                 Relative r2 = e2.getRelativePositionToOrigin(e1.getTarget());
                 correctByRelativePlacement(e2, e1, next1, r2);
+            }
+        }
+
+        // Make sure that we have the correct access point to our cycle.
+        if(edge.getOrigin().y > rectangleEdge.getOrigin().y) {
+            edge = rectangleEdge;
+        } else {
+            // We might have merged the two if the access edge is equal.
+            // In general, we would always like the access point to be the rightmost left pointed edge.
+            if(Math.abs(edge.getOrigin().y - rectangleEdge.getOrigin().y) < 1e-4) {
+                // What is the position of our new edge relative to the previous access point?
+                if(edge.getOrigin().x <= rectangleEdge.getOrigin().x) {
+                    edge = rectangleEdge;
+                }
             }
         }
 
