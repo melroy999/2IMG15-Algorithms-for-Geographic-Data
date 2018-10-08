@@ -42,6 +42,14 @@ public class HalfGridPoint {
         }
     }
 
+    public static HalfGridPoint make(Point2d c, WeightedPoint original) {
+        if(original.w % 2 == 0) {
+            return new HalfGridPoint(Math.round(c.x), Math.round(c.y), original);
+        } else {
+            return new HalfGridPoint(Math.round(c.x - 0.5d) + 0.5d, Math.round(c.y - 0.5d) + 0.5d, original);
+        }
+    }
+
     /**
      * Get the coordinates of the point as a mathematical 2d point.
      *

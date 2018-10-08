@@ -101,8 +101,10 @@ public class BufferedOutline {
 
         for(OutlineEdge e : edge) {
             Point2d projection = e.project(p);
-            if(projection.distance2(p) < min) {
+            double distance = projection.distance2(p);
+            if(distance < min) {
                 position = projection;
+                min = distance;
             }
         }
 

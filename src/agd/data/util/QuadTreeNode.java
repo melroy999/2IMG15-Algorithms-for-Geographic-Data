@@ -79,7 +79,7 @@ public class QuadTreeNode<T extends EntryRectangle> {
      *
      * @param r The rectangular area to query.
      */
-    public List<EntryRectangle> query(Rectangle r) {
+    public List<T> query(Rectangle r) {
         Set<T> intersections = new HashSet<>();
 
         // Using the recursive definition to find all potential intersecting rectangles.
