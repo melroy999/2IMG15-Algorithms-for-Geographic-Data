@@ -64,12 +64,14 @@ public class ProblemSolution {
             if(!bl.epsilonEquals(blRounded, 0.01)) {
                 // The assigned point is invalid, since the corner points are not on integer positions.
                 errors.add(p.o.i);
+                System.out.println("Point " + p.o.i + " does not have its corner position on integer positions.");
             }
 
             // Next, check if the node overlaps with other regions.
             for(HalfGridPoint q : points) {
                 if(p.o.i != q.o.i && p.hasOverlap(q)) {
                     errors.add(p.o.i);
+                    System.out.println("Point " + p.o.i + " overlaps with " + q.o.i + ".");
                 }
             }
         }
