@@ -25,10 +25,6 @@ public class PlaceEvent extends AbstractEvent {
      */
     @Override
     public void execute(IntervalTree intervalTree, ArrayList<HalfGridPoint> points, PriorityQueue<AbstractEvent> events) {
-
-        intervalTree.printTree(intervalTree.getRoot());
-        System.out.println("\n");
-
         // Get overlaps between interval tree and point interval on y-coords
         Interval interval = new Interval(getP().y, (getP().y + getOwner().w), getP().x, getOwner().i);
         List<Interval> overlaps;
@@ -40,11 +36,6 @@ public class PlaceEvent extends AbstractEvent {
             if (i.getDepth() > maxDepth) {
                 maxDepth = i.getDepth();
             }
-        }
-
-        System.out.println(interval + ": ");
-        for (Interval i : overlaps) {
-            System.out.println(i);
         }
 
         HalfGridPoint placedPoint;
@@ -59,12 +50,11 @@ public class PlaceEvent extends AbstractEvent {
             placedPoint = new HalfGridPoint(getP().x + getOwner().w * 0.5, getP().y + getOwner().w * 0.5, getOwner());
         }
 
-        System.out.println(placedPoint);
-        System.out.println("\n");
         // Add interval to interval tree and add placedPoint to solution
         intervalTree.setRoot(intervalTree.addInterval(intervalTree.getRoot(), interval));
         points.add(placedPoint);
 
+        // Create deletion event for square
         events.add(new DeleteEvent(new Point2i(interval.getDepth(), interval.getStart()), getOwner()));
     }
 }

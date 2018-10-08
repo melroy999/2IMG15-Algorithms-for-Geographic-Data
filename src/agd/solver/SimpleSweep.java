@@ -46,23 +46,17 @@ public class SimpleSweep extends AbstractSolver {
         IntervalTree intervalTree = new IntervalTree();
         PriorityQueue<AbstractEvent> events = new PriorityQueue<>();
 
-        // TODO: Create events
         // Events: -Lower left region corner reached. Place square if possible or move to the right until possible to place
         //          and add square corner coords to status
         //         -Lower right region corner reached. Remove square corner coords from status
         for (HalfGridCorner p : eventPoints) {
             events.add(new PlaceEvent(new Point2i((int)p.point().x, (int) p.point().y ), p.o));
         }
-        System.out.println(events + "\n");
 
         // Get events from PQ using poll(), use .execute() on event
 
         while (!events.isEmpty()) {
             events.poll().execute(intervalTree, points, events);
         }
-
-        // TODO: Use a sweep line algorithm to start placing square regions, tracking the regions that have been placed
-        // TODO: Figure out the above
-        // Status: Coords of corners of currently placed squares in quadtree
     }
 }
