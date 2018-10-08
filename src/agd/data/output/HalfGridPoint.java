@@ -71,4 +71,8 @@ public class HalfGridPoint {
         java.awt.Rectangle r2 = new java.awt.Rectangle(q.x_double - q.o.w, q.y_double - q.o.w, 2 * q.o.w, 2 * q.o.w);
         return r1.intersects(r2);
     }
+
+    public String toString() {
+        return "[" + this.point().x + ", " + this.point().y + ", " + this.o.i + ", " + this.o.w +  "]";
+    }
 }
