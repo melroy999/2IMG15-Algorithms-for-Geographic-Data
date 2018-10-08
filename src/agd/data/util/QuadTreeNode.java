@@ -30,6 +30,9 @@ public class QuadTreeNode<T extends EntryRectangle> {
     public QuadTreeNode(Rectangle box) {
         this.box = box;
         this.children = new ArrayList<>(4);
+        for(int i = 0; i < 4; i++) {
+            this.children.add(null);
+        }
     }
 
     /**
