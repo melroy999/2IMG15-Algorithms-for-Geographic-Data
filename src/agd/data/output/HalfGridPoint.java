@@ -63,4 +63,8 @@ public class HalfGridPoint {
         int w = a.x <= b.x ? o.w : q.o.w;
         return Math.abs(a.x - b.x) < w && Math.abs(a.y - b.y) < w;
     }
+
+    public String toString() {
+        return "[" + this.point().x + " " + this.point().y + " " + this.o.i + " " + this.o.w +  "]";
+    }
 }

@@ -32,11 +32,6 @@ public class IntervalTree {
             return node;
         }
 
-        // Check if the max value of a (sub)tree should be updated
-        if (node.getMax() > root.getMax()) {
-            root.setMax(node.getMax());
-        }
-
         // Check if the interval "node" should be placed on the left
         // Placed on the left when root interval == node interval
         // Or when root.start > node.start or root.end > node.end
@@ -80,15 +75,13 @@ public class IntervalTree {
             overlap.add(tree);
         }
 
-        // Check if we need to recurse to the left, max of left subtree is greater than the start of the interval
-        if ((tree.getLeft() != null) && (tree.getLeft().getMax() >= interval.getStart())) {
-            overlap.addAll(checkInterval(tree.getLeft(), interval));
-        }
-
         // Check if we need to recurse to the right, start of root is greater than the end of the interval
-        if (!(tree.getRight() == null) || (tree.getStart() > interval.getMax())) {
+        if (!(tree.getRight() == null) || (tree.getStart() > interval.getEnd())) {
             overlap.addAll(checkInterval(tree.getRight(), interval));
         }
+
+        // Recurse to the left
+        overlap.addAll(checkInterval(tree.getLeft(), interval));
 
         return overlap;
     }
@@ -102,8 +95,47 @@ public class IntervalTree {
      */
     public Interval deleteInterval(Interval tree, Interval target){
 
+        // If the tree is empty, return the empty tree
+        if (tree == null) {
+            return null;
+        }
 
+        // Check if we have the correct interval in the tree
+        if (tree.getId() == target.getId()) {
+            // node with only one child or no child
+            if (tree.getLeft() == null)
+                return tree.getRight();
+            else if (tree.getRight() == null)
+                return tree.getLeft();
 
+            // node with two children: Get the inorder successor (smallest in the right subtree)
+            Interval successor = getLeft(tree.getRight());
+            tree.setDepth(successor.getDepth());
+            tree.setEnd(successor.getEnd());
+            tree.setStart(successor.getStart());
+            tree.setId(successor.getId());
+
+            // Delete the inorder successor
+            tree.setRight(deleteInterval(tree.getRight(), successor));
+        }
+
+        // Check if we need to recurse to the right
+        if (!(tree.getRight() == null) || (tree.getStart() > target.getEnd())) {
+            tree.setRight(deleteInterval(tree.getRight(), target));
+        }
+
+        // Recurse to the left
+        tree.setLeft(deleteInterval(tree.getLeft(), target));
+
+        return tree;
+    }
+
+    Interval getLeft(Interval tree)
+    {
+        while (tree.getLeft() != null)
+        {
+            tree = tree.getLeft();
+        }
         return tree;
     }
 }

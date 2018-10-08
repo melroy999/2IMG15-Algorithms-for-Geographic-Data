@@ -32,5 +32,9 @@ public abstract class AbstractEvent implements Comparable<AbstractEvent>{
         return p.x == o.p.x ? Integer.compare(p.y, o.p.y) : Integer.compare(p.x, o.p.x);
     }
 
+    public String toString() {
+        return "[" + this.p.x + " " + this.p.y + " " + this.owner.i +  "]";
+    }
+
     public abstract void execute(IntervalTree intervalTree, ArrayList<HalfGridPoint> points);
 }
