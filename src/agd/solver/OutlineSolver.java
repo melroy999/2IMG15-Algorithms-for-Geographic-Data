@@ -4,17 +4,17 @@ import agd.data.input.ProblemInstance;
 import agd.data.input.WeightedPoint;
 import agd.data.outline.BufferedOutline;
 import agd.data.outline.Outline;
+import agd.data.outline.OutlineEdge;
 import agd.data.outline.OutlineRectangle;
 import agd.data.output.HalfGridPoint;
 import agd.data.util.QuadTreeNode;
 import agd.math.Point2d;
-import javafx.util.Pair;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class OutlineSolver extends AbstractSolver {
@@ -34,9 +34,9 @@ public class OutlineSolver extends AbstractSolver {
         centre = centre.scale(1d / instance.getPoints().size());
 
         // Find the distance between the centre point and all of the points, and sort on distance.
-        Point2d finalCentre = centre;
-        List<WeightedPoint> sortedPoints = instance.getPoints().stream().sorted(
-                Comparator.comparingDouble(p -> p.distance(finalCentre))).collect(Collectors.toList());
+//        List<WeightedPoint> sortedPoints = getSortOnDefaultCentroid(instance.getPoints(), centre);
+//        List<WeightedPoint> sortedPoints = getSortOnCornerPoints(instance.getPoints(), centre);
+        List<WeightedPoint> sortedPoints = getSortOnClosestPointOnBorder(instance.getPoints(), centre);
 
         // Create a quadtree in which we will check for overlapping rectangles.
         // TODO choose a reliable bound for the quadtree.
@@ -84,5 +84,58 @@ public class OutlineSolver extends AbstractSolver {
             points.add(HalfGridPoint.make(placement, p));
             tree.insert(result);
         }
+    }
+
+    private static List<WeightedPoint> getSortOnDefaultCentroid(List<WeightedPoint> points, final Point2d c) {
+        return points.stream().sorted(Comparator.comparingDouble(p -> p.distance2(c))).collect(Collectors.toList());
+    }
+
+    private static List<WeightedPoint> getSortOnCornerPoints(List<WeightedPoint> points, final Point2d c) {
+        return points.stream().sorted(Comparator.comparingDouble(p -> getClosestCornerPoint(p, c).distance2(c))).collect(Collectors.toList());
+    }
+
+    private static List<WeightedPoint> getSortOnClosestPointOnBorder(List<WeightedPoint> points, final Point2d c) {
+        return points.stream().sorted(Comparator.comparingDouble(p -> getClosestPointOnBorder(p, c).distance2(c))).collect(Collectors.toList());
+    }
+
+    private static Point2d getClosestCornerPoint(WeightedPoint p, final Point2d c) {
+        double hw = 0.5 * p.w;
+        Point2d[] points = new Point2d[] {
+                new Point2d(p.x + hw, p.y + hw),
+                new Point2d(p.x - hw, p.y + hw),
+                new Point2d(p.x + hw, p.y - hw),
+                new Point2d(p.x - hw, p.y - hw)
+        };
+
+        double min = Double.MAX_VALUE;
+        Point2d best = null;
+
+        for(Point2d q : points) {
+            double distance = c.distance2(q);
+            if(distance < min) {
+                min = distance;
+                best = q;
+            }
+        }
+
+        return best;
+    }
+
+    private static Point2d getClosestPointOnBorder(WeightedPoint p, final Point2d c) {
+        OutlineRectangle r = p.getOutlineRectangle();
+
+        double min = Double.MAX_VALUE;
+        Point2d best = null;
+
+        for(OutlineEdge e : r.createOutline(OutlineEdge.Direction.LEFT)) {
+            Point2d q = e.project(c);
+            double distance = c.distance2(q);
+            if(distance < min) {
+                min = distance;
+                best = q;
+            }
+        }
+
+        return best;
     }
 }
