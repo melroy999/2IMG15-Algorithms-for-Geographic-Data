@@ -134,12 +134,6 @@ public class OutlineEdge implements Iterable<OutlineEdge> {
      * @return True if the two lines share a line segment, false otherwise.
      */
     public boolean doTouch(OutlineEdge conflict) {
-        if(origin.epsilonEquals(new Point2d(12.0, 3.0), 1e-4)) {
-            System.out.println();
-        }
-
-        //TODO this is not working as it should.
-
         // Are they upon the same line?
         if(direction.isHorizontal) {
             if(Math.abs(origin.y - conflict.origin.y) > 1e-4) return false;
@@ -179,7 +173,7 @@ public class OutlineEdge implements Iterable<OutlineEdge> {
             diff1 = conflict.getTarget().sub(getTarget());
             diff2 = getOrigin().sub(conflict.getOrigin());
         }
-        return direction.isHorizontal ? diff1.x > -1e-4 && diff2.x > -1e-4 : diff1.y > -1e-4 && diff2.y > -1e-4;
+        return direction.isHorizontal ? diff1.x > -1e-4 && diff2.x > 1e-4 : diff1.y > -1e-4 && diff2.y > 1e-4;
     }
 
     /**
