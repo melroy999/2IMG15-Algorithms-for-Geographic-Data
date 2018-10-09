@@ -64,12 +64,14 @@ public class ProblemSolution {
             if(!bl.epsilonEquals(blRounded, 0.01)) {
                 // The assigned point is invalid, since the corner points are not on integer positions.
                 errors.add(p.o.i);
+                System.out.println("Point " + p.o.i + " does not have its corner position on integer positions.");
             }
 
             // Next, check if the node overlaps with other regions.
             for(HalfGridPoint q : points) {
                 if(p.o.i != q.o.i && p.hasOverlap(q)) {
                     errors.add(p.o.i);
+                    System.out.println("Point " + p.o.i + " overlaps with " + q.o.i + ".");
                 }
             }
         }
@@ -100,5 +102,26 @@ public class ProblemSolution {
      */
     public List<HalfGridPoint> getPoints() {
         return new ArrayList<>(points);
+    }
+
+    /**
+     * Output the configuration to text.
+     *
+     * @return A string containing the entire contents of the file.
+     */
+    public String output() {
+        StringBuilder builder = new StringBuilder();
+        builder.append(7).append("\n");
+        builder.append(instance.id);
+
+        // Sort the points on the id.
+        points.sort(Comparator.comparingInt(a -> a.o.i));
+
+        for(HalfGridPoint p : points) {
+            Point2d t = p.point();
+            builder.append("\n").append(t.x).append(" ").append(t.y);
+        }
+
+        return builder.toString();
     }
 }

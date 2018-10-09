@@ -3,6 +3,7 @@ package agd.gui;
 import agd.core.Core;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -21,6 +22,7 @@ public class GUI {
 
     // A static file chooser, to avoid slow loading issues.
     private static JFileChooser fc = new JFileChooser(); //now declared globally
+    private static JFileChooser fs = new JFileChooser(); //now declared globally
 
     // Components of the GUI.
     private JPanel rootPanel;
@@ -30,14 +32,19 @@ public class GUI {
     private JPanel filePanel;
     private JPanel settingsPanel;
     private JButton saveFileButton;
-    private JCheckBox magic1CheckBox;
-    private JCheckBox magic2CheckBox;
     private JLabel minErrorLabel;
     private JLabel errorLabel;
 
     private GUI(Core core) {
         this.core = core;
         init();
+
+        fc.setDialogType(JFileChooser.OPEN_DIALOG);
+        fc.setFileFilter(new FileNameExtensionFilter("text file", "txt"));
+
+        fs.setDialogType(JFileChooser.SAVE_DIALOG);
+        fs.setSelectedFile(new File("output.txt"));
+        fs.setFileFilter(new FileNameExtensionFilter("text file", "txt"));
     }
 
     private void init() {
@@ -47,6 +54,14 @@ public class GUI {
             if(status == JFileChooser.APPROVE_OPTION) {
                 File selectedFile = fc.getSelectedFile();
                 core.fileHandler.importFile(selectedFile);
+            }
+        });
+
+        saveFileButton.addActionListener(e -> {
+            int status = fc.showSaveDialog(rootPanel);
+
+            if(status == JFileChooser.APPROVE_OPTION) {
+                core.fileHandler.exportFile(fc.getSelectedFile());
             }
         });
     }

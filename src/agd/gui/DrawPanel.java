@@ -24,7 +24,7 @@ public class DrawPanel extends JPanel {
     private final GUI gui;
 
     // The clearance we want at the borders.
-    private static final int clearance = 120;
+    private static final int clearance = 250;
 
     /**
      * Creates a new <code>JPanel</code> with a double buffer and a flow layout.

@@ -5,6 +5,8 @@ import agd.data.input.ProblemInstance;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
@@ -35,6 +37,23 @@ public class FileHandler {
             core.solveProblemInstance(ProblemInstance.readInstance(scanner));
 
         } catch (FileNotFoundException | NoSuchElementException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void exportFile(File file) {
+        String filename = file.toString();
+
+        if(!filename.endsWith(".txt")) {
+            filename += ".txt";
+        }
+
+        try(FileWriter fw = new FileWriter(filename)) {
+            // Write the result to the desired file.
+            if(core.solution != null) {
+                fw.write(core.solution.output());
+            }
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

@@ -1,6 +1,7 @@
 package agd.data.output;
 
 import agd.data.input.WeightedPoint;
+import agd.gui.util.Rectangle;
 import agd.math.Point2d;
 
 /**
@@ -42,6 +43,14 @@ public class HalfGridPoint {
         }
     }
 
+    public static HalfGridPoint make(Point2d c, WeightedPoint original) {
+        if(original.w % 2 == 0) {
+            return new HalfGridPoint(Math.round(c.x), Math.round(c.y), original);
+        } else {
+            return new HalfGridPoint(Math.round(c.x - 0.5d) + 0.5d, Math.round(c.y - 0.5d) + 0.5d, original);
+        }
+    }
+
     /**
      * Get the coordinates of the point as a mathematical 2d point.
      *
@@ -58,10 +67,9 @@ public class HalfGridPoint {
      * @return Whether the two regions associated with the points overlap.
      */
     public boolean hasOverlap(HalfGridPoint q) {
-        Point2d a = point().add(new Point2d(o.w, o.w).scale(-0.5d));
-        Point2d b = q.point().add(new Point2d(q.o.w, q.o.w).scale(-0.5d));
-        int w = a.x <= b.x ? o.w : q.o.w;
-        return Math.abs(a.x - b.x) < w && Math.abs(a.y - b.y) < w;
+        java.awt.Rectangle r1 = new java.awt.Rectangle(x_double - o.w, y_double - o.w, 2 * o.w, 2 * o.w);
+        java.awt.Rectangle r2 = new java.awt.Rectangle(q.x_double - q.o.w, q.y_double - q.o.w, 2 * q.o.w, 2 * q.o.w);
+        return r1.intersects(r2);
     }
 
     public String toString() {
