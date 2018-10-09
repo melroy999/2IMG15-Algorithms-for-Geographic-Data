@@ -218,7 +218,7 @@ public class BufferedOutline {
         }
 
         public static Quadrant getQuadrant(Point2d p, Point2d c) {
-            if(p.distance2(c) < -1e04) {
+            if(p.distance2(c) < 1e-4) {
                 return ON;
             } else {
                 if(p.x <= c.x) {

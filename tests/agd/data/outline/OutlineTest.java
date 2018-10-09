@@ -106,4 +106,18 @@ class OutlineTest {
         rectangles.stream().skip(1).forEach(outline::insert);
         System.out.println(outline.toLatexFigure());
     }
+
+    @Test
+    void seeminglySimpleTest() {
+        List<OutlineRectangle> rectangles = new ArrayList<>();
+
+        rectangles.add(new OutlineRectangle(0, 0, 4, new WeightedPoint(0, 0, 0, 0)));
+        rectangles.add(new OutlineRectangle(4, -2, 4, new WeightedPoint(0, 0, 0, 0)));
+        rectangles.add(new OutlineRectangle(4, 2, 2, new WeightedPoint(0, 0, 0, 0)));
+        rectangles.add(new OutlineRectangle(1, -3, 3, new WeightedPoint(0, 0, 0, 0)));
+
+        Outline outline = new Outline(rectangles.get(0));
+        rectangles.stream().skip(1).forEach(outline::insert);
+        System.out.println(outline.toLatexFigure());
+    }
 }

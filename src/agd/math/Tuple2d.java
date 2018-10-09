@@ -98,6 +98,16 @@ public abstract class Tuple2d<T> {
     }
 
     /**
+     * Calculate the manhattan distance between this tuple and the given tuple.
+     *
+     * @param t The tuple we want to measure the euclidean distance to from this tuple.
+     * @return The manhattan distance between this tuple and the tuple t.
+     */
+    public double manhattan(Tuple2d t) {
+        return Math.abs(x - t.x) + Math.abs(y - t.y);
+    }
+
+    /**
      * Create a new instance of a tuple2d subclass.
      *
      * @param x The x-coordinate of the tuple.

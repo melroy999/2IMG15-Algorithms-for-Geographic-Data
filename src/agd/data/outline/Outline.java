@@ -25,6 +25,7 @@ public class Outline {
         edge = rectangle.createOutline(Direction.LEFT);
         rectangle.setOutline(this);
         rectangles.add(rectangle);
+        System.out.println("Creating new outline box for " + rectangle.owner);
     }
 
     /**
@@ -137,10 +138,11 @@ public class Outline {
 
         for(int i = 0; i < edges.size(); i++) {
             OutlineEdge e2 = edges.get((i + 1) % edges.size());
+            OutlineEdge e3 = edges.get((i + 2) % edges.size());
 
-            if(prev.getDirection() == e2.getDirection()) {
+            if(prev.getDirection() == e3.getDirection() && e2.getOrigin().distance2(e2.getTarget()) < 1e-4) {
                 // Merge the two directions.
-                prev.setNext(e2.getNext());
+                prev.setNext(e3.getNext());
 
                 // Be careful if edges.size() - 1 == i, since we might have removed our handle!
                 if(i == edges.size() - 1) {
@@ -149,7 +151,7 @@ public class Outline {
                 }
 
                 // Skip ahead one iteration.
-                i++;
+                i += 2;
             } else {
                 // Set the new previous.
                 prev = e2;

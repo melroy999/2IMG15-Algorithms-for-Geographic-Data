@@ -34,9 +34,10 @@ public class OutlineSolver extends AbstractSolver {
         centre = centre.scale(1d / instance.getPoints().size());
 
         // Find the distance between the centre point and all of the points, and sort on distance.
-//        List<WeightedPoint> sortedPoints = getSortOnDefaultCentroid(instance.getPoints(), centre);
+        List<WeightedPoint> sortedPoints = getSortOnDefaultCentroid(instance.getPoints(), centre);
 //        List<WeightedPoint> sortedPoints = getSortOnCornerPoints(instance.getPoints(), centre);
-        List<WeightedPoint> sortedPoints = getSortOnClosestPointOnBorder(instance.getPoints(), centre);
+//        List<WeightedPoint> sortedPoints = getSortOnClosestPointOnBorder(instance.getPoints(), centre);
+//        List<WeightedPoint> sortedPoints = getSortOnManhattanCentroid(instance.getPoints(), centre);
 
         // Create a quadtree in which we will check for overlapping rectangles.
         // TODO choose a reliable bound for the quadtree.
@@ -66,11 +67,20 @@ public class OutlineSolver extends AbstractSolver {
                 List<Outline> outlines = intersections.stream().map(
                         OutlineRectangle::getOutline).distinct().collect(Collectors.toList());
 
+                if(outlines.size() > 1) {
+                    System.out.println("Intersecting with multiple outline groups.");
+                }
+
                 // Find the associated outline.
+//                System.out.println();
                 Outline outline = outlines.get(0);
+//                System.out.println(outline.toLatexFigure());
                 BufferedOutline bOutline = new BufferedOutline(outline, 0.5 * p.w);
-//                placement = bOutline.projectAndSelect(p, centre);
-                placement = bOutline.projectAndSelect(p);
+                bOutline.sanitizeOutline();
+//                System.out.println(bOutline.toLatexFigure());
+//                System.out.println();
+                placement = bOutline.projectAndSelect(p, centre);
+//                placement = bOutline.projectAndSelect(p);
                 result = p.getOutlineRectangle(placement);
                 outline.insert(result);
             } else {
@@ -88,6 +98,10 @@ public class OutlineSolver extends AbstractSolver {
 
     private static List<WeightedPoint> getSortOnDefaultCentroid(List<WeightedPoint> points, final Point2d c) {
         return points.stream().sorted(Comparator.comparingDouble(p -> p.distance2(c))).collect(Collectors.toList());
+    }
+
+    private static List<WeightedPoint> getSortOnManhattanCentroid(List<WeightedPoint> points, final Point2d c) {
+        return points.stream().sorted(Comparator.comparingDouble(p -> p.manhattan(c))).collect(Collectors.toList());
     }
 
     private static List<WeightedPoint> getSortOnCornerPoints(List<WeightedPoint> points, final Point2d c) {

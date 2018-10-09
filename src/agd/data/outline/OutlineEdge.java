@@ -378,7 +378,7 @@ public class OutlineEdge implements Iterable<OutlineEdge> {
      * @return ON if the points are equal, LEFT or RIGHT otherwise, depending on the position.
      */
     public Relative getRelativePositionToOrigin(Point2d p) {
-        if(origin.epsilonEquals(p, 1e-4)) {
+        if(false && origin.epsilonEquals(p, 1e-4)) {
             return Relative.ON;
         } else {
             // Note that a point is right of the origin if it is past the origin on the line.
@@ -468,7 +468,7 @@ public class OutlineEdge implements Iterable<OutlineEdge> {
      * The direction of the outline edge.
      */
     public enum Direction {
-        UP(false), DOWN(false), LEFT(true), RIGHT(true);
+        LEFT(true), UP(false), RIGHT(true), DOWN(false);
 
         // Whether the direction is horizontal or not.
         public final boolean isHorizontal;
