@@ -213,13 +213,15 @@ public class Outline {
 
         // Combine everything into one figure.
         StringBuilder result = new StringBuilder();
-        result.append("\\begin{tikzpicture}[x=5mm, y=5mm, baseline]\n");
+        result.append("\\resizebox{\\textwidth}{!}{% <------ Don't forget this %\n");
+        result.append("\\begin{tikzpicture}[x=5mm, y=5mm, baseline, trim left]\n");
         result.append("\\tikz {\n");
         latexRectangles.forEach(result::append);
         latexNodes.forEach(result::append);
         result.append(latexEdges);
         result.append("}\n");
-        result.append("\\end{tikzpicture}");
+        result.append("\\end{tikzpicture}\n");
+        result.append("}");
 
         return result.toString();
     }

@@ -88,9 +88,17 @@ public class BufferedOutline {
      * Remove the intersections within the outline.
      */
     public void sanitizeOutline() {
-        // Find all intersections, and resolve them.
+        // Start by resolving intersections.
         for(Pair<OutlineEdge, OutlineEdge> pair : IntersectionSweep.findIntersections(edge)) {
             pair.getKey().resolveIntersection(pair.getValue());
+        }
+
+        // Proceed with resolving the remaining overlaps.
+        for(Pair<OutlineEdge, OutlineEdge> pair : IntersectionSweep.findHorizontalOverlaps(edge)) {
+            pair.getKey().resolveOverlap(pair.getValue());
+        }
+        for(Pair<OutlineEdge, OutlineEdge> pair : IntersectionSweep.findVerticalOverlaps(edge)) {
+            pair.getKey().resolveOverlap(pair.getValue());
         }
     }
 
@@ -177,7 +185,13 @@ public class BufferedOutline {
      * @return A string representing a tikz figure in latex.
      */
     public String toLatexFigure() {
-        List<OutlineEdge> edges = edge.toList();
+        List<OutlineEdge> edges = new ArrayList<>();
+        for(OutlineEdge e : edge) {
+            edges.add(e);
+            if(e.getNext() == null) {
+                break;
+            }
+        }
 
         // Draw the edges and nodes.
         List<String> latexNodes = new ArrayList<>();
@@ -191,12 +205,14 @@ public class BufferedOutline {
 
         // Combine everything into one figure.
         StringBuilder result = new StringBuilder();
-        result.append("\\begin{tikzpicture}[x=5mm, y=5mm, baseline]\n");
+        result.append("\\resizebox{\\textwidth}{!}{% <------ Don't forget this %\n");
+        result.append("\\begin{tikzpicture}[x=5mm, y=5mm, baseline, trim left]\n");
         result.append("\\tikz {\n");
         latexNodes.forEach(result::append);
         result.append(latexEdges);
         result.append("}\n");
-        result.append("\\end{tikzpicture}");
+        result.append("\\end{tikzpicture}\n");
+        result.append("}");
 
         return result.toString();
     }

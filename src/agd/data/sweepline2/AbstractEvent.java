@@ -37,7 +37,17 @@ public abstract class AbstractEvent implements Comparable<AbstractEvent> {
      * @param status The status of the sweep line.
      * @param intersections The set of currently found intersections.
      */
-    public abstract void resolve(PriorityQueue<AbstractEvent> events, TreeMap<DoubleWrapper, Set<LeftEndpointEvent>> status, List<Pair<OutlineEdge,OutlineEdge>> intersections);
+    public abstract void resolveIntersection(PriorityQueue<AbstractEvent> events, TreeMap<DoubleWrapper, Set<LeftEndpointEvent>> status, List<Pair<OutlineEdge,OutlineEdge>> intersections);
+
+    /**
+     * Resolve the event using the sweep line data.
+     *
+     * @param events The current queue of sweep line events.
+     * @param status The status of the sweep line.
+     * @param intersections The set of currently found intersections.
+     * @param h             The direction of the sweep (true if p.y should be used, false if p.x).
+     */
+    public abstract void resolveOverlap(PriorityQueue<AbstractEvent> events, TreeMap<DoubleWrapper, Set<LeftEndpointEvent>> status, List<Pair<OutlineEdge,OutlineEdge>> intersections, boolean h);
 
     @Override
     public int compareTo(AbstractEvent o) {

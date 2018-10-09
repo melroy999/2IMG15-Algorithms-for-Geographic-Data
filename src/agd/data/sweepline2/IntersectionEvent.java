@@ -32,7 +32,20 @@ public class IntersectionEvent extends AbstractEvent {
      * @param intersections The set of currently found intersections.
      */
     @Override
-    public void resolve(PriorityQueue<AbstractEvent> events, TreeMap<DoubleWrapper, Set<LeftEndpointEvent>> status, List<Pair<OutlineEdge, OutlineEdge>> intersections) {
+    public void resolveIntersection(PriorityQueue<AbstractEvent> events, TreeMap<DoubleWrapper, Set<LeftEndpointEvent>> status, List<Pair<OutlineEdge, OutlineEdge>> intersections) {
+        intersections.add(new Pair<>(e1, e2));
+    }
+
+    /**
+     * Resolve the event using the sweep line data.
+     *
+     * @param events        The current queue of sweep line events.
+     * @param status        The status of the sweep line.
+     * @param intersections The set of currently found intersections.
+     * @param h             The direction of the sweep (true if p.y should be used, false if p.x).
+     */
+    @Override
+    public void resolveOverlap(PriorityQueue<AbstractEvent> events, TreeMap<DoubleWrapper, Set<LeftEndpointEvent>> status, List<Pair<OutlineEdge, OutlineEdge>> intersections, boolean h) {
         intersections.add(new Pair<>(e1, e2));
     }
 }

@@ -55,6 +55,8 @@ public class OutlineSolver extends AbstractSolver {
 
         // Insert the points into the plane one by one, using the outline for placement resolution.
         for(WeightedPoint p : sortedPoints) {
+            System.out.println("Placing point " + p);
+
             OutlineRectangle rectangle = p.getOutlineRectangle();
             List<OutlineRectangle> intersections = tree.query(rectangle);
 
@@ -76,6 +78,7 @@ public class OutlineSolver extends AbstractSolver {
                 Outline outline = outlines.get(0);
 //                System.out.println(outline.toLatexFigure());
                 BufferedOutline bOutline = new BufferedOutline(outline, 0.5 * p.w);
+//                System.out.println(bOutline.toLatexFigure());
                 bOutline.sanitizeOutline();
 //                System.out.println(bOutline.toLatexFigure());
 //                System.out.println();
