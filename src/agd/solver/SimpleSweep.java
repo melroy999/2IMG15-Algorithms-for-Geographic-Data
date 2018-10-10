@@ -3,10 +3,7 @@ package agd.solver;
 import agd.data.input.ProblemInstance;
 import agd.data.output.HalfGridCorner;
 import agd.data.output.HalfGridPoint;
-import agd.data.sweepline.AbstractEvent;
-import agd.data.sweepline.DeleteEvent;
-import agd.data.sweepline.IntervalTree;
-import agd.data.sweepline.PlaceEvent;
+import agd.data.sweepline.*;
 import agd.math.Point2i;
 
 import java.util.*;
@@ -28,8 +25,9 @@ public class SimpleSweep extends AbstractSolver {
         // point(x, y)→round(point(x, y)−0.5wx)
         instance.getPoints().forEach(p ->
                 points.add(new HalfGridCorner(Math.round(p.x - 0.5*p.w), Math.round(p.y - 0.5*p.w), p)));
-
     }
+
+    //TODO: Split points in half and get both sweeps working together
 
     /**
      * Solve the given problem instance using a left to right sweep line.
@@ -43,20 +41,31 @@ public class SimpleSweep extends AbstractSolver {
         ArrayList<HalfGridCorner> eventPoints = new ArrayList<>();
         translatePoints(instance, eventPoints);
 
-        IntervalTree intervalTree = new IntervalTree();
-        PriorityQueue<AbstractEvent> events = new PriorityQueue<>();
+        IntervalTree intervalTreeRight = new IntervalTree();
+        PriorityQueue<AbstractEvent> eventsRight = new PriorityQueue<>();
+
+        IntervalTree intervalTreeLeft = new IntervalTree();
+        PriorityQueue<AbstractEvent> eventsLeft = new PriorityQueue<>(Collections.reverseOrder());
 
         // Events: -Lower left region corner reached. Place square if possible or move to the right until possible to place
         //          and add square corner coords to status
         //         -Lower right region corner reached. Remove square corner coords from status
         for (HalfGridCorner p : eventPoints) {
-            events.add(new PlaceEvent(new Point2i((int)p.point().x, (int) p.point().y ), p.o));
+            eventsLeft.add(new PlaceEventLeft(new Point2i((int)p.point().x + p.o.w, (int) p.point().y ), p.o));
         }
+        
+//        for (int i = 0; i < eventsRight.size(); i++) {
+//            eventsLeft.add(eventsRight.poll());
+//        }
 
         // Get events from PQ using poll(), use .execute() on event
 
-        while (!events.isEmpty()) {
-            events.poll().execute(intervalTree, points, events);
+        while (!eventsRight.isEmpty()) {
+            eventsRight.poll().execute(intervalTreeRight, points, eventsRight);
+        }
+
+        while (!eventsLeft.isEmpty()) {
+            eventsLeft.poll().execute(intervalTreeLeft, points, eventsRight);
         }
     }
 }
