@@ -1,6 +1,5 @@
 package agd.data.input;
 
-import agd.data.outline.OutlineRectangle;
 import agd.math.Point2d;
 import agd.math.Point2i;
 
@@ -34,35 +33,4 @@ public class WeightedPoint extends Point2d {
         Point2i bottomLeft = new Point2i((int) Math.round(x - 0.5d * w), (int) Math.round(y - 0.5d * w));
         c = new Point2d(bottomLeft.x + 0.5d * w, bottomLeft.y + 0.5d * w);
     }
-
-    /**
-     * Convert the preferred placement of a weighted point to a outline rectangle.
-     *
-     * @return An outline rectangle with the point c at the center.
-     */
-    public OutlineRectangle getOutlineRectangle() {
-        return new OutlineRectangle(
-                (int) Math.round(c.x - 0.5 * w),
-                (int) Math.round(c.y - 0.5 * w),
-                w,
-                this
-        );
-    }
-
-    /**
-     * Convert the preferred placement of a weighted point to a outline rectangle.
-     *
-     * @param p The chosen placement for the center point.
-     * @return An outline rectangle with the point c at the center.
-     */
-    public OutlineRectangle getOutlineRectangle(Point2d p) {
-        return new OutlineRectangle(
-                (int) Math.round(p.x - 0.5 * w),
-                (int) Math.round(p.y - 0.5 * w),
-                w,
-                this
-        );
-    }
-
-    // TODO possibly add a better equality and hashcode.
 }
