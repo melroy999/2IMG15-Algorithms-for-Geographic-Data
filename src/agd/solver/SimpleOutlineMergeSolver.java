@@ -12,6 +12,7 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -96,12 +97,6 @@ public class SimpleOutlineMergeSolver extends SimpleOutlineSolver {
                 List<AbstractOutline> intersectingOutlines = intersections.stream().map(
                         OutlineRectangle::getOutline).distinct().collect(Collectors.toList());
 
-                if(intersectingOutlines.size() > 1) {
-                    System.out.println("Intersecting with multiple outline groups.");
-                }
-
-                // If we have more than 1, we can choose.
-
                 // Find the associated outline.
                 intersectingOutlines.sort((a, b) -> -Integer.compare(a.getRectangles().size(), b.getRectangles().size()));
                 SimpleOutline outline = (SimpleOutline) intersectingOutlines.get(0);
@@ -110,33 +105,24 @@ public class SimpleOutlineMergeSolver extends SimpleOutlineSolver {
 //                placement = bOutline.projectAndSelect(p);
                 result = getOutlineRectangle(placement, p);
                 outline.insert(result);
+                tree.insert(result);
 
                 // We want to merge smaller outlines with the larger outline.
-                if(intersectingOutlines.size() > 1) {
-                    for(int i = 1; i < intersectingOutlines.size(); i++) {
-                        // Merge outline i with outline 0.
-                        mergeCounter++;
-                        merge(outline, (SimpleOutline) intersectingOutlines.get(i), points, tree);
-                    }
-                }
+                mergeConflicts(tree, result, points, centre);
+
             } else {
                 // Create a new outline, which will set a pointer in the rectangle to the outline.
                 outlines.add(new SimpleOutline(rectangle));
                 placement = p.c;
                 result = rectangle;
+                tree.insert(result);
             }
 
             // Add the chosen rectangle to the tree and result.
             points.set(p.i, HalfGridPoint.make(placement, p));
-
-            if(result.getOutline() == null) {
-                System.out.println();
-            }
-
-            tree.insert(result);
         }
 
-        System.out.println("We have generated " + outlines.size() + " outline groups, of which we merged " + mergeCounter + ".");
+        System.out.println("We have generated " + outlines.size() + " outline groups.");
 
         // Print the entire solution.
         StringBuilder result = new StringBuilder();
@@ -158,28 +144,45 @@ public class SimpleOutlineMergeSolver extends SimpleOutlineSolver {
         clipboard.setContents(selection, selection);
     }
 
-    public static void merge(SimpleOutline outline, SimpleOutline target, ArrayList<HalfGridPoint> points, QuadTreeNode<OutlineRectangle> tree) {
-        // Find all the weighted points that are in the outline.
-        List<WeightedPoint> weightedPoints = target.getRectangles().stream().map(r -> r.owner).collect(Collectors.toList());
+    private static void mergeConflicts(QuadTreeNode<OutlineRectangle> tree, OutlineRectangle target, ArrayList<HalfGridPoint> points, Point2d centre) {
+        // First, check which overlaps we have.
+        List<OutlineRectangle> conflicts = tree.query(target);
 
-        // Remove all the rectangles from the quadtree.
-        target.getRectangles().forEach(tree::delete);
+        // Which outlines are we concerned with?
+        List<AbstractOutline> outlines = conflicts.stream().map(OutlineRectangle::getOutline).distinct()
+                .sorted((a, b) -> -Integer.compare(a.getRectangles().size(), b.getRectangles().size())).collect(Collectors.toList());
 
-        // Sort them on the distance to the center of the outline.
-        Rectangle dim = outline.getDimensions();
-        Point2d centre = new Point2d(dim.x + 0.5 * dim.width, dim.y + 0.5 * dim.height);
-        weightedPoints = getSortOnClosestPointOnBorder(weightedPoints, centre);
+        // The target outline.
+        SimpleOutline outline = (SimpleOutline) outlines.get(0);
 
-        // Insert them all into this outline.
-        for(WeightedPoint p : weightedPoints) {
-            BufferedOutline bOutline = new BufferedOutline(outline, 0.5 * p.w);
-            Point2d placement = bOutline.projectAndSelect(p, centre);
-            OutlineRectangle result = getOutlineRectangle(placement, p);
-            outline.insert(result);
+        if(outlines.size() > 1) {
+            // Gather all rectangles that have to be placed anew.
+            List<OutlineRectangle> conflictRectangles = new ArrayList<>();
+            for(int i = 1; i < outlines.size(); i++) {
+                conflictRectangles.addAll(outlines.get(i).getRectangles());
+            }
 
-            // Add the chosen rectangle to the tree and result.
-            points.set(p.i, HalfGridPoint.make(placement, p));
-            tree.insert(result);
+            // Remove all affected rectangles from the quadtree.
+            conflictRectangles.forEach(tree::delete);
+
+            // Sort all the points.
+            List<WeightedPoint> weightedPoints = getSortOnDefaultCentroid(
+                    conflictRectangles.stream().map(c -> c.owner).collect(Collectors.toList()), centre);
+            LinkedList<WeightedPoint> queue = new LinkedList<>(weightedPoints);
+
+            // Re-insert all the points.
+            while(!queue.isEmpty()) {
+                WeightedPoint p = queue.pollFirst();
+
+                BufferedOutline bOutline = new BufferedOutline(outline, 0.5 * p.w);
+                Point2d placement = bOutline.projectAndSelect(p, centre);
+                OutlineRectangle result = getOutlineRectangle(placement, p);
+                outline.insert(result);
+
+                // Add the chosen rectangle to the tree and result.
+                points.set(p.i, HalfGridPoint.make(placement, p));
+                tree.insert(result);
+            }
         }
     }
 
