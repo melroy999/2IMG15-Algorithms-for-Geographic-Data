@@ -35,6 +35,14 @@ public class SimpleOutline extends AbstractOutline implements Insertable {
         // Create an outline for the new rectangle.
         Map<Direction, Edge> rectangleEdges = rectangle.createOutlineMap();
 
+        if(rectangle.x == 53 && rectangle.y == 36) {
+            System.out.println();
+        }
+
+        if(rectangle.x == 49 && rectangle.y == 36) {
+            System.out.println();
+        }
+
         // We know that the rectangle is placed against at most two existing edges. Find those edges.
         List<Edge> touching = new ArrayList<>();
         for(Edge edge : this) {
@@ -204,7 +212,8 @@ public class SimpleOutline extends AbstractOutline implements Insertable {
         // - is moving in the opposite direction;
         // - which has an origin above the target of e.
         // We should terminate when no such edge is found before a turn opposite to the direction of the previous.
-        Iterator<Edge> reverse = reverseIterator();
+        Iterator<Edge> reverse = edge.reverseIterator();
+        reverse.next();
         while(reverse.hasNext()) {
             Edge previous = reverse.next();
 
@@ -224,7 +233,7 @@ public class SimpleOutline extends AbstractOutline implements Insertable {
                 // If relative reports after, we have found the edge to contract.
                 if(r == Relative.AFTER) {
                     // Project the target onto previous and create a new edge.
-                    Edge n = new Edge(point, edge.getDirection());
+                    Edge n = new Edge(point, edge.getPrevious().getDirection());
 
                     n.setPrevious(previous);
                     n.setNext(edge.getNext().getNext());

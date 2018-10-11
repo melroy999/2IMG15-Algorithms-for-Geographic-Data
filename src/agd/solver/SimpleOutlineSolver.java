@@ -47,6 +47,10 @@ public class SimpleOutlineSolver extends AbstractSolver {
         for(WeightedPoint p : sortedPoints) {
             System.out.println("Placing point " + p);
 
+            if(p.epsilonEquals(new Point2d(55.2,37.5), 1)) {
+                System.out.println();
+            }
+
             OutlineRectangle rectangle = getOutlineRectangle(p.c, p);
             List<OutlineRectangle> intersections = tree.query(rectangle);
 
