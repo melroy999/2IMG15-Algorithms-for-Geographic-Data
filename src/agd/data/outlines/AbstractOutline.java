@@ -1,9 +1,9 @@
 package agd.data.outlines;
 
 import agd.data.outlines.Edge.Direction;
+import agd.data.util.OutlineDimensions;
 
 import java.awt.*;
-import java.awt.geom.Dimension2D;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -19,7 +19,7 @@ public abstract class AbstractOutline implements Iterable<Edge> {
     private Edge edge;
 
     // The current dimensions of the outline.
-    private Rectangle dimensions;
+    private OutlineDimensions dimensions;
 
     /**
      * Create a new outline.
@@ -29,7 +29,7 @@ public abstract class AbstractOutline implements Iterable<Edge> {
     public AbstractOutline(OutlineRectangle rectangle) {
         // A left directional edge in a rectangle can only be the bottom edge.
         edge = rectangle.createOutline(Direction.LEFT);
-        dimensions = new Rectangle(rectangle);
+        dimensions = new OutlineDimensions(rectangle.x, rectangle.y, rectangle.width, rectangle.height, this);
         addRectangle(rectangle);
     }
 
@@ -81,7 +81,7 @@ public abstract class AbstractOutline implements Iterable<Edge> {
         int maxx = Math.max(rectangle.x + rectangle.width, dimensions.x + dimensions.width);
         int miny = Math.min(rectangle.y, dimensions.y);
         int maxy = Math.max(rectangle.y + rectangle.height, dimensions.y + dimensions.height);
-        this.dimensions = new Rectangle(minx, miny, maxx - minx, maxy - miny);
+        this.dimensions = new OutlineDimensions(minx, miny, maxx - minx, maxy - miny, this);
     }
 
     /**
@@ -89,7 +89,7 @@ public abstract class AbstractOutline implements Iterable<Edge> {
      *
      * @return The dimensions of rectangular box around the outline.
      */
-    public Rectangle getDimensions() {
+    public OutlineDimensions getDimensions() {
         return dimensions;
     }
 

@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
  * An efficient data structure for rectangle collision detection.
  */
 // TODO make our own implementation of a rectangle holding the id of the associated point, with enhanced equality checks.
-public class QuadTreeNode<T extends EntryRectangle> {
+public class QuadTreeNode<T extends Rectangle> {
     // The maximum number of nodes that are allowed to be inside of the node before splitting.
     private static final int NO_MAX_ENTRIES = 5;
 

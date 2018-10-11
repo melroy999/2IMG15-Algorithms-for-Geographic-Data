@@ -13,10 +13,9 @@ import java.awt.datatransfer.StringSelection;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
-public class SimpleOutlineSolver extends AbstractSolver {
+public class SimpleOutlineMergeSolver extends SimpleOutlineSolver {
     /**
      * Solve the given problem instance.
      *
@@ -25,13 +24,14 @@ public class SimpleOutlineSolver extends AbstractSolver {
      */
     @Override
     public void solve(ProblemInstance instance, ArrayList<HalfGridPoint> points) {
-        solve(instance, points, SortingOptions.FURTHEST);
+        solve(instance, points, SortingOptions.CENTROID);
     }
 
     public enum SortingOptions {
         CENTROID, CORNER, CLOSEST_POINT, MANHATTAN_CENTROID, FURTHEST
     }
 
+    @SuppressWarnings("Duplicates")
     public void solve(ProblemInstance instance, ArrayList<HalfGridPoint> points, SortingOptions option) {
         // Find the centre of mass.
         Point2d centre = new Point2d();
@@ -39,6 +39,11 @@ public class SimpleOutlineSolver extends AbstractSolver {
             centre = centre.add(p.c);
         }
         centre = centre.scale(1d / instance.getPoints().size());
+
+        // Initialize the array of points to hold null for every entry.
+        for(int i = 0; i < instance.getPoints().size(); i++) {
+            points.add(null);
+        }
 
         // Find the distance between the centre point and all of the points, and sort on distance.
         List<WeightedPoint> sortedPoints;
@@ -62,8 +67,6 @@ public class SimpleOutlineSolver extends AbstractSolver {
         }
 
         // Create a quadtree in which we will check for overlapping rectangles.
-        // TODO choose a reliable bound for the quadtree.
-
         int width = instance.max_x - instance.min_x;
         int height = instance.max_y - instance.min_y;
         QuadTreeNode<OutlineRectangle> tree = new QuadTreeNode<>(
@@ -77,6 +80,7 @@ public class SimpleOutlineSolver extends AbstractSolver {
 
         // The list of outlines that have been generated.
         List<AbstractOutline> outlines = new ArrayList<>();
+        int mergeCounter = 0;
 
         // Insert the points into the plane one by one, using the outline for placement resolution.
         for(WeightedPoint p : sortedPoints) {
@@ -99,19 +103,22 @@ public class SimpleOutlineSolver extends AbstractSolver {
                 // If we have more than 1, we can choose.
 
                 // Find the associated outline.
-//                System.out.println();
-//                intersectingOutlines.sort((a, b) -> -Integer.compare(a.getRectangles().size(), b.getRectangles().size()));
-                intersectingOutlines.sort(Comparator.comparingInt(a -> a.getRectangles().size()));
+                intersectingOutlines.sort((a, b) -> -Integer.compare(a.getRectangles().size(), b.getRectangles().size()));
                 SimpleOutline outline = (SimpleOutline) intersectingOutlines.get(0);
-
-//                System.out.println(outline.toLatexFigure());
                 BufferedOutline bOutline = new BufferedOutline(outline, 0.5 * p.w);
-
                 placement = bOutline.projectAndSelect(p, centre);
 //                placement = bOutline.projectAndSelect(p);
-
                 result = getOutlineRectangle(placement, p);
                 outline.insert(result);
+
+                // We want to merge smaller outlines with the larger outline.
+                if(intersectingOutlines.size() > 1) {
+                    for(int i = 1; i < intersectingOutlines.size(); i++) {
+                        // Merge outline i with outline 0.
+                        mergeCounter++;
+                        merge(outline, (SimpleOutline) intersectingOutlines.get(i), points, tree);
+                    }
+                }
             } else {
                 // Create a new outline, which will set a pointer in the rectangle to the outline.
                 outlines.add(new SimpleOutline(rectangle));
@@ -120,7 +127,7 @@ public class SimpleOutlineSolver extends AbstractSolver {
             }
 
             // Add the chosen rectangle to the tree and result.
-            points.add(HalfGridPoint.make(placement, p));
+            points.set(p.i, HalfGridPoint.make(placement, p));
 
             if(result.getOutline() == null) {
                 System.out.println();
@@ -129,7 +136,7 @@ public class SimpleOutlineSolver extends AbstractSolver {
             tree.insert(result);
         }
 
-        System.out.println("We have generated " + outlines.size() + " outline groups.");
+        System.out.println("We have generated " + outlines.size() + " outline groups, of which we merged " + mergeCounter + ".");
 
         // Print the entire solution.
         StringBuilder result = new StringBuilder();
@@ -151,6 +158,31 @@ public class SimpleOutlineSolver extends AbstractSolver {
         clipboard.setContents(selection, selection);
     }
 
+    public static void merge(SimpleOutline outline, SimpleOutline target, ArrayList<HalfGridPoint> points, QuadTreeNode<OutlineRectangle> tree) {
+        // Find all the weighted points that are in the outline.
+        List<WeightedPoint> weightedPoints = target.getRectangles().stream().map(r -> r.owner).collect(Collectors.toList());
+
+        // Remove all the rectangles from the quadtree.
+        target.getRectangles().forEach(tree::delete);
+
+        // Sort them on the distance to the center of the outline.
+        Rectangle dim = outline.getDimensions();
+        Point2d centre = new Point2d(dim.x + 0.5 * dim.width, dim.y + 0.5 * dim.height);
+        weightedPoints = getSortOnClosestPointOnBorder(weightedPoints, centre);
+
+        // Insert them all into this outline.
+        for(WeightedPoint p : weightedPoints) {
+            BufferedOutline bOutline = new BufferedOutline(outline, 0.5 * p.w);
+            Point2d placement = bOutline.projectAndSelect(p, centre);
+            OutlineRectangle result = getOutlineRectangle(placement, p);
+            outline.insert(result);
+
+            // Add the chosen rectangle to the tree and result.
+            points.set(p.i, HalfGridPoint.make(placement, p));
+            tree.insert(result);
+        }
+    }
+
     /**
      * Convert the preferred placement of a weighted point to a outline rectangle.
      *
@@ -164,89 +196,5 @@ public class SimpleOutlineSolver extends AbstractSolver {
                 o.w,
                 o
         );
-    }
-
-    protected static List<WeightedPoint> getSortOnDefaultCentroid(List<WeightedPoint> points, final Point2d c) {
-        return points.stream().sorted(Comparator.comparingDouble(p -> p.distance2(c))).collect(Collectors.toList());
-    }
-
-    protected static List<WeightedPoint> getSortOnManhattanCentroid(List<WeightedPoint> points, final Point2d c) {
-        return points.stream().sorted(Comparator.comparingDouble(p -> p.manhattan(c))).collect(Collectors.toList());
-    }
-
-    protected static List<WeightedPoint> getSortOnCornerPoints(List<WeightedPoint> points, final Point2d c) {
-        return points.stream().sorted(Comparator.comparingDouble(p -> getClosestCornerPoint(p, c).distance2(c))).collect(Collectors.toList());
-    }
-
-    protected static List<WeightedPoint> getSortOnFurthestCornerPoints(List<WeightedPoint> points, final Point2d c) {
-        return points.stream().sorted(Comparator.comparingDouble(p -> getFurthestCornerPoint(p, c).distance2(c))).collect(Collectors.toList());
-    }
-
-    protected static List<WeightedPoint> getSortOnClosestPointOnBorder(List<WeightedPoint> points, final Point2d c) {
-        return points.stream().sorted(Comparator.comparingDouble(p -> getClosestPointOnBorder(p, c).distance2(c))).collect(Collectors.toList());
-    }
-
-    private static Point2d getClosestCornerPoint(WeightedPoint p, final Point2d c) {
-        double hw = 0.5 * p.w;
-        Point2d[] points = new Point2d[] {
-                new Point2d(p.x + hw, p.y + hw),
-                new Point2d(p.x - hw, p.y + hw),
-                new Point2d(p.x + hw, p.y - hw),
-                new Point2d(p.x - hw, p.y - hw)
-        };
-
-        double min = Double.MAX_VALUE;
-        Point2d best = null;
-
-        for(Point2d q : points) {
-            double distance = c.distance2(q);
-            if(distance < min) {
-                min = distance;
-                best = q;
-            }
-        }
-
-        return best;
-    }
-
-    private static Point2d getFurthestCornerPoint(WeightedPoint p, final Point2d c) {
-        double hw = 0.5 * p.w;
-        Point2d[] points = new Point2d[] {
-                new Point2d(p.x + hw, p.y + hw),
-                new Point2d(p.x - hw, p.y + hw),
-                new Point2d(p.x + hw, p.y - hw),
-                new Point2d(p.x - hw, p.y - hw)
-        };
-
-        double max = -Double.MAX_VALUE;
-        Point2d best = null;
-
-        for(Point2d q : points) {
-            double distance = c.distance2(q);
-            if(distance > max) {
-                max = distance;
-                best = q;
-            }
-        }
-
-        return best;
-    }
-
-    private static Point2d getClosestPointOnBorder(WeightedPoint p, final Point2d c) {
-        OutlineRectangle r = getOutlineRectangle(p.c, p);
-
-        double min = Double.MAX_VALUE;
-        Point2d best = null;
-
-        for(Edge e : r.createOutline(Edge.Direction.LEFT)) {
-            Point2d q = e.project(c);
-            double distance = c.distance2(q);
-            if(distance < min) {
-                min = distance;
-                best = q;
-            }
-        }
-
-        return best;
     }
 }
