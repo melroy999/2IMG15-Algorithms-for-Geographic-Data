@@ -11,7 +11,7 @@ import static agd.data.outlines.Edge.*;
  */
 public class SimpleOutline extends AbstractOutline implements Insertable {
     // The bounding edges of the outline, for each direction.
-    private final EnumMap<Direction, Edge> bounds = new EnumMap<>(Direction.class);
+//    private final EnumMap<Direction, Edge> bounds = new EnumMap<>(Direction.class);
 
     /**
      * Create a new outline.
@@ -21,8 +21,8 @@ public class SimpleOutline extends AbstractOutline implements Insertable {
     public SimpleOutline(OutlineRectangle rectangle) {
         super(rectangle);
         // Create an outline for the new rectangle.
-        Map<Direction, Edge> rectangleEdges = rectangle.createOutlineMap();
-        rectangleEdges.forEach(bounds::put);
+//        Map<Direction, Edge> rectangleEdges = rectangle.createOutlineMap();
+//        rectangleEdges.forEach(bounds::put);
     }
 
     /**
@@ -49,13 +49,60 @@ public class SimpleOutline extends AbstractOutline implements Insertable {
         }
 
         if(touching.size() == 1) {
+            // Get the single edge that we touch.
             Edge a0 = touching.get(0);
 
-            // We only touch one edge. Is this the direction-most edge?
-            if(a0 != bounds.get(a0.getDirection())) {
-                // We are about to place the new rectangle on the direction-most edge.
-            } else {
-                //
+            // Get the edge on the opposite side of our rectangle.
+            Edge b0 = rectangleEdges.get(a0.getDirection().opposite());
+
+            // Check relative positions for both sides.
+            Relative r0 = a0.getRelativePosition(b0.getTarget());
+            Relative r1 = b0.getRelativePosition(a0.getTarget());
+
+            switch(r0) {
+                case ON:
+                    // We have to merge a0.previous and b0.next.
+                    a0.getPrevious().setNext(b0.getNext().getNext());
+                    break;
+                case BEFORE:
+                    // We have to create a new edge in the same direction as b0.
+                    Edge n0 = new Edge(a0.getOrigin(), b0.getDirection());
+                    n0.setNext(b0.getNext());
+                    n0.setPrevious(a0.getPrevious());
+
+                    // Resolve potential simplicity issues.
+                    resolveBackwards(n0);
+                    break;
+                case AFTER:
+                    // We have to cut short a0.
+                    a0.setNext(b0.getNext());
+
+                    // Resolve potential simplicity issues.
+                    resolveBackwards(a0.getNext());
+                    break;
+            }
+
+            switch (r1) {
+                case ON:
+                    // We have to merge b0.previous and a0.next.
+                    b0.getPrevious().setNext(a0.getNext().getNext());
+                    break;
+                case BEFORE:
+                    // We have to create a new edge in the same direction as a1.
+                    Edge n1 = new Edge(b0.getOrigin(), a0.getDirection());
+                    n1.setNext(a0.getNext());
+                    n1.setPrevious(b0.getPrevious());
+
+                    // Resolve potential simplicity issues.
+                    resolveBackwards(n1.getPrevious());
+                    break;
+                case AFTER:
+                    // We have to cut short b0.
+                    b0.setNext(a0.getNext());
+
+                    // Resolve potential simplicity issues.
+                    resolveForwards(b0);
+                    break;
             }
 
 
@@ -114,6 +161,20 @@ public class SimpleOutline extends AbstractOutline implements Insertable {
             throw new IllegalArgumentException("The rectangle does not touch the outline.");
         } else {
             throw new IllegalArgumentException("The rectangle touches too many edges.");
+        }
+
+        double oy = getEdge().getOrigin().y;
+        double ny = rectangleEdges.get(Direction.LEFT).getOrigin().y;
+
+        // Do we need to change our access point?
+        if(Math.abs(oy - ny) < 1e-4) {
+            // They are on the same height. Check if the new edge is more to the right.
+            if(getEdge().getOrigin().x < rectangleEdges.get(Direction.LEFT).getOrigin().x) {
+                setEdge(rectangleEdges.get(Direction.LEFT));
+            }
+        } else if(oy > ny) {
+            // The edge is definitely placed lower. Set it as an access point.
+            setEdge(rectangleEdges.get(Direction.LEFT));
         }
 
         // TODO make sure that the outline is "simple" through a cleaning process.
@@ -187,8 +248,6 @@ public class SimpleOutline extends AbstractOutline implements Insertable {
 
         n.setPrevious(candidate.getPrevious());
         n.setNext(edge.getNext());
-
-        // TODO set the edge as the new maximum, obviously...
     }
 
     /**
@@ -254,6 +313,5 @@ public class SimpleOutline extends AbstractOutline implements Insertable {
 
         n.setPrevious(edge.getPrevious());
         n.setNext(candidate.getNext());
-        // TODO set the edge as the new maximum, obviously...
     }
 }

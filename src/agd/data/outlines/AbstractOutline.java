@@ -55,6 +55,15 @@ public abstract class AbstractOutline implements Iterable<Edge> {
     }
 
     /**
+     * Get the edge that gives access to the cycle.
+     *
+     * @return The access point of the cycle.
+     */
+    public Edge getEdge() {
+        return edge;
+    }
+
+    /**
      * Add a rectangle to the list of rectangles.
      *
      * @param rectangle The new rectangle.
