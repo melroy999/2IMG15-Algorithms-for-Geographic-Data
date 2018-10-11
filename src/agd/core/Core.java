@@ -4,6 +4,7 @@ import agd.data.output.ProblemSolution;
 import agd.file.FileHandler;
 import agd.gui.GUI;
 import agd.data.input.ProblemInstance;
+import agd.solver.SimpleOutlineSolver;
 import agd.solver.SimpleSweep;
 
 public class Core {
@@ -35,8 +36,8 @@ public class Core {
      */
     public void solveProblemInstance(ProblemInstance instance) {
         this.instance = instance;
-        this.solution = new ProblemSolution(instance, new SimpleSweep());
-//        this.solution = new ProblemSolution(instance, new OutlineSolver());
+//        this.solution = new ProblemSolution(instance, new SimpleSweep());
+        this.solution = new ProblemSolution(instance, new SimpleOutlineSolver());
 
         gui.redrawDisplayPanel();
         gui.setMinError();

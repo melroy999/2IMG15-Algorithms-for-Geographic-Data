@@ -97,4 +97,92 @@ class SimpleOutlineTest {
 
         System.out.println(outline.toLatexFigure());
     }
+
+    @Test
+    void insert7() {
+        OutlineRectangle r = new OutlineRectangle(0, 0, 2, p);
+        SimpleOutline outline = new SimpleOutline(r);
+
+        OutlineRectangle r1 = new OutlineRectangle(-2, -2, 2, p);
+        outline.insert(r1);
+
+        System.out.println(outline.toLatexFigure());
+    }
+
+    @Test
+    void insert8() {
+        OutlineRectangle r = new OutlineRectangle(0, 0, 2, p);
+        SimpleOutline outline = new SimpleOutline(r);
+
+        OutlineRectangle r1 = new OutlineRectangle(2, 2, 2, p);
+        outline.insert(r1);
+
+        System.out.println(outline.toLatexFigure());
+    }
+
+    @Test
+    void insert9() {
+        OutlineRectangle r = new OutlineRectangle(0, 0, 2, p);
+        SimpleOutline outline = new SimpleOutline(r);
+
+        OutlineRectangle r1 = new OutlineRectangle(2, -2, 2, p);
+        outline.insert(r1);
+
+        System.out.println(outline.toLatexFigure());
+    }
+
+    @Test
+    void insert10() {
+        OutlineRectangle r = new OutlineRectangle(0, 0, 2, p);
+        SimpleOutline outline = new SimpleOutline(r);
+
+        OutlineRectangle r1 = new OutlineRectangle(-2, 2, 2, p);
+        outline.insert(r1);
+
+        System.out.println(outline.toLatexFigure());
+    }
+
+
+    @Test
+    void insert11() {
+        OutlineRectangle r = new OutlineRectangle(0, 0, 4, p);
+        SimpleOutline outline = new SimpleOutline(r);
+
+        OutlineRectangle r1 = new OutlineRectangle(0, 4, 2, p);
+        outline.insert(r1);
+
+        OutlineRectangle r2 = new OutlineRectangle(2, 4, 1, p);
+        outline.insert(r2);
+
+        System.out.println(outline.toLatexFigure());
+    }
+
+    @Test
+    void insert12() {
+        OutlineRectangle r = new OutlineRectangle(0, 0, 4, p);
+        SimpleOutline outline = new SimpleOutline(r);
+
+        OutlineRectangle r1 = new OutlineRectangle(0, 4, 2, p);
+        outline.insert(r1);
+
+        OutlineRectangle r2 = new OutlineRectangle(2, 4, 2, p);
+        outline.insert(r2);
+
+        System.out.println(outline.toLatexFigure());
+    }
+
+    @Test
+    void insert13() {
+        OutlineRectangle r = new OutlineRectangle(0, 0, 4, p);
+        SimpleOutline outline = new SimpleOutline(r);
+
+        OutlineRectangle r1 = new OutlineRectangle(0, 4, 1, p);
+        outline.insert(r1);
+
+        OutlineRectangle r2 = new OutlineRectangle(1, 4, 2, p);
+        outline.insert(r2);
+
+        System.out.println(outline.toLatexFigure());
+    }
+
 }

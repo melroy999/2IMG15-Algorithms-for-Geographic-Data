@@ -24,9 +24,7 @@ public abstract class AbstractOutline implements Iterable<Edge> {
     public AbstractOutline(OutlineRectangle rectangle) {
         // A left directional edge in a rectangle can only be the bottom edge.
         edge = rectangle.createOutline(Direction.LEFT);
-        rectangle.setOutline(this);
-        rectangles.add(rectangle);
-        System.out.println("Creating new outline box for " + rectangle.owner);
+        addRectangle(rectangle);
     }
 
     /**
@@ -70,6 +68,7 @@ public abstract class AbstractOutline implements Iterable<Edge> {
      */
     void addRectangle(OutlineRectangle rectangle) {
         rectangles.add(rectangle);
+        rectangle.setOutline(this);
     }
 
     /**

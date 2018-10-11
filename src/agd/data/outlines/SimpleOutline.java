@@ -48,6 +48,9 @@ public class SimpleOutline extends AbstractOutline implements Insertable {
             }
         }
 
+        // Add the rectangle to the list of rectangles.
+        addRectangle(rectangle);
+
         if(touching.size() == 1) {
             // Get the single edge that we touch.
             Edge a0 = touching.get(0);
@@ -70,6 +73,7 @@ public class SimpleOutline extends AbstractOutline implements Insertable {
                 case BEFORE:
                     // We have to create a new edge in the same direction as b0.
                     Edge n0 = new Edge(a0.getOrigin(), b0.getDirection());
+
                     n0.setNext(b0.getNext());
                     n0.setPrevious(a0.getPrevious());
 
@@ -88,13 +92,12 @@ public class SimpleOutline extends AbstractOutline implements Insertable {
             switch (r1) {
                 case ON:
                     // We have to merge b0.previous and a0.next.
-                    // TODO a0.setNext above causes a conflict here, since we want the original next.
                     b0.getPrevious().setNext(a0next.getNext());
                     break;
                 case BEFORE:
                     // We have to create a new edge in the same direction as a1.
                     Edge n1 = new Edge(b0.getOrigin(), a0.getDirection());
-                    n1.setNext(a0.getNext());
+                    n1.setNext(a0next);
                     n1.setPrevious(b0.getPrevious());
 
                     // Resolve potential simplicity issues.
@@ -102,7 +105,7 @@ public class SimpleOutline extends AbstractOutline implements Insertable {
                     break;
                 case AFTER:
                     // We have to cut short b0.
-                    b0.setNext(a0.getNext());
+                    b0.setNext(a0next);
 
                     // Resolve potential simplicity issues.
                     resolveForwards(b0);
@@ -180,13 +183,6 @@ public class SimpleOutline extends AbstractOutline implements Insertable {
             // The edge is definitely placed lower. Set it as an access point.
             setEdge(rectangleEdges.get(Direction.LEFT));
         }
-
-        // TODO make sure that the outline is "simple" through a cleaning process.
-        // TODO set the edge as the new maximum, obviously...
-        // This should be quite straightforward: we just propagate to each side until we reach one of the borders.
-
-
-        addRectangle(rectangle);
     }
 
     /**
