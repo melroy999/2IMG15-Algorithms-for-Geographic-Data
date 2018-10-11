@@ -2,6 +2,8 @@ package agd.data.outlines;
 
 import agd.data.outlines.Edge.Direction;
 
+import java.awt.*;
+import java.awt.geom.Dimension2D;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -16,6 +18,9 @@ public abstract class AbstractOutline implements Iterable<Edge> {
     // Access point to one of the edges in the outline.
     private Edge edge;
 
+    // The current dimensions of the outline.
+    private Rectangle dimensions;
+
     /**
      * Create a new outline.
      *
@@ -24,6 +29,7 @@ public abstract class AbstractOutline implements Iterable<Edge> {
     public AbstractOutline(OutlineRectangle rectangle) {
         // A left directional edge in a rectangle can only be the bottom edge.
         edge = rectangle.createOutline(Direction.LEFT);
+        dimensions = new Rectangle(rectangle);
         addRectangle(rectangle);
     }
 
@@ -69,6 +75,22 @@ public abstract class AbstractOutline implements Iterable<Edge> {
     void addRectangle(OutlineRectangle rectangle) {
         rectangles.add(rectangle);
         rectangle.setOutline(this);
+
+        // Set the new bounding box of the outline.
+        int minx = Math.min(rectangle.x, dimensions.x);
+        int maxx = Math.max(rectangle.x + rectangle.width, dimensions.x + dimensions.width);
+        int miny = Math.min(rectangle.y, dimensions.y);
+        int maxy = Math.max(rectangle.y + rectangle.height, dimensions.y + dimensions.height);
+        this.dimensions = new Rectangle(minx, miny, maxx - minx, maxy - miny);
+    }
+
+    /**
+     * Get the dimensions of the outline.
+     *
+     * @return The dimensions of rectangular box around the outline.
+     */
+    public Rectangle getDimensions() {
+        return dimensions;
     }
 
     /**
@@ -93,6 +115,7 @@ public abstract class AbstractOutline implements Iterable<Edge> {
     // Patterns for node and rectangle constructs in the tikz language.
     private static final String LATEX_POINT = "\\node[circle,fill,red,inner sep=1pt] (v%d) at (%f, %f) {};\n";
     private static final String LATEX_RECTANGLE = "\\draw (%d, %d) rectangle (%d, %d);\n";
+    private static final String LATEX_RECTANGLE_BB = "\\draw[cyan] (%d, %d) rectangle (%d, %d);\n";
 
     /**
      * Convert the outline to a figure in latex.
@@ -100,35 +123,49 @@ public abstract class AbstractOutline implements Iterable<Edge> {
      * @return A string representing a tikz figure in latex.
      */
     public String toLatexFigure() {
-        List<Edge> edges = edge.toList();
-
-        // Draw the edges and nodes.
-        List<String> latexNodes = new ArrayList<>();
-        StringBuilder latexEdges = new StringBuilder("\\draw[red] ");
-        for(int i = 0; i < edges.size(); i++) {
-            Edge e = edges.get(i);
-            latexNodes.add(String.format(LATEX_POINT, i, e.getOrigin().x, e.getOrigin().y));
-            latexEdges.append("(v").append(i).append(") -- ");
-        }
-        latexEdges.append("(v").append(0).append(");\n");
-
-        // Draw the rectangles.
-        List<String> latexRectangles = new ArrayList<>();
-        for(OutlineRectangle r : rectangles) {
-            latexRectangles.add(String.format(LATEX_RECTANGLE, r.x, r.y, r.x + r.width, r.y + r.height));
-        }
-
         // Combine everything into one figure.
         StringBuilder result = new StringBuilder();
         result.append("\\resizebox{\\textwidth}{!}{% <------ Don't forget this %\n");
         result.append("\\begin{tikzpicture}[x=5mm, y=5mm, baseline, trim left]\n");
         result.append("\\tikz {\n");
-        latexRectangles.forEach(result::append);
-        latexNodes.forEach(result::append);
-        result.append(latexEdges);
+        result.append(toTikzCode());
         result.append("}\n");
         result.append("\\end{tikzpicture}\n");
         result.append("}");
+
+        return result.toString();
+    }
+    /**
+     * Convert the outline to a code representation in tikz.
+     *
+     * @return A string representing a tikz figure in latex.
+     */
+    public String toTikzCode() {
+        StringBuilder result = new StringBuilder();
+        List<Edge> edges = edge.toList();
+
+        // Draw the edges and nodes.
+        List<String> latexNodes = new ArrayList<>();
+        StringBuilder latexEdges = new StringBuilder("\\draw[red] ");
+        for (Edge e : edges) {
+            latexNodes.add(String.format(LATEX_POINT, e.getId(), e.getOrigin().x, e.getOrigin().y));
+            latexEdges.append("(v").append(e.getId()).append(") -- ");
+        }
+        latexEdges.append("cycle;\n");
+
+        // Draw the rectangles.
+        List<String> latexRectangles = new ArrayList<>();
+        Rectangle bb = dimensions;
+        if(bb != null) {
+            latexRectangles.add(String.format(LATEX_RECTANGLE_BB, bb.x, bb.y, bb.x + bb.width, bb.y + bb.height));
+        }
+        for(OutlineRectangle r : rectangles) {
+            latexRectangles.add(String.format(LATEX_RECTANGLE, r.x, r.y, r.x + r.width, r.y + r.height));
+        }
+
+        latexRectangles.forEach(result::append);
+        latexNodes.forEach(result::append);
+        result.append(latexEdges);
 
         return result.toString();
     }

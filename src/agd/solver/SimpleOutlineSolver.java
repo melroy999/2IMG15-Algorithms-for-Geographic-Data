@@ -11,11 +11,26 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 public class SimpleOutlineSolver extends AbstractSolver {
+    /**
+     * Solve the given problem instance.
+     *
+     * @param instance The problem instance that contains all the required data.
+     * @param points   The list of placed points.
+     */
     @Override
     public void solve(ProblemInstance instance, ArrayList<HalfGridPoint> points) {
+        solve(instance, points, SortingOptions.CENTROID);
+    }
+
+    public enum SortingOptions {
+        CENTROID, CORNER, CLOSEST_POINT, MANHATTAN_CENTROID
+    }
+
+    public void solve(ProblemInstance instance, ArrayList<HalfGridPoint> points, SortingOptions option) {
         // Find the centre of mass.
         Point2d centre = new Point2d();
         for(WeightedPoint p : instance.getPoints()) {
@@ -24,10 +39,22 @@ public class SimpleOutlineSolver extends AbstractSolver {
         centre = centre.scale(1d / instance.getPoints().size());
 
         // Find the distance between the centre point and all of the points, and sort on distance.
-        List<WeightedPoint> sortedPoints = getSortOnDefaultCentroid(instance.getPoints(), centre);
-//        List<WeightedPoint> sortedPoints = getSortOnCornerPoints(instance.getPoints(), centre);
-//        List<WeightedPoint> sortedPoints = getSortOnClosestPointOnBorder(instance.getPoints(), centre);
-//        List<WeightedPoint> sortedPoints = getSortOnManhattanCentroid(instance.getPoints(), centre);
+        List<WeightedPoint> sortedPoints;
+        switch (option) {
+            case CENTROID:
+                sortedPoints = getSortOnDefaultCentroid(instance.getPoints(), centre);
+                break;
+            case CORNER:
+                sortedPoints = getSortOnCornerPoints(instance.getPoints(), centre);
+                break;
+            case CLOSEST_POINT:
+                sortedPoints = getSortOnClosestPointOnBorder(instance.getPoints(), centre);
+                break;
+            case MANHATTAN_CENTROID:
+            default:
+                sortedPoints = getSortOnManhattanCentroid(instance.getPoints(), centre);
+                break;
+        }
 
         // Create a quadtree in which we will check for overlapping rectangles.
         // TODO choose a reliable bound for the quadtree.
@@ -43,14 +70,11 @@ public class SimpleOutlineSolver extends AbstractSolver {
                 )
         );
 
+        // The list of outlines that have been generated.
+        List<AbstractOutline> outlines = new ArrayList<>();
+
         // Insert the points into the plane one by one, using the outline for placement resolution.
         for(WeightedPoint p : sortedPoints) {
-            System.out.println("Placing point " + p);
-
-            if(p.epsilonEquals(new Point2d(55.2,37.5), 1)) {
-                System.out.println();
-            }
-
             OutlineRectangle rectangle = getOutlineRectangle(p.c, p);
             List<OutlineRectangle> intersections = tree.query(rectangle);
 
@@ -60,16 +84,20 @@ public class SimpleOutlineSolver extends AbstractSolver {
 
             if(!intersections.isEmpty()) {
                 // Which outlines do we intersect with?
-                List<AbstractOutline> outlines = intersections.stream().map(
+                List<AbstractOutline> intersectingOutlines = intersections.stream().map(
                         OutlineRectangle::getOutline).distinct().collect(Collectors.toList());
 
-                if(outlines.size() > 1) {
+                if(intersectingOutlines.size() > 1) {
                     System.out.println("Intersecting with multiple outline groups.");
                 }
 
+                // If we have more than 1, we can choose.
+
                 // Find the associated outline.
 //                System.out.println();
-                SimpleOutline outline = (SimpleOutline) outlines.get(0);
+                intersectingOutlines.sort((a, b) -> -Integer.compare(a.getRectangles().size(), b.getRectangles().size()));
+                SimpleOutline outline = (SimpleOutline) intersectingOutlines.get(0);
+
 //                System.out.println(outline.toLatexFigure());
                 BufferedOutline bOutline = new BufferedOutline(outline, 0.5 * p.w);
 
@@ -80,7 +108,7 @@ public class SimpleOutlineSolver extends AbstractSolver {
                 outline.insert(result);
             } else {
                 // Create a new outline, which will set a pointer in the rectangle to the outline.
-                new SimpleOutline(rectangle);
+                outlines.add(new SimpleOutline(rectangle));
                 placement = p.c;
                 result = rectangle;
             }
@@ -94,6 +122,24 @@ public class SimpleOutlineSolver extends AbstractSolver {
 
             tree.insert(result);
         }
+
+        System.out.println("We have generated " + outlines.size() + " outline groups.");
+
+        // Print the entire solution.
+//        StringBuilder result = new StringBuilder();
+//        result.append("\\resizebox{\\textwidth}{!}{% <------ Don't forget this %\n");
+//        result.append("\\begin{tikzpicture}[x=5mm, y=5mm, baseline, trim left]\n");
+//        result.append("\\tikz {\n");
+//
+//        for(AbstractOutline outline : outlines) {
+//            // Combine everything into one figure.
+//            result.append(outline.toTikzCode() + "\n");
+//        }
+//
+//        result.append("}\n");
+//        result.append("\\end{tikzpicture}\n");
+//        result.append("}");
+//        System.out.println(result.toString());
     }
 
     /**
