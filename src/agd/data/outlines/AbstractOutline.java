@@ -68,7 +68,7 @@ public abstract class AbstractOutline implements Iterable<Edge> {
      *
      * @param rectangle The new rectangle.
      */
-    public void addRectangle(OutlineRectangle rectangle) {
+    void addRectangle(OutlineRectangle rectangle) {
         rectangles.add(rectangle);
     }
 

@@ -44,7 +44,7 @@ public class SimpleOutline extends AbstractOutline implements Insertable {
 
             // Check if the edge and the target edge touch.
             if(edge.doTouch(target)) {
-                touching.add(target);
+                touching.add(edge);
             }
         }
 
@@ -58,6 +58,9 @@ public class SimpleOutline extends AbstractOutline implements Insertable {
             // Check relative positions for both sides.
             Relative r0 = a0.getRelativePosition(b0.getTarget());
             Relative r1 = b0.getRelativePosition(a0.getTarget());
+
+            // The nexts of both lines.
+            Edge a0next = a0.getNext();
 
             switch(r0) {
                 case ON:
@@ -85,7 +88,8 @@ public class SimpleOutline extends AbstractOutline implements Insertable {
             switch (r1) {
                 case ON:
                     // We have to merge b0.previous and a0.next.
-                    b0.getPrevious().setNext(a0.getNext().getNext());
+                    // TODO a0.setNext above causes a conflict here, since we want the original next.
+                    b0.getPrevious().setNext(a0next.getNext());
                     break;
                 case BEFORE:
                     // We have to create a new edge in the same direction as a1.
@@ -191,6 +195,8 @@ public class SimpleOutline extends AbstractOutline implements Insertable {
      * @param edge The edge to start the resolution from.
      */
     private void resolveBackwards(Edge edge) {
+//        if(true) return;
+
         // What is the direction we start at?
         Direction targetDirection = edge.getDirection().opposite();
         Direction terminateDirection = edge.getDirection();
@@ -242,7 +248,11 @@ public class SimpleOutline extends AbstractOutline implements Insertable {
 
         // If we reach this point, we know that the next of the edge is a direction-maximum.
         // We know that we will have to flip the direction of the candidate.
-        assert candidate != null;
+        if(candidate == null) {
+            // We found no candidate. We are good.
+            return;
+        }
+
         Point2d point = candidate.getPrevious().getIntersection(edge);
         Edge n = new Edge(point, edge.getDirection());
 
@@ -256,6 +266,8 @@ public class SimpleOutline extends AbstractOutline implements Insertable {
      * @param edge The edge to start the resolution from.
      */
     private void resolveForwards(Edge edge) {
+//        if(true) return;
+
         // What is the direction we start at?
         Direction targetDirection = edge.getDirection().opposite();
         Direction terminateDirection = edge.getDirection();
@@ -307,7 +319,11 @@ public class SimpleOutline extends AbstractOutline implements Insertable {
 
         // If we reach this point, we know that the next of the edge is a direction-maximum.
         // We know that we will have to flip the direction of the candidate.
-        assert candidate != null;
+        if(candidate == null) {
+            // We found no candidate. We are good.
+            return;
+        }
+
         Point2d point = candidate.getNext().getIntersection(edge);
         Edge n = new Edge(point, edge.getDirection().opposite());
 

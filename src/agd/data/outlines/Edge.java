@@ -255,10 +255,10 @@ public class Edge implements Iterable<Edge> {
                 }
 
                 // Increment i, and check whether we have exceeded the unique id counter.
-                i++;
                 if(i > Edge.ID_COUNTER) {
                     throw new RuntimeException("The iterator has detected an infinite loop.");
                 }
+                i++;
 
                 return current;
             }
@@ -339,6 +339,11 @@ public class Edge implements Iterable<Edge> {
     @Override
     public int hashCode() {
         return id;
+    }
+
+    @Override
+    public String toString() {
+        return "" + origin + "-" + direction + "->" + (next == null ? "null" : next.origin.toString());
     }
 
     /**
