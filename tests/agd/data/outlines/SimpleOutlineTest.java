@@ -185,4 +185,17 @@ class SimpleOutlineTest {
         System.out.println(outline.toLatexFigure());
     }
 
+    @Test
+    void insert14() {
+        OutlineRectangle r = new OutlineRectangle(0, 0, 4, p);
+        SimpleOutline outline = new SimpleOutline(r);
+
+        OutlineRectangle r1 = new OutlineRectangle(4, 1, 2, p);
+        outline.insert(r1);
+
+        OutlineRectangle r2 = new OutlineRectangle(2, 4, 4, p);
+        outline.insert(r2);
+
+        System.out.println(outline.toLatexFigure());
+    }
 }

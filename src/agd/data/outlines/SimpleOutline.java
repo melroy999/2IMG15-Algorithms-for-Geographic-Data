@@ -48,9 +48,6 @@ public class SimpleOutline extends AbstractOutline implements Insertable {
             }
         }
 
-        // Add the rectangle to the list of rectangles.
-        addRectangle(rectangle);
-
         if(touching.size() == 1) {
             // Get the single edge that we touch.
             Edge a0 = touching.get(0);
@@ -101,7 +98,7 @@ public class SimpleOutline extends AbstractOutline implements Insertable {
                     n1.setPrevious(b0.getPrevious());
 
                     // Resolve potential simplicity issues.
-                    resolveBackwards(n1.getPrevious());
+                    resolveForwards(n1.getPrevious());
                     break;
                 case AFTER:
                     // We have to cut short b0.
@@ -169,6 +166,9 @@ public class SimpleOutline extends AbstractOutline implements Insertable {
         } else {
             throw new IllegalArgumentException("The rectangle touches too many edges.");
         }
+
+        // Add the rectangle to the list of rectangles.
+        addRectangle(rectangle);
 
         double oy = getEdge().getOrigin().y;
         double ny = rectangleEdges.get(Direction.LEFT).getOrigin().y;
@@ -275,7 +275,7 @@ public class SimpleOutline extends AbstractOutline implements Insertable {
         // - is moving in the opposite direction;
         // - which has an origin above the target of e.
         // We should terminate when no such edge is found (which is when we are back at the direction of our edge).
-        for(Edge next : this) {
+        for(Edge next : edge.getNext()) {
             // If we encounter a termination direction, break and find the last visited edge.
             if(next.getDirection() == terminateDirection) {
                 break;
