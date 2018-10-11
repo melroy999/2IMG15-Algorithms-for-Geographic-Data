@@ -321,9 +321,9 @@ public class SimpleOutline extends AbstractOutline implements Insertable {
         }
 
         Point2d point = candidate.getNext().getIntersection(edge);
-        Edge n = new Edge(point, edge.getDirection().opposite());
+        Edge n = new Edge(point, edge.getNext().getDirection());
 
-        n.setPrevious(edge.getPrevious());
-        n.setNext(candidate.getNext());
+        n.setPrevious(edge);
+        n.setNext(candidate.getNext().getNext());
     }
 }
