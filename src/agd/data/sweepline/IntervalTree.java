@@ -110,7 +110,8 @@ public class IntervalTree {
 
             // node with two children: Get the inorder successor (smallest in the right subtree)
             Interval successor = getLeft(tree.getRight());
-            tree.setDepth(successor.getDepth());
+            tree.setMaxDepth(successor.getMaxDepth());
+            tree.setMinDepth(successor.getMinDepth());
             tree.setEnd(successor.getEnd());
             tree.setStart(successor.getStart());
             tree.setId(successor.getId());
