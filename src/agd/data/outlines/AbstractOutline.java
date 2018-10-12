@@ -21,6 +21,10 @@ public abstract class AbstractOutline implements Iterable<Edge> {
     // The current dimensions of the outline.
     private OutlineDimensions dimensions;
 
+    // The id of the outline.
+    private static int ID_COUNTER = 0;
+    private final int id = ID_COUNTER++;
+
     /**
      * Create a new outline.
      *
@@ -168,5 +172,20 @@ public abstract class AbstractOutline implements Iterable<Edge> {
         result.append(latexEdges);
 
         return result.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        AbstractOutline edges = (AbstractOutline) o;
+
+        return id == edges.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return id;
     }
 }

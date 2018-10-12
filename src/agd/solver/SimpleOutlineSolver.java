@@ -166,6 +166,26 @@ public class SimpleOutlineSolver extends AbstractSolver {
         );
     }
 
+    protected static Comparator<WeightedPoint> getCentroidComparator(final Point2d c) {
+        return Comparator.comparingDouble(p -> p.distance2(c));
+    }
+
+    protected static Comparator<WeightedPoint> getManhattanCentroidComparator(final Point2d c) {
+        return Comparator.comparingDouble(p -> p.manhattan(c));
+    }
+
+    protected static Comparator<WeightedPoint> getCornerPointComparator(final Point2d c) {
+        return Comparator.comparingDouble(p -> getClosestCornerPoint(p, c).distance2(c));
+    }
+
+    protected static Comparator<WeightedPoint> getBorderPointComparator(final Point2d c) {
+        return Comparator.comparingDouble(p -> getClosestPointOnBorder(p, c).distance2(c));
+    }
+
+    protected static Comparator<WeightedPoint> getFurthestPointComparator(final Point2d c) {
+        return Comparator.comparingDouble(p -> getFurthestCornerPoint(p, c).distance2(c));
+    }
+
     protected static List<WeightedPoint> getSortOnDefaultCentroid(List<WeightedPoint> points, final Point2d c) {
         return points.stream().sorted(Comparator.comparingDouble(p -> p.distance2(c))).collect(Collectors.toList());
     }

@@ -26,6 +26,22 @@ public class SimpleOutline extends AbstractOutline implements Insertable {
     }
 
     /**
+     * Create a new outline.
+     *
+     * @param rectangle The rectangle which defines the original outline.
+     */
+    public SimpleOutline(OutlineRectangle rectangle, List<OutlineRectangle> rectangles) {
+        super(rectangle);
+
+        // Remove the rectangle that we just added.
+        this.getRectangles().clear();
+
+        // Add all the rectangles.
+        this.getRectangles().addAll(rectangles);
+        rectangles.forEach(r -> r.setOutline(this));
+    }
+
+    /**
      * Insert the given rectangle into the outline.
      *
      * @param rectangle The rectangle to insert into the outline.
@@ -34,14 +50,6 @@ public class SimpleOutline extends AbstractOutline implements Insertable {
     public void insert(OutlineRectangle rectangle) {
         // Create an outline for the new rectangle.
         Map<Direction, Edge> rectangleEdges = rectangle.createOutlineMap();
-
-        if(rectangle.x == 53 && rectangle.y == 36) {
-            System.out.println();
-        }
-
-        if(rectangle.x == 49 && rectangle.y == 36) {
-            System.out.println();
-        }
 
         // We know that the rectangle is placed against at most two existing edges. Find those edges.
         List<Edge> touching = new ArrayList<>();

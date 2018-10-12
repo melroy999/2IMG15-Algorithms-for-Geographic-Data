@@ -4,15 +4,14 @@ import agd.data.input.ProblemInstance;
 import agd.data.input.WeightedPoint;
 import agd.data.outlines.*;
 import agd.data.output.HalfGridPoint;
+import agd.data.util.OutlineDimensions;
 import agd.data.util.QuadTreeNode;
 import agd.math.Point2d;
 
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -47,23 +46,23 @@ public class SimpleOutlineMergeSolver extends SimpleOutlineSolver {
         }
 
         // Find the distance between the centre point and all of the points, and sort on distance.
-        List<WeightedPoint> sortedPoints;
+        Comparator<WeightedPoint> comparator;
         switch (option) {
             case CENTROID:
-                sortedPoints = getSortOnDefaultCentroid(instance.getPoints(), centre);
+                comparator = getCentroidComparator(centre);
                 break;
             case CORNER:
-                sortedPoints = getSortOnCornerPoints(instance.getPoints(), centre);
+                comparator = getCornerPointComparator(centre);
                 break;
             case CLOSEST_POINT:
-                sortedPoints = getSortOnClosestPointOnBorder(instance.getPoints(), centre);
+                comparator = getBorderPointComparator(centre);
                 break;
             case FURTHEST:
-                sortedPoints = getSortOnFurthestCornerPoints(instance.getPoints(), centre);
+                comparator = getFurthestPointComparator(centre);
                 break;
             case MANHATTAN_CENTROID:
             default:
-                sortedPoints = getSortOnManhattanCentroid(instance.getPoints(), centre);
+                comparator = getManhattanCentroidComparator(centre);
                 break;
         }
 
@@ -80,49 +79,98 @@ public class SimpleOutlineMergeSolver extends SimpleOutlineSolver {
         );
 
         // The list of outlines that have been generated.
-        List<AbstractOutline> outlines = new ArrayList<>();
-        int mergeCounter = 0;
+        Set<AbstractOutline> outlines = new HashSet<>();
+
+        PriorityQueue<WeightedPoint> queue = new PriorityQueue<>(comparator);
+        queue.addAll(instance.getPoints());
 
         // Insert the points into the plane one by one, using the outline for placement resolution.
-        for(WeightedPoint p : sortedPoints) {
-            OutlineRectangle rectangle = getOutlineRectangle(p.c, p);
+        while(!queue.isEmpty()) {
+            // Remove the first element from the queue.
+            WeightedPoint p = queue.poll();
+
+            // Do we overlap with any of the rectangles that are currently stored within the tree?
+            OutlineRectangle rectangle = getOutlineRectangle(p.c, p, false);
             List<OutlineRectangle> intersections = tree.query(rectangle);
 
-            // The resulting placements.
-            OutlineRectangle result;
-            Point2d placement;
-
+            // Create a new outline or put the rectangle in an existing outline.
             if(!intersections.isEmpty()) {
-                // Which outlines do we intersect with?
-                List<AbstractOutline> intersectingOutlines = intersections.stream().map(
-                        OutlineRectangle::getOutline).distinct().collect(Collectors.toList());
-
-                // Find the associated outline.
-                intersectingOutlines.sort((a, b) -> -Integer.compare(a.getRectangles().size(), b.getRectangles().size()));
-                SimpleOutline outline = (SimpleOutline) intersectingOutlines.get(0);
-                BufferedOutline bOutline = new BufferedOutline(outline, 0.5 * p.w);
-                placement = bOutline.projectAndSelect(p, centre);
-//                placement = bOutline.projectAndSelect(p);
-                result = getOutlineRectangle(placement, p);
-                outline.insert(result);
-                tree.insert(result);
-
-                // We want to merge smaller outlines with the larger outline.
-                mergeConflicts(tree, result, points, centre);
-
+                if(!insertExistingOutline(tree, outlines, intersections, p, centre, points)) {
+                    // We have failed to place the point, and have to retry.
+                    queue.add(p);
+                }
             } else {
-                // Create a new outline, which will set a pointer in the rectangle to the outline.
-                outlines.add(new SimpleOutline(rectangle));
-                placement = p.c;
-                result = rectangle;
-                tree.insert(result);
+                insertNewOutline(tree, outlines, rectangle, p, points);
             }
-
-            // Add the chosen rectangle to the tree and result.
-            points.set(p.i, HalfGridPoint.make(placement, p));
         }
 
         System.out.println("We have generated " + outlines.size() + " outline groups.");
+        printSolution(outlines);
+    }
+
+    private static void insertNewOutline(QuadTreeNode<OutlineRectangle> tree, Set<AbstractOutline> outlines, OutlineRectangle rectangle, WeightedPoint p, ArrayList<HalfGridPoint> points) {
+        // Create a new outline, which will set a pointer in the rectangle to the outline.
+        outlines.add(new SimpleOutline(rectangle));
+        Point2d placement = p.c;
+        tree.insert(rectangle);
+
+        // Add the chosen rectangle to the tree and result.
+        points.set(p.i, HalfGridPoint.make(placement, p));
+    }
+
+    private static boolean insertExistingOutline(QuadTreeNode<OutlineRectangle> tree, Set<AbstractOutline> outlines, List<OutlineRectangle> intersections, WeightedPoint p, Point2d centre, ArrayList<HalfGridPoint> points) {
+        // Which distinct outlines do we intersect with? Sort them on rectangle size in decreasing order.
+        List<AbstractOutline> intersectingOutlines = intersections.stream().map(OutlineRectangle::getOutline).distinct().collect(Collectors.toList());
+        intersectingOutlines.sort((a, b) -> -Integer.compare(a.getRectangles().size(), b.getRectangles().size()));
+
+        List<OutlineRectangle> firstConflicts = null;
+
+        // For each of the outlines, attempt an insertion.
+        for(AbstractOutline outline : intersectingOutlines) {
+            // Create a buffered variant of the outline, and get a preferred placement.
+            BufferedOutline bOutline = new BufferedOutline((SimpleOutline) outline, 0.5 * p.w);
+            Point2d placement = bOutline.projectAndSelect(p, centre);
+            OutlineRectangle result = getOutlineRectangle(placement, p, false);
+
+            // Is the placement viable? I.e. is the spot free in the tree?
+            List<OutlineRectangle> conflicts = tree.query(result);
+
+            // Remember the rectangles we had a conflict with during the first placement.
+            if(firstConflicts == null) {
+                firstConflicts = conflicts;
+            }
+
+            if(conflicts.isEmpty()) {
+                // We can freely add the selected position.
+                ((SimpleOutline) outline).insert(result);
+                tree.insert(result);
+
+                // Add the chosen rectangle to the tree and result.
+                points.set(p.i, HalfGridPoint.make(placement, p));
+                return true;
+            }
+        }
+
+        // Merge the outlines that are in conflict when placing the rectangle in the foremost outline.
+        AbstractOutline source = intersectingOutlines.get(0);
+        intersectingOutlines = firstConflicts.stream().map(OutlineRectangle::getOutline).distinct().collect(Collectors.toList());
+
+        outlines.remove(source);
+
+        // We have been unable to place the point without causing conflicts. We have to merge outlines.
+        for(AbstractOutline outline : intersectingOutlines) {
+            // Merge all the intersecting outlines.
+            source = merge(source, outline);
+            outlines.remove(outline);
+        }
+
+        outlines.add(source);
+
+        // Next, we postpone the insertion of the point.
+        return false;
+    }
+
+    private void printSolution(Set<AbstractOutline> outlines) {
 
         // Print the entire solution.
         StringBuilder result = new StringBuilder();
@@ -132,7 +180,7 @@ public class SimpleOutlineMergeSolver extends SimpleOutlineSolver {
 
         for(AbstractOutline outline : outlines) {
             // Combine everything into one figure.
-            result.append(outline.toTikzCode() + "\n");
+            result.append(outline.toTikzCode()).append("\n");
         }
 
         result.append("}\n");
@@ -144,46 +192,24 @@ public class SimpleOutlineMergeSolver extends SimpleOutlineSolver {
         clipboard.setContents(selection, selection);
     }
 
-    private static void mergeConflicts(QuadTreeNode<OutlineRectangle> tree, OutlineRectangle target, ArrayList<HalfGridPoint> points, Point2d centre) {
-        // First, check which overlaps we have.
-        List<OutlineRectangle> conflicts = tree.query(target);
+    private static SimpleOutline merge(AbstractOutline o1, AbstractOutline o2) {
+        OutlineDimensions d1 = o1.getDimensions();
+        OutlineDimensions d2 = o2.getDimensions();
 
-        // Which outlines are we concerned with?
-        List<AbstractOutline> outlines = conflicts.stream().map(OutlineRectangle::getOutline).distinct()
-                .sorted((a, b) -> -Integer.compare(a.getRectangles().size(), b.getRectangles().size())).collect(Collectors.toList());
+        // Find the bounds.
+        int xmin = Math.min(d1.x, d2.x);
+        int xmax = Math.max(d1.x + d1.width, d2.x + d2.width);
+        int ymin = Math.min(d1.y, d2.y);
+        int ymax = Math.max(d1.y + d1.height, d2.y + d2.height);
 
-        // The target outline.
-        SimpleOutline outline = (SimpleOutline) outlines.get(0);
+        // Create a new outline.
+        OutlineRectangle rectangle = new OutlineRectangle(xmin, ymin, xmax - xmin, ymax - ymin, null, false);
 
-        if(outlines.size() > 1) {
-            // Gather all rectangles that have to be placed anew.
-            List<OutlineRectangle> conflictRectangles = new ArrayList<>();
-            for(int i = 1; i < outlines.size(); i++) {
-                conflictRectangles.addAll(outlines.get(i).getRectangles());
-            }
+        List<OutlineRectangle> rectangles = new ArrayList<>();
+        rectangles.addAll(o1.getRectangles());
+        rectangles.addAll(o2.getRectangles());
 
-            // Remove all affected rectangles from the quadtree.
-            conflictRectangles.forEach(tree::delete);
-
-            // Sort all the points.
-            List<WeightedPoint> weightedPoints = getSortOnDefaultCentroid(
-                    conflictRectangles.stream().map(c -> c.owner).collect(Collectors.toList()), centre);
-            LinkedList<WeightedPoint> queue = new LinkedList<>(weightedPoints);
-
-            // Re-insert all the points.
-            while(!queue.isEmpty()) {
-                WeightedPoint p = queue.pollFirst();
-
-                BufferedOutline bOutline = new BufferedOutline(outline, 0.5 * p.w);
-                Point2d placement = bOutline.projectAndSelect(p, centre);
-                OutlineRectangle result = getOutlineRectangle(placement, p);
-                outline.insert(result);
-
-                // Add the chosen rectangle to the tree and result.
-                points.set(p.i, HalfGridPoint.make(placement, p));
-                tree.insert(result);
-            }
-        }
+        return new SimpleOutline(rectangle, rectangles);
     }
 
     /**
@@ -198,6 +224,22 @@ public class SimpleOutlineMergeSolver extends SimpleOutlineSolver {
                 (int) Math.round(p.y - 0.5 * o.w),
                 o.w,
                 o
+        );
+    }
+
+    /**
+     * Convert the preferred placement of a weighted point to a outline rectangle.
+     *
+     * @param p The chosen placement for the center point.
+     * @return An outline rectangle with the point c at the center.
+     */
+    protected static OutlineRectangle getOutlineRectangle(Point2d p, WeightedPoint o, boolean includeBorders) {
+        return new OutlineRectangle(
+                (int) Math.round(p.x - 0.5 * o.w),
+                (int) Math.round(p.y - 0.5 * o.w),
+                o.w,
+                o,
+                includeBorders
         );
     }
 }

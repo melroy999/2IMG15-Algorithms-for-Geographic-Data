@@ -17,6 +17,36 @@ public class OutlineRectangle extends EntryRectangle {
     // A reference to the outline this rectangle is part of.
     private AbstractOutline outline;
 
+    // Whether to include the borders in our intersection check.
+    private final boolean includeBorders;
+
+    /**
+     * Create an outline rectangle.
+     *
+     * @param x The x-coordinate of the left bottom corner point.
+     * @param y The y-coordinate of the left bottom corner point.
+     * @param size The size of the square.
+     * @param owner The weighted point for which this rectangle is a placement.
+     */
+    public OutlineRectangle(int x, int y, int size, WeightedPoint owner, boolean includeBorders) {
+        super(x, y, size, size, owner);
+        this.includeBorders = includeBorders;
+    }
+
+    /**
+     * Create an outline rectangle.
+     *
+     * @param x The x-coordinate of the left bottom corner point.
+     * @param y The y-coordinate of the left bottom corner point.
+     * @param width The width of the rectangle.
+     * @param height The height of the rectangle.
+     * @param owner The weighted point for which this rectangle is a placement.
+     */
+    public OutlineRectangle(int x, int y, int width, int height, WeightedPoint owner, boolean includeBorders) {
+        super(x, y, width, height, owner);
+        this.includeBorders = includeBorders;
+    }
+
     /**
      * Create an outline rectangle.
      *
@@ -26,7 +56,7 @@ public class OutlineRectangle extends EntryRectangle {
      * @param owner The weighted point for which this rectangle is a placement.
      */
     public OutlineRectangle(int x, int y, int size, WeightedPoint owner) {
-        super(x, y, size, size, owner);
+        this(x, y, size, owner, true);
     }
 
     /**
@@ -57,8 +87,8 @@ public class OutlineRectangle extends EntryRectangle {
         // Create all the required edges.
         Edge up = new Edge(new Point2d(x, y), Direction.UP);
         Edge right = new Edge(new Point2d(x, y + this.height), Direction.RIGHT);
-        Edge down = new Edge(new Point2d(x + this.height, y + this.height), Direction.DOWN);
-        Edge left = new Edge(new Point2d(x + this.height, y), Direction.LEFT);
+        Edge down = new Edge(new Point2d(x + this.width, y + this.height), Direction.DOWN);
+        Edge left = new Edge(new Point2d(x + this.width, y), Direction.LEFT);
 
         // Set the links.
         up.setNext(right);
@@ -128,10 +158,19 @@ public class OutlineRectangle extends EntryRectangle {
         rh += ry;
         tw += tx;
         th += ty;
-        //      overflow || intersect
-        return ((rw <= rx || rw >= tx) &&
-                (rh <= ry || rh >= ty) &&
-                (tw <= tx || tw >= rx) &&
-                (th <= ty || th >= ry));
+
+        if(includeBorders) {
+            //      overflow || intersect
+            return ((rw <= rx || rw >= tx) &&
+                    (rh <= ry || rh >= ty) &&
+                    (tw <= tx || tw >= rx) &&
+                    (th <= ty || th >= ry));
+        } else {
+            //      overflow || intersect
+            return ((rw < rx || rw > tx) &&
+                    (rh < ry || rh > ty) &&
+                    (tw < tx || tw > rx) &&
+                    (th < ty || th > ry));
+        }
     }
 }
