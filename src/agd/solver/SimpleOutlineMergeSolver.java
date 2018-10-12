@@ -24,11 +24,11 @@ public class SimpleOutlineMergeSolver extends SimpleOutlineSolver {
      */
     @Override
     public void solve(ProblemInstance instance, ArrayList<HalfGridPoint> points) {
-        solve(instance, points, SortingOptions.CENTROID);
+        solve(instance, points, SortingOptions.MIN_BASED);
     }
 
     public enum SortingOptions {
-        CENTROID, CORNER, CLOSEST_POINT, MANHATTAN_CENTROID, FURTHEST
+        CENTROID, CORNER, CLOSEST_POINT, MANHATTAN_CENTROID, FURTHEST, NONE, SIZE_ASC, SIZE_DESC, X, Y, ROTATION, MAX_BASED, MIN_BASED
     }
 
     @SuppressWarnings("Duplicates")
@@ -44,6 +44,7 @@ public class SimpleOutlineMergeSolver extends SimpleOutlineSolver {
         for(int i = 0; i < instance.getPoints().size(); i++) {
             points.add(null);
         }
+        Point2d c = centre;
 
         // Find the distance between the centre point and all of the points, and sort on distance.
         Comparator<WeightedPoint> comparator;
@@ -59,6 +60,30 @@ public class SimpleOutlineMergeSolver extends SimpleOutlineSolver {
                 break;
             case FURTHEST:
                 comparator = getFurthestPointComparator(centre);
+                break;
+            case NONE:
+                comparator = (a1, a2) -> 0;
+                break;
+            case SIZE_ASC:
+                comparator = Comparator.comparingInt(a -> a.w);
+                break;
+            case SIZE_DESC:
+                comparator = (a1, a2) -> -Integer.compare(a1.w, a2.w);
+                break;
+            case X:
+                comparator = Comparator.comparingDouble(a -> a.x);
+                break;
+            case Y:
+                comparator = Comparator.comparingDouble(a -> a.y);
+                break;
+            case ROTATION:
+                comparator = getRotationalComparator(centre);
+                break;
+            case MAX_BASED:
+                comparator = Comparator.comparingDouble(a -> Math.max(Math.abs(a.x - c.x), Math.abs(a.y - c.y)));
+                break;
+            case MIN_BASED:
+                comparator = Comparator.comparingDouble(a -> Math.min(Math.abs(a.x - c.x), Math.abs(a.y - c.y)));
                 break;
             case MANHATTAN_CENTROID:
             default:
@@ -129,7 +154,7 @@ public class SimpleOutlineMergeSolver extends SimpleOutlineSolver {
         for(AbstractOutline outline : intersectingOutlines) {
             // Create a buffered variant of the outline, and get a preferred placement.
             BufferedOutline bOutline = new BufferedOutline((SimpleOutline) outline, 0.5 * p.w);
-            Point2d placement = bOutline.projectAndSelect(p, centre);
+            Point2d placement = bOutline.projectAndSelect(p);
             OutlineRectangle result = getOutlineRectangle(placement, p, false);
 
             // Is the placement viable? I.e. is the spot free in the tree?
@@ -162,6 +187,7 @@ public class SimpleOutlineMergeSolver extends SimpleOutlineSolver {
             // Merge all the intersecting outlines.
             source = merge(source, outline);
             outlines.remove(outline);
+            break;
         }
 
         outlines.add(source);
@@ -209,7 +235,22 @@ public class SimpleOutlineMergeSolver extends SimpleOutlineSolver {
         rectangles.addAll(o1.getRectangles());
         rectangles.addAll(o2.getRectangles());
 
-        return new SimpleOutline(rectangle, rectangles);
+        if(d1.contains(d2) || d2.contains(d1)) {
+            return new SimpleOutline(rectangle, rectangles);
+        } else if(d1.intersects(d2)) {
+            System.out.println("Intersection.");
+            System.out.println("Area " + (d1.width * d1.height + d2.width * d2.height - d1.intersection(d2).width * d1.intersection(d2).height) + " to " + rectangle.width * rectangle.height);
+
+            // TODO combine the two dimensions into an outline.
+            // TODO ALT: merge the two outlines.
+            return new SimpleOutline(rectangle, rectangles);
+        } else {
+            System.out.println("No intersection.");
+            System.out.println("Area " + (d1.width * d1.height + d2.width * d2.height - d1.intersection(d2).width * d1.intersection(d2).height) + " to " + rectangle.width * rectangle.height);
+
+            // Convert the outline to a square.
+            return new SimpleOutline(rectangle, rectangles);
+        }
     }
 
     /**
@@ -241,5 +282,14 @@ public class SimpleOutlineMergeSolver extends SimpleOutlineSolver {
                 o,
                 includeBorders
         );
+    }
+
+    private static Comparator<WeightedPoint> getRotationalComparator(final Point2d c) {
+        return Comparator.comparingDouble(a -> getAngleDegree(c, a));
+    }
+
+    private static double getAngleDegree(Point2d origin, Point2d target) {
+        double n = 270 - (Math.atan2(origin.y - target.y, origin.x - target.x)) * 180 / Math.PI;
+        return n % 360;
     }
 }
