@@ -38,10 +38,8 @@ public class Core {
      */
     public void solveProblemInstance(ProblemInstance instance) {
         this.instance = instance;
-//        this.solution = new ProblemSolution(instance, new SimpleSweep());
-//        this.solution = new ProblemSolution(instance, new SimpleOutlineSolver());
-//        this.solution = new ProblemSolution(instance, new BBSimpleOutlineSolver());
         this.solution = new ProblemSolution(instance, new SimpleOutlineMergeSolver());
+//        this.solution = new ProblemSolution(instance, new SimpleSweep());
 
         gui.redrawDisplayPanel();
         gui.setMinError();

@@ -7,7 +7,8 @@ public class Interval implements Comparable<Interval> {
     private int start;
     private int end;
     // Furthest x-coord
-    private int depth;
+    private int minDepth;
+    private int maxDepth;
 
     private int id;
     // Intervals to the left and right of this interval in the interval tree
@@ -19,12 +20,15 @@ public class Interval implements Comparable<Interval> {
      *
      * @param start : Start of the interval, smallest y-coord
      * @param end : End of the interval, largest y-coord
-     * @param depth : x-coord of interval
+     * @param minDepth : the min x-coord of interval
+     * @param maxDepth : the max x-coord of interval
+     * @param id
      */
-    public Interval(int start, int end, int depth, int id) {
+    public Interval(int start, int end, int minDepth, int maxDepth, int id) {
         this.start = start;
         this.end = end;
-        this.depth = depth;
+        this.maxDepth = maxDepth;
+        this.minDepth = minDepth;
         this.id = id;
     }
 
@@ -53,12 +57,20 @@ public class Interval implements Comparable<Interval> {
         return end;
     }
 
-    public int getDepth() {
-        return depth;
+    public int getMinDepth() {
+        return minDepth;
     }
 
-    public void setDepth(int depth) {
-        this.depth = depth;
+    public void setMinDepth(int minDepth) {
+        this.minDepth = minDepth;
+    }
+
+    public int getMaxDepth() {
+        return maxDepth;
+    }
+
+    public void setMaxDepth(int maxDepth) {
+        this.maxDepth = maxDepth;
     }
 
     public int getId() {
@@ -84,6 +96,6 @@ public class Interval implements Comparable<Interval> {
 
     @Override
     public String toString() {
-        return "[" + this.getStart() + ", " + this.getEnd() + ", " + this.getId() +  ", " + this.getDepth() + "]";
+        return "[" + this.getStart() + ", " + this.getEnd() + ", " + this.getId() +  ", " + this.getMaxDepth() + "]";
     }
 }
