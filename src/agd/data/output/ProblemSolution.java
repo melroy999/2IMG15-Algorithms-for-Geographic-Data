@@ -80,7 +80,7 @@ public class ProblemSolution {
         }
 
         overlaps.forEach(System.out::println);
-        System.out.println("We have " + overlaps.size() + " rectangles that overlap.");
+        if(overlaps.size() > 0) System.out.println("We have " + overlaps.size() + " rectangles that overlap.");
 
         // Check whether each point is represented in the solution.
         List<WeightedPoint> originalPoints = instance.getPoints();

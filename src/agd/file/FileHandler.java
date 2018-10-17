@@ -3,12 +3,12 @@ package agd.file;
 import agd.core.Core;
 import agd.data.input.ProblemInstance;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.util.Enumeration;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 /**
  * A class that handles the I/O.
@@ -40,6 +40,32 @@ public class FileHandler {
             e.printStackTrace();
         }
     }
+
+//    public void batchResolutionFile(File input, File output) {
+//        try {
+//            ZipFile zip = new ZipFile(input);
+//
+//            Enumeration<? extends ZipEntry> entries = zip.entries();
+//
+//            // Iterate over all the entries.
+//            while(entries.hasMoreElements()){
+//                ZipEntry entry = entries.nextElement();
+//
+//                if(entry.getName().endsWith(".txt")) {
+//                    try(Scanner scanner = new Scanner(new InputStreamReader(zip.getInputStream(entry)))) {
+//                        // Notify the core that we have a new problem to solve.
+//                        core.solveProblemInstance(ProblemInstance.readInstance(scanner));
+//
+//                    } catch (FileNotFoundException | NoSuchElementException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//            }
+//
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     public void exportFile(File file) {
         String filename = file.toString();

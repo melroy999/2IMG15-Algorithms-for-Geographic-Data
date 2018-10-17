@@ -42,14 +42,17 @@ public class Core {
         GUI.SolverOptions option = (GUI.SolverOptions) gui.solverSelector.getSelectedItem();
 
         if(option == GUI.SolverOptions.SimpleSweep) {
+            System.out.println("Solver: SimpleSweep solving " + instance.id);
             this.solution = new ProblemSolution(instance, new SimpleSweep());
         } else {
+            System.out.println("Solver: Outline(" + gui.sortSelector.getSelectedItem() + ", " + gui.binarySearchCheckBox.isSelected() + ") solving " + instance.id);
             this.solution = new ProblemSolution(instance, new SimpleOutlineMergeSolver());
         }
 
         gui.redrawDisplayPanel();
         gui.setMinError();
         gui.setError();
+        System.out.println();
     }
 
     /**

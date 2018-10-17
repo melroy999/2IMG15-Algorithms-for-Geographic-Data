@@ -139,6 +139,7 @@ public class GUI {
 
     public void setMinError() {
         if(core.solution != null) {
+            System.out.println("Minimum error: " + String.format(Locale.ROOT, "%.3f", core.solution.getMinimumError()));
             minErrorLabel.setText(String.format(Locale.ROOT, "%.3f", core.solution.getMinimumError()));
         } else {
             minErrorLabel.setText("0");
@@ -147,6 +148,7 @@ public class GUI {
 
     public void setError() {
         if(core.solution != null) {
+            System.out.println("Total error: " + String.format(Locale.ROOT, "%.3f", core.solution.getTotalError()));
             errorLabel.setText(String.format(Locale.ROOT, "%.3f", core.solution.getTotalError()));
         } else {
             errorLabel.setText("0");
