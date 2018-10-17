@@ -227,7 +227,7 @@ public class SimpleOutlineMergeSolver extends SimpleOutlineSolver {
         Point2d candidatePlacement = placement;
         Point2d invalidPlacement = p.c;
 
-        while(candidatePlacement.distance(invalidPlacement) > p.w) {
+        while(candidatePlacement.distance(invalidPlacement) > 1) {
             Point2d halfway = invalidPlacement.interpolate(candidatePlacement, 0.5);
             Point2d altPlacement = HalfGridPoint.make(halfway, p).point();
             OutlineRectangle altResult = getOutlineRectangle(halfway, p, false);
