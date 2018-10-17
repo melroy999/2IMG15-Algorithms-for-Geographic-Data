@@ -71,7 +71,7 @@ public class IntervalTree {
         }
 
         // Check if we have an overlap with current interval in interval tree add to list if we do
-        if (!((tree.getEnd() < interval.getStart()) || (tree.getStart() > interval.getEnd()))) {
+        if (!((tree.getEnd() <= interval.getStart()) || (tree.getStart() >= interval.getEnd()))) {
             overlap.add(tree);
         }
 
