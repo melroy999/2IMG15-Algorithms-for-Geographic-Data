@@ -41,6 +41,7 @@ public class GUI {
     public JComboBox<SolverOptions> solverSelector;
     public JComboBox<SortingOptions> sortSelector;
     private JButton recalculateButton;
+    public JCheckBox binarySearchCheckBox;
 
     private GUI(Core core) {
         this.core = core;

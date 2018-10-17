@@ -8,6 +8,7 @@ import agd.data.output.HalfGridPoint;
 import agd.data.util.OutlineDimensions;
 import agd.data.util.QuadTreeNode;
 import agd.math.Point2d;
+import javafx.util.Pair;
 
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
@@ -17,6 +18,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class SimpleOutlineMergeSolver extends SimpleOutlineSolver {
+    private static boolean binarySearch = false;
+
     /**
      * Solve the given problem instance.
      *
@@ -25,11 +28,14 @@ public class SimpleOutlineMergeSolver extends SimpleOutlineSolver {
      */
     @Override
     public void solve(ProblemInstance instance, ArrayList<HalfGridPoint> points) {
-        solve(instance, points, (SortingOptions) Core.getCore().gui.sortSelector.getSelectedItem());
+        Core core = Core.getCore();
+        binarySearch = core.gui.binarySearchCheckBox.isSelected();
+
+        solve(instance, points, (SortingOptions) core.gui.sortSelector.getSelectedItem());
     }
 
     public enum SortingOptions {
-        CENTROID, CORNER, CLOSEST_POINT, MANHATTAN_CENTROID, FURTHEST, NONE, SIZE_ASC, SIZE_DESC, X, Y, ROTATION, MAX_BASED, MIN_BASED
+        MANHATTAN_CENTROID, CENTROID, CORNER, CLOSEST_POINT, FURTHEST, NONE, SIZE_ASC, SIZE_DESC, X, Y, ROTATION, MAX_BASED, MIN_BASED
     }
 
     @SuppressWarnings("Duplicates")
@@ -167,12 +173,29 @@ public class SimpleOutlineMergeSolver extends SimpleOutlineSolver {
             }
 
             if(conflicts.isEmpty()) {
-                // We can freely add the selected position.
-                ((SimpleOutline) outline).insert(result);
-                tree.insert(result);
+                Pair<Point2d, OutlineRectangle> closestPlacement = findCloserPlacement(placement, result, p, tree);
 
-                // Add the chosen rectangle to the tree and result.
-                points.set(p.i, HalfGridPoint.make(placement, p));
+                if(binarySearch) {
+                    if(closestPlacement.getKey().distance2(placement) < 1e-4) {
+                        // We haven't found a better position, add it to the outline.
+                        ((SimpleOutline) outline).insert(closestPlacement.getValue());
+                    } else {
+                        // Create a new outline.
+                        outlines.add(new SimpleOutline(closestPlacement.getValue()));
+                    }
+
+                    tree.insert(closestPlacement.getValue());
+                    points.set(p.i, HalfGridPoint.make(closestPlacement.getKey(), p));
+                } else {
+
+                    // We can freely add the selected position.
+                    ((SimpleOutline) outline).insert(result);
+                    tree.insert(result);
+
+                    // Add the chosen rectangle to the tree and result.
+                    points.set(p.i, HalfGridPoint.make(placement, p));
+                }
+
                 return true;
             }
         }
@@ -195,6 +218,36 @@ public class SimpleOutlineMergeSolver extends SimpleOutlineSolver {
 
         // Next, we postpone the insertion of the point.
         return false;
+    }
+
+    private static Pair<Point2d, OutlineRectangle> findCloserPlacement(Point2d placement, OutlineRectangle rectangle, WeightedPoint p, QuadTreeNode<OutlineRectangle> tree) {
+        // The best candidates.
+        OutlineRectangle candidateRectangle = rectangle;
+
+        Point2d candidatePlacement = placement;
+        Point2d invalidPlacement = p.c;
+
+        while(candidatePlacement.distance(invalidPlacement) > p.w) {
+            Point2d halfway = invalidPlacement.interpolate(candidatePlacement, 0.5);
+            Point2d altPlacement = HalfGridPoint.make(halfway, p).point();
+            OutlineRectangle altResult = getOutlineRectangle(halfway, p, false);
+
+            if(tree.query(altResult).isEmpty()) {
+                if(candidatePlacement.epsilonEquals(altPlacement, 1e-4)) break;
+
+                // Our halfway point is the new candidate.
+                candidatePlacement = altPlacement;
+                candidateRectangle = altResult;
+            } else {
+                if(invalidPlacement.epsilonEquals(altPlacement, 1e-4)) break;
+
+                // We have to look above the halfway point.
+                invalidPlacement = altPlacement;
+            }
+        }
+
+        return new Pair<>(candidatePlacement, candidateRectangle);
+
     }
 
     private void printSolution(Set<AbstractOutline> outlines) {
