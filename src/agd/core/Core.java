@@ -14,7 +14,7 @@ public class Core {
     private static Core core;
 
     // Reference to the GUI component.
-    private final GUI gui;
+    public final GUI gui;
 
     // The file handler used to import and save files.
     public final FileHandler fileHandler;
@@ -38,8 +38,14 @@ public class Core {
      */
     public void solveProblemInstance(ProblemInstance instance) {
         this.instance = instance;
-        this.solution = new ProblemSolution(instance, new SimpleOutlineMergeSolver());
-//        this.solution = new ProblemSolution(instance, new SimpleSweep());
+
+        GUI.SolverOptions option = (GUI.SolverOptions) gui.solverSelector.getSelectedItem();
+
+        if(option == GUI.SolverOptions.SimpleSweep) {
+            this.solution = new ProblemSolution(instance, new SimpleSweep());
+        } else {
+            this.solution = new ProblemSolution(instance, new SimpleOutlineMergeSolver());
+        }
 
         gui.redrawDisplayPanel();
         gui.setMinError();

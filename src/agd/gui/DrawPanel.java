@@ -13,6 +13,7 @@ import agd.math.Point2d;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -55,7 +56,11 @@ public class DrawPanel extends JPanel {
 
             ProblemSolution solution = gui.core.solution;
             List<HalfGridPoint> placedPoints = solution.getPoints();
-            Set<Integer> invalids = solution.getInvalidPoints();
+
+            Set<Integer> invalids = new HashSet<>();
+            if(gui.validateOutputCheckBox.isSelected()) {
+                invalids = solution.getInvalidPoints();
+            }
 
             // Save the old transform.
             AffineTransform old = g2.getTransform();

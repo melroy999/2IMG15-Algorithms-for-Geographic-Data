@@ -1,5 +1,6 @@
 package agd.solver;
 
+import agd.core.Core;
 import agd.data.input.ProblemInstance;
 import agd.data.input.WeightedPoint;
 import agd.data.outlines.*;
@@ -24,7 +25,7 @@ public class SimpleOutlineMergeSolver extends SimpleOutlineSolver {
      */
     @Override
     public void solve(ProblemInstance instance, ArrayList<HalfGridPoint> points) {
-        solve(instance, points, SortingOptions.MIN_BASED);
+        solve(instance, points, (SortingOptions) Core.getCore().gui.sortSelector.getSelectedItem());
     }
 
     public enum SortingOptions {
@@ -129,7 +130,7 @@ public class SimpleOutlineMergeSolver extends SimpleOutlineSolver {
             }
         }
 
-        System.out.println("We have generated " + outlines.size() + " outline groups.");
+//        System.out.println("We have generated " + outlines.size() + " outline groups.");
         printSolution(outlines);
     }
 
@@ -238,15 +239,15 @@ public class SimpleOutlineMergeSolver extends SimpleOutlineSolver {
         if(d1.contains(d2) || d2.contains(d1)) {
             return new SimpleOutline(rectangle, rectangles);
         } else if(d1.intersects(d2)) {
-            System.out.println("Intersection.");
-            System.out.println("Area " + (d1.width * d1.height + d2.width * d2.height - d1.intersection(d2).width * d1.intersection(d2).height) + " to " + rectangle.width * rectangle.height);
+//            System.out.println("Intersection.");
+//            System.out.println("Area " + (d1.width * d1.height + d2.width * d2.height - d1.intersection(d2).width * d1.intersection(d2).height) + " to " + rectangle.width * rectangle.height);
 
             // TODO combine the two dimensions into an outline.
             // TODO ALT: merge the two outlines.
             return new SimpleOutline(rectangle, rectangles);
         } else {
-            System.out.println("No intersection.");
-            System.out.println("Area " + (d1.width * d1.height + d2.width * d2.height - d1.intersection(d2).width * d1.intersection(d2).height) + " to " + rectangle.width * rectangle.height);
+//            System.out.println("No intersection.");
+//            System.out.println("Area " + (d1.width * d1.height + d2.width * d2.height - d1.intersection(d2).width * d1.intersection(d2).height) + " to " + rectangle.width * rectangle.height);
 
             // Convert the outline to a square.
             return new SimpleOutline(rectangle, rectangles);

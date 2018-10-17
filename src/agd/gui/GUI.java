@@ -1,6 +1,9 @@
 package agd.gui;
 
 import agd.core.Core;
+import agd.data.input.ProblemInstance;
+import agd.solver.SimpleOutlineMergeSolver;
+import agd.solver.SimpleOutlineMergeSolver.SortingOptions;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -34,6 +37,10 @@ public class GUI {
     private JButton saveFileButton;
     private JLabel minErrorLabel;
     private JLabel errorLabel;
+    public JCheckBox validateOutputCheckBox;
+    public JComboBox<SolverOptions> solverSelector;
+    public JComboBox<SortingOptions> sortSelector;
+    private JButton recalculateButton;
 
     private GUI(Core core) {
         this.core = core;
@@ -64,6 +71,14 @@ public class GUI {
                 core.fileHandler.exportFile(fc.getSelectedFile());
             }
         });
+
+        recalculateButton.addActionListener(e -> {
+                if(core.instance != null) {
+                    // Notify the core that we have a new problem to solve.
+                    core.solveProblemInstance(core.instance);
+                }
+            }
+        );
     }
 
     /**
@@ -106,12 +121,19 @@ public class GUI {
         return gui;
     }
 
+    public enum SolverOptions {
+        SimpleSweep, SimpleOutlines
+    }
+
     /**
      * Create the GUI components that are not automatically created.
      */
     private void createUIComponents() {
         // Obviously, we have to initialize our drawing panel.
         displayPanel = new DrawPanel(this);
+
+        solverSelector = new JComboBox<>(SolverOptions.values());
+        sortSelector = new JComboBox<>(SortingOptions.values());
     }
 
     public void setMinError() {
