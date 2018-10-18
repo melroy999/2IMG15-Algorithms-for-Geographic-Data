@@ -112,8 +112,7 @@ public class BufferedOutline extends AbstractOutline {
                     e.setNext(newEdge);
                     newEdge.setNext(next.getNext());
 
-                    // Continue.
-                    break;
+                    // Stay on this edge.
                 } else {
                     // Set a new next.
                     next = next.getNext();
