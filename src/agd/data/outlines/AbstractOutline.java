@@ -7,6 +7,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * An abstract variant of an outline, defining the common structures and functions.
@@ -97,6 +98,18 @@ public abstract class AbstractOutline implements Iterable<Edge> {
         return dimensions;
     }
 
+    protected void updateAccessPoint(Map<Direction, Edge> rectangleEdges, double oy, double ny) {
+        if(Math.abs(oy - ny) < 1e-4) {
+            // They are on the same height. Check if the new edge is more to the right.
+            if(getEdge().getOrigin().x < rectangleEdges.get(Direction.LEFT).getOrigin().x) {
+                setEdge(rectangleEdges.get(Direction.LEFT));
+            }
+        } else if(oy > ny) {
+            // The edge is definitely placed lower. Set it as an access point.
+            setEdge(rectangleEdges.get(Direction.LEFT));
+        }
+    }
+
     /**
      * Returns an iterator over elements of type {@code T}.
      *
@@ -135,7 +148,7 @@ public abstract class AbstractOutline implements Iterable<Edge> {
         result.append(toTikzCode());
         result.append("}\n");
         result.append("\\end{tikzpicture}\n");
-        result.append("}");
+        result.append("}\n");
 
         return result.toString();
     }

@@ -190,15 +190,7 @@ public class SimpleOutline extends AbstractOutline implements Insertable {
         double ny = rectangleEdges.get(Direction.LEFT).getOrigin().y;
 
         // Do we need to change our access point?
-        if(Math.abs(oy - ny) < 1e-4) {
-            // They are on the same height. Check if the new edge is more to the right.
-            if(getEdge().getOrigin().x < rectangleEdges.get(Direction.LEFT).getOrigin().x) {
-                setEdge(rectangleEdges.get(Direction.LEFT));
-            }
-        } else if(oy > ny) {
-            // The edge is definitely placed lower. Set it as an access point.
-            setEdge(rectangleEdges.get(Direction.LEFT));
-        }
+        updateAccessPoint(rectangleEdges, oy, ny);
     }
 
     /**
