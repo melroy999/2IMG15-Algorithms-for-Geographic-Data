@@ -137,7 +137,7 @@ public class SimpleOutlineMergeSolver extends SimpleOutlineSolver {
         }
 
 //        System.out.println("We have generated " + outlines.size() + " outline groups.");
-        printSolution(outlines);
+//        printSolution(outlines);
     }
 
     private static void insertNewOutline(QuadTreeNode<OutlineRectangle> tree, Set<AbstractOutline> outlines, OutlineRectangle rectangle, WeightedPoint p, ArrayList<HalfGridPoint> points) {

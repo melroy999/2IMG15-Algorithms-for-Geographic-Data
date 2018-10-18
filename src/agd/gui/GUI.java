@@ -26,6 +26,7 @@ public class GUI {
     // A static file chooser, to avoid slow loading issues.
     private static JFileChooser fc = new JFileChooser(); //now declared globally
     private static JFileChooser fs = new JFileChooser(); //now declared globally
+    private static JFileChooser fc2 = new JFileChooser(); //now declared globally
 
     // Components of the GUI.
     private JPanel rootPanel;
@@ -42,6 +43,7 @@ public class GUI {
     public JComboBox<SortingOptions> sortSelector;
     private JButton recalculateButton;
     public JCheckBox binarySearchCheckBox;
+    private JButton loadZipButton;
 
     private GUI(Core core) {
         this.core = core;
@@ -49,6 +51,9 @@ public class GUI {
 
         fc.setDialogType(JFileChooser.OPEN_DIALOG);
         fc.setFileFilter(new FileNameExtensionFilter("text file", "txt"));
+
+        fc2.setDialogType(JFileChooser.OPEN_DIALOG);
+        fc2.setFileFilter(new FileNameExtensionFilter("zip file", "zip"));
 
         fs.setDialogType(JFileChooser.SAVE_DIALOG);
         fs.setSelectedFile(new File("output.txt"));
@@ -70,6 +75,17 @@ public class GUI {
 
             if(status == JFileChooser.APPROVE_OPTION) {
                 core.fileHandler.exportFile(fc.getSelectedFile());
+            }
+        });
+
+        loadZipButton.addActionListener(e -> {
+            int status = fc2.showOpenDialog(rootPanel);
+
+            if(status == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = fc2.getSelectedFile();
+
+                File outputFolder = new File("C:\\Users\\s139037\\Desktop\\Outputs");
+                core.fileHandler.batchResolutionFile(selectedFile, outputFolder);
             }
         });
 
@@ -123,7 +139,7 @@ public class GUI {
     }
 
     public enum SolverOptions {
-        SimpleSweep, SimpleOutlines
+        SimpleOutlines, SimpleSweep
     }
 
     /**
