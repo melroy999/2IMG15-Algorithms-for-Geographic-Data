@@ -10,6 +10,10 @@ import java.util.ArrayList;
  * A class that can be extended to create solvers for the problem.
  */
 public abstract class AbstractSolver {
+    public enum SortingOptions {
+        MANHATTAN_CENTROID, CENTROID, CORNER, CLOSEST_POINT, FURTHEST, NONE, SIZE_ASC, SIZE_DESC, X, Y, ROTATION, MAX_BASED, MIN_BASED
+    }
+
     /**
      * Solve the given problem instance.
      *

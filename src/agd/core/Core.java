@@ -4,9 +4,8 @@ import agd.data.output.ProblemSolution;
 import agd.file.FileHandler;
 import agd.gui.GUI;
 import agd.data.input.ProblemInstance;
-import agd.solver.BBSimpleOutlineSolver;
+import agd.solver.ComplexOutlineMergeSolver;
 import agd.solver.SimpleOutlineMergeSolver;
-import agd.solver.SimpleOutlineSolver;
 import agd.solver.SimpleSweep;
 
 public class Core {
@@ -44,9 +43,12 @@ public class Core {
         if(option == GUI.SolverOptions.SimpleSweep) {
             System.out.println("Solver: SimpleSweep solving " + instance.id);
             this.solution = new ProblemSolution(instance, new SimpleSweep());
-        } else {
-            System.out.println("Solver: Outline(" + gui.sortSelector.getSelectedItem() + ", " + gui.binarySearchCheckBox.isSelected() + ") solving " + instance.id);
+        } else if(option == GUI.SolverOptions.SimpleOutlines) {
+            System.out.println("Solver: SimpleOutline(" + gui.sortSelector.getSelectedItem() + ", " + gui.binarySearchCheckBox.isSelected() + ") solving " + instance.id);
             this.solution = new ProblemSolution(instance, new SimpleOutlineMergeSolver());
+        } else {
+            System.out.println("Solver: ComplexOutline(" + gui.sortSelector.getSelectedItem() + ") solving " + instance.id);
+            this.solution = new ProblemSolution(instance, new ComplexOutlineMergeSolver());
         }
 
         gui.redrawDisplayPanel();

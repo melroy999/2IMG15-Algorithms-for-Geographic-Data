@@ -23,6 +23,12 @@ public class BufferedOutline extends AbstractOutline {
         setEdge(createOutline(outline, w));
     }
 
+    public BufferedOutline(ComplexOutline outline, double w) {
+        super(outline.getRectangles());
+        setEdge(createOutline(outline, w));
+        sanitize();
+    }
+
     /**
      * Generate the buffered outline associated with the given outline.
      *
@@ -63,6 +69,57 @@ public class BufferedOutline extends AbstractOutline {
 
         // Return the first edge that we have set.
         return first;
+    }
+
+    private void sanitize() {
+        // Sanitize the drawn buffered outline using a bottom-up sweep.
+        Edge next;
+        for(Edge e : this) {
+            next = e.getNext();
+
+            while(next != e) {
+                if(e.getDirection() == next.getDirection()) {
+                    if(e.doIntersect(next)) {
+                        // Which edge should we visit next?
+                        Edge next2 = next.getNext();
+
+                        // We should extend the current edge.
+                        e.setNext(next.getNext());
+
+                        // Set the next pointer.
+                        next = next2;
+
+                    } else if(next.doIntersect(e)) {
+                        // Which edge should we visit next?
+                        Edge next2 = next.getNext();
+
+                        // We should extend the current edge.
+                        e.setNext(next.getNext());
+
+                        // Set the next pointer.
+                        next = next2;
+                    } else {
+                        // Set a new next.
+                        next = next.getNext();
+                    }
+                } else if(e.doIntersect(next)) {
+                    // We have a normal intersection with an intersection point.
+                    Point2d i = e.getIntersection(next);
+
+                    // Create a new edge for the next edge.
+                    Edge newEdge = new Edge(i, next.getDirection());
+
+                    e.setNext(newEdge);
+                    newEdge.setNext(next.getNext());
+
+                    // Continue.
+                    break;
+                } else {
+                    // Set a new next.
+                    next = next.getNext();
+                }
+            }
+        }
     }
 
     /**

@@ -98,6 +98,7 @@ class ComplexOutlineTest {
         ComplexOutline outline = new ComplexOutline(rectangles.get(0));
         rectangles.stream().skip(1).forEach(outline::insert);
         System.out.println(outline.toLatexFigure());
+        System.out.println(new BufferedOutline(outline, 2).toLatexFigure());
     }
     @Test
     void lessSimpleTest7() {

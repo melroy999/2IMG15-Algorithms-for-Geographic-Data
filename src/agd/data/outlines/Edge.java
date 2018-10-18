@@ -154,6 +154,30 @@ public class Edge implements Iterable<Edge> {
         }
     }
 
+    public boolean doIntersect(Edge conflict) {
+        Point2d i = getIntersection(conflict);
+
+        // The point is on this edge.
+        if(getOrigin().distance(i) + i.distance(getTarget()) <= length()) {
+            // The point is on the conflict edge.
+            if(conflict.getOrigin().distance(i) + i.distance(conflict.getTarget()) <= conflict.length()) {
+                // Is the intersection valid?
+                if(direction == conflict.direction) {
+                    // If they have the same direction, it always is.
+                    return true;
+                } else if(direction != conflict.direction.opposite()) {
+                    // The direction is on a different axis. We don't want any endpoint to coincide with i.
+                    return !(i.epsilonEquals(getOrigin(), 1e-4)
+                            || i.epsilonEquals(getTarget(), 1e-4)
+                            || i.epsilonEquals(conflict.getOrigin(), 1e-4)
+                            || i.epsilonEquals(conflict.getTarget(), 1e-4));
+                }
+            }
+        }
+
+        return false;
+    }
+
     /**
      * Check whether two edges in opposite direction touch one another.
      *

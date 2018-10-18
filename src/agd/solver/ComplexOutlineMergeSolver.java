@@ -17,8 +17,7 @@ import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class SimpleOutlineMergeSolver extends AbstractSolver {
-    private static boolean binarySearch = false;
+public class ComplexOutlineMergeSolver extends AbstractSolver {
 
     /**
      * Solve the given problem instance.
@@ -29,8 +28,6 @@ public class SimpleOutlineMergeSolver extends AbstractSolver {
     @Override
     public void solve(ProblemInstance instance, ArrayList<HalfGridPoint> points) {
         Core core = Core.getCore();
-        binarySearch = core.gui.binarySearchCheckBox.isSelected();
-
         solve(instance, points, (SortingOptions) core.gui.sortSelector.getSelectedItem());
     }
 
@@ -132,13 +129,12 @@ public class SimpleOutlineMergeSolver extends AbstractSolver {
             }
         }
 
-//        System.out.println("We have generated " + outlines.size() + " outline groups.");
-//        printSolution(outlines);
+        printSolution(outlines);
     }
 
     private static void insertNewOutline(QuadTreeNode<OutlineRectangle> tree, Set<AbstractOutline> outlines, OutlineRectangle rectangle, WeightedPoint p, ArrayList<HalfGridPoint> points) {
         // Create a new outline, which will set a pointer in the rectangle to the outline.
-        outlines.add(new SimpleOutline(rectangle));
+        outlines.add(new ComplexOutline(rectangle));
         Point2d placement = p.c;
         tree.insert(rectangle);
 
@@ -156,7 +152,7 @@ public class SimpleOutlineMergeSolver extends AbstractSolver {
         // For each of the outlines, attempt an insertion.
         for(AbstractOutline outline : intersectingOutlines) {
             // Create a buffered variant of the outline, and get a preferred placement.
-            BufferedOutline bOutline = new BufferedOutline((SimpleOutline) outline, 0.5 * p.w);
+            BufferedOutline bOutline = new BufferedOutline((ComplexOutline) outline, 0.5 * p.w);
             Point2d placement = bOutline.projectAndSelect(p);
             OutlineRectangle result = getOutlineRectangle(placement, p, false);
 
@@ -169,28 +165,13 @@ public class SimpleOutlineMergeSolver extends AbstractSolver {
             }
 
             if(conflicts.isEmpty()) {
-                Pair<Point2d, OutlineRectangle> closestPlacement = findCloserPlacement(placement, result, p, tree);
 
-                if(binarySearch) {
-                    if(closestPlacement.getKey().distance2(placement) < 1e-4) {
-                        // We haven't found a better position, add it to the outline.
-                        ((SimpleOutline) outline).insert(closestPlacement.getValue());
-                    } else {
-                        // Create a new outline.
-                        outlines.add(new SimpleOutline(closestPlacement.getValue()));
-                    }
+                // We can freely add the selected position.
+                ((ComplexOutline) outline).insert(result);
+                tree.insert(result);
 
-                    tree.insert(closestPlacement.getValue());
-                    points.set(p.i, HalfGridPoint.make(closestPlacement.getKey(), p));
-                } else {
-
-                    // We can freely add the selected position.
-                    ((SimpleOutline) outline).insert(result);
-                    tree.insert(result);
-
-                    // Add the chosen rectangle to the tree and result.
-                    points.set(p.i, HalfGridPoint.make(placement, p));
-                }
+                // Add the chosen rectangle to the tree and result.
+                points.set(p.i, HalfGridPoint.make(placement, p));
 
                 return true;
             }
@@ -216,36 +197,6 @@ public class SimpleOutlineMergeSolver extends AbstractSolver {
         return false;
     }
 
-    private static Pair<Point2d, OutlineRectangle> findCloserPlacement(Point2d placement, OutlineRectangle rectangle, WeightedPoint p, QuadTreeNode<OutlineRectangle> tree) {
-        // The best candidates.
-        OutlineRectangle candidateRectangle = rectangle;
-
-        Point2d candidatePlacement = placement;
-        Point2d invalidPlacement = p.c;
-
-        while(candidatePlacement.distance(invalidPlacement) > 1) {
-            Point2d halfway = invalidPlacement.interpolate(candidatePlacement, 0.5);
-            Point2d altPlacement = HalfGridPoint.make(halfway, p).point();
-            OutlineRectangle altResult = getOutlineRectangle(halfway, p, false);
-
-            if(tree.query(altResult).isEmpty()) {
-                if(candidatePlacement.epsilonEquals(altPlacement, 1e-4)) break;
-
-                // Our halfway point is the new candidate.
-                candidatePlacement = altPlacement;
-                candidateRectangle = altResult;
-            } else {
-                if(invalidPlacement.epsilonEquals(altPlacement, 1e-4)) break;
-
-                // We have to look above the halfway point.
-                invalidPlacement = altPlacement;
-            }
-        }
-
-        return new Pair<>(candidatePlacement, candidateRectangle);
-
-    }
-
     private void printSolution(Set<AbstractOutline> outlines) {
 
         // Print the entire solution.
@@ -268,7 +219,7 @@ public class SimpleOutlineMergeSolver extends AbstractSolver {
         clipboard.setContents(selection, selection);
     }
 
-    private static SimpleOutline merge(AbstractOutline o1, AbstractOutline o2) {
+    private static ComplexOutline merge(AbstractOutline o1, AbstractOutline o2) {
         OutlineDimensions d1 = o1.getDimensions();
         OutlineDimensions d2 = o2.getDimensions();
 
@@ -286,20 +237,20 @@ public class SimpleOutlineMergeSolver extends AbstractSolver {
         rectangles.addAll(o2.getRectangles());
 
         if(d1.contains(d2) || d2.contains(d1)) {
-            return new SimpleOutline(rectangle, rectangles);
+            return new ComplexOutline(rectangle, rectangles);
         } else if(d1.intersects(d2)) {
 //            System.out.println("Intersection.");
 //            System.out.println("Area " + (d1.width * d1.height + d2.width * d2.height - d1.intersection(d2).width * d1.intersection(d2).height) + " to " + rectangle.width * rectangle.height);
 
             // TODO combine the two dimensions into an outline.
             // TODO ALT: merge the two outlines.
-            return new SimpleOutline(rectangle, rectangles);
+            return new ComplexOutline(rectangle, rectangles);
         } else {
 //            System.out.println("No intersection.");
 //            System.out.println("Area " + (d1.width * d1.height + d2.width * d2.height - d1.intersection(d2).width * d1.intersection(d2).height) + " to " + rectangle.width * rectangle.height);
 
             // Convert the outline to a square.
-            return new SimpleOutline(rectangle, rectangles);
+            return new ComplexOutline(rectangle, rectangles);
         }
     }
 

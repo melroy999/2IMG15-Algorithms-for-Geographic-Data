@@ -27,6 +27,22 @@ public class ComplexOutline extends AbstractOutline implements Insertable {
     }
 
     /**
+     * Create a new outline.
+     *
+     * @param rectangle The rectangle which defines the original outline.
+     */
+    public ComplexOutline(OutlineRectangle rectangle, List<OutlineRectangle> rectangles) {
+        super(rectangle);
+
+        // Remove the rectangle that we just added.
+        this.getRectangles().clear();
+
+        // Add all the rectangles.
+        this.getRectangles().addAll(rectangles);
+        rectangles.forEach(r -> r.setOutline(this));
+    }
+
+    /**
      * Insert the given rectangle into the outline.
      *
      * @param rectangle The rectangle to insert into the outline.

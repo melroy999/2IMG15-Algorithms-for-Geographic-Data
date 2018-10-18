@@ -1,15 +1,11 @@
 package agd.gui;
 
 import agd.core.Core;
-import agd.data.input.ProblemInstance;
-import agd.solver.SimpleOutlineMergeSolver;
-import agd.solver.SimpleOutlineMergeSolver.SortingOptions;
+import agd.solver.AbstractSolver;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.Locale;
 
@@ -40,7 +36,7 @@ public class GUI {
     private JLabel errorLabel;
     public JCheckBox validateOutputCheckBox;
     public JComboBox<SolverOptions> solverSelector;
-    public JComboBox<SortingOptions> sortSelector;
+    public JComboBox<AbstractSolver.SortingOptions> sortSelector;
     private JButton recalculateButton;
     public JCheckBox binarySearchCheckBox;
     private JButton loadZipButton;
@@ -139,7 +135,7 @@ public class GUI {
     }
 
     public enum SolverOptions {
-        SimpleOutlines, SimpleSweep
+        SimpleOutlines, ComplexOutlines, SimpleSweep
     }
 
     /**
@@ -150,7 +146,7 @@ public class GUI {
         displayPanel = new DrawPanel(this);
 
         solverSelector = new JComboBox<>(SolverOptions.values());
-        sortSelector = new JComboBox<>(SortingOptions.values());
+        sortSelector = new JComboBox<>(AbstractSolver.SortingOptions.values());
     }
 
     public void setMinError() {
