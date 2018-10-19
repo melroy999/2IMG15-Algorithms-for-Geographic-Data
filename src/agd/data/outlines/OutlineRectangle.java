@@ -59,6 +59,11 @@ public class OutlineRectangle extends EntryRectangle {
         this(x, y, size, owner, true);
     }
 
+    public OutlineRectangle(OutlineRectangle r, boolean includeBorders) {
+        super(r.x, r.y, r.width, r.height, r.owner);
+        this.includeBorders = includeBorders;
+    }
+
     /**
      * Get the outline associated with the rectangle.
      *
@@ -159,7 +164,7 @@ public class OutlineRectangle extends EntryRectangle {
         tw += tx;
         th += ty;
 
-        if(includeBorders) {
+        if(includeBorders || (r instanceof OutlineRectangle && ((OutlineRectangle) r).includeBorders)) {
             //      overflow || intersect
             return ((rw <= rx || rw >= tx) &&
                     (rh <= ry || rh >= ty) &&

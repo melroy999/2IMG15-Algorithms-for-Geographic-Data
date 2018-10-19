@@ -173,9 +173,7 @@ public abstract class AbstractOutline implements Iterable<Edge> {
         // Draw the rectangles.
         List<String> latexRectangles = new ArrayList<>();
         Rectangle bb = dimensions;
-        if(bb != null) {
-            latexRectangles.add(String.format(LATEX_RECTANGLE_BB, bb.x, bb.y, bb.x + bb.width, bb.y + bb.height));
-        }
+
         for(OutlineRectangle r : rectangles) {
             latexRectangles.add(String.format(LATEX_RECTANGLE, r.x, r.y, r.x + r.width, r.y + r.height));
         }
@@ -183,6 +181,7 @@ public abstract class AbstractOutline implements Iterable<Edge> {
         latexRectangles.forEach(result::append);
         latexNodes.forEach(result::append);
         result.append(latexEdges);
+        if(bb != null) result.append(String.format(LATEX_RECTANGLE_BB, bb.x, bb.y, bb.x + bb.width, bb.y + bb.height));
 
         return result.toString();
     }

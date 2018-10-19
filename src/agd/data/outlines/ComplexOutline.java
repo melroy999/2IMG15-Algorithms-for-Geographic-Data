@@ -53,17 +53,7 @@ public class ComplexOutline extends AbstractOutline implements Insertable {
         Map<Direction, Edge> rectangleEdges = rectangle.createOutlineMap();
 
         // We know that the rectangle is placed against at most two existing edges. Find those edges.
-        List<Edge> touching = new ArrayList<>();
-        for(Edge edge : this) {
-            // Find the edge that is opposing the given edge.
-            Direction direction = edge.getDirection();
-            Edge target = rectangleEdges.get(direction.opposite());
-
-            // Check if the edge and the target edge touch.
-            if(edge.doTouch(target)) {
-                touching.add(edge);
-            }
-        }
+        List<Edge> touching = getTouchingEdges(rectangleEdges);
 
         if(touching.size() == 1) {
             // Get the single edge that we touch.
@@ -161,7 +151,8 @@ public class ComplexOutline extends AbstractOutline implements Insertable {
                     break;
             }
         } else {
-            throw new IllegalArgumentException("The rectangle does not touch the outline.");
+            // TODO if it does not touch the outline, we should consider it an internal rectangle.
+            //throw new IllegalArgumentException("The rectangle does not touch the outline.");
         }
 
         // Add the rectangle to the list of rectangles.
@@ -172,5 +163,20 @@ public class ComplexOutline extends AbstractOutline implements Insertable {
 
         // Do we need to change our access point?
         updateAccessPoint(rectangleEdges, oy, ny);
+    }
+
+    private List<Edge> getTouchingEdges(Map<Direction, Edge> rectangleEdges) {
+        List<Edge> touching = new ArrayList<>();
+        for(Edge edge : this) {
+            // Find the edge that is opposing the given edge.
+            Direction direction = edge.getDirection();
+            Edge target = rectangleEdges.get(direction.opposite());
+
+            // Check if the edge and the target edge touch.
+            if(edge.doTouch(target)) {
+                touching.add(edge);
+            }
+        }
+        return touching;
     }
 }
