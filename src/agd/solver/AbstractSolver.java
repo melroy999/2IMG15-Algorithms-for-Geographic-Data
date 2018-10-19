@@ -177,7 +177,7 @@ public abstract class AbstractSolver {
         return best;
     }
 
-    static void printSolution(Set<AbstractOutline> outlines) {
+    public static void printSolution(Set<AbstractOutline> outlines) {
 
         // Print the entire solution.
         StringBuilder result = new StringBuilder();

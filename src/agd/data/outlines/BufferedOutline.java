@@ -3,10 +3,7 @@ package agd.data.outlines;
 import agd.intersection.IntersectionSweep;
 import agd.math.Point2d;
 
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 
 import static agd.data.outlines.Edge.*;
 import static agd.data.outlines.Edge.Direction.*;
@@ -34,7 +31,7 @@ public class BufferedOutline extends AbstractOutline {
         super(outline.getRectangles());
         setEdge(createOutline(outline, w));
         maxId = getEdge().getPrevious().getId();
-        sanitize();
+        sanitizeImproved();
     }
 
     /**
@@ -79,7 +76,7 @@ public class BufferedOutline extends AbstractOutline {
         return first;
     }
 
-    private void resolveIntersection(Edge target, Edge conflict) {
+    private void resolveIntersection(Edge target, Edge conflict, TreeMap<Integer, Integer> castMap) {
         if(target.getDirection() == conflict.getDirection()) {
 
             // We should extend the current edge.
@@ -92,41 +89,48 @@ public class BufferedOutline extends AbstractOutline {
             // Create a new edge for the next edge.
             Edge newEdge = new Edge(i, conflict.getDirection());
 
+            // What was the original edge we split up? Find the edge recursively.
+            castMap.put(newEdge.getId(), conflict.getId());
+
             target.setNext(newEdge);
             newEdge.setNext(conflict.getNext());
         }
     }
 
-    private void sanitize() {
-
+    private void sanitizeImproved() {
         // Which intersections do we have?
-        TreeMap<Edge, Set<Edge>> intersectionMapping = IntersectionSweep.findIntersections(getEdge());
-//        TreeMap<Edge, Set<Edge>> intersectionMapping = IntersectionSweep.findIntersectionsBF(getEdge());
+        TreeMap<Integer, Set<Edge>> intersectionMapping = IntersectionSweep.findIntersections(getEdge());
 
-//        if(intersectionMapping.size() != intersectionMapping2.size()) {
-//            System.out.println("Unbalanced");
-//        }
-//
-//        for(Edge target : this) {
-//            // Does this edge have intersections in the intersection list?
-//            // If it does not, continue. Otherwise, resolve the intersection and continue.
-//            if(intersectionMapping.containsKey(target)) {
-//                Set<Edge> intersections = intersectionMapping.get(target);
-//
-//                // Find the intersection that is applicable first by comparing the ids of the edges.
-//                for(Edge conflict : intersections) {
-//                    if(conflict.getId() > target.getId()) {
-//                        // We have found the edge that follows this edge immediately.
-//                        resolveIntersection(target, conflict);
-//
-//                        // Which kind of intersection did we have? If it was an intersection, break; otherwise continue.
-//                        if(target.getDirection() != conflict.getDirection()) {
-//                            break;
-//                        }
-//                    }
-//                }
-//            }
-//        }
+        // A mapping in which we track all the ids that have changed.
+        TreeMap<Integer, Integer> castMap = new TreeMap<>();
+
+        for(Edge target : this) {
+            // Get the true id of the target.
+            int targetId = castMap.getOrDefault(target.getId(), target.getId());
+
+            // Does this edge have intersections in the intersection list?
+            // If it does not, continue. Otherwise, resolve the intersection and continue.
+
+            if(intersectionMapping.containsKey(targetId)) {
+                Set<Edge> intersections = intersectionMapping.get(targetId);
+
+                // Find the intersection that is applicable first by comparing the ids of the edges.
+                for(Edge conflict : intersections) {
+                    if(conflict.getId() > targetId) {
+                        // We have found the edge that follows this edge immediately.
+                        resolveIntersection(target, conflict, castMap);
+
+                        // Which kind of intersection did we have? If it was an intersection, break; otherwise continue.
+                        if(target.getDirection() != conflict.getDirection()) {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private void sanitize() {
 
         // Sanitize the drawn buffered outline using a bottom-up sweep.
         Edge next;
@@ -136,11 +140,6 @@ public class BufferedOutline extends AbstractOutline {
             while(next != e) {
                 if(e.getDirection() == next.getDirection()) {
                     if(e.doIntersect(next)) {
-                        if(!intersectionMapping.containsKey(e)) {
-                            System.out.println("No intersections found for " + e + " and " + next);
-                        } else if(!intersectionMapping.get(e).contains(next)) {
-                            System.out.println("No contains found for " + e + " and " + next);
-                        }
 
                         // Which edge should we visit next?
                         Edge next2 = next.getNext();
@@ -152,11 +151,6 @@ public class BufferedOutline extends AbstractOutline {
                         next = next2;
 
                     } else if(next.doIntersect(e)) {
-                        if(!intersectionMapping.containsKey(e)) {
-                            System.out.println("No intersections found for " + e + " and " + next);
-                        } else if(!intersectionMapping.get(e).contains(next)) {
-                            System.out.println("No contains found for " + e + " and " + next);
-                        }
 
                         // Which edge should we visit next?
                         Edge next2 = next.getNext();
@@ -171,11 +165,6 @@ public class BufferedOutline extends AbstractOutline {
                         next = next.getNext();
                     }
                 } else if(e.doIntersect(next)) {
-                    if(!intersectionMapping.containsKey(e)) {
-                        System.out.println("No intersections found for " + e + " and " + next);
-                    } else if(!intersectionMapping.get(e).contains(next)) {
-                        System.out.println("No contains found for " + e + " and " + next);
-                    }
 
                     // We have a normal intersection with an intersection point.
                     Point2d i = e.getIntersection(next);

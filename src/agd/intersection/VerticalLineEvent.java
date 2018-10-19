@@ -26,20 +26,20 @@ public class VerticalLineEvent extends AbstractEvent {
      * @param intersections The set of currently found intersections.
      */
     @Override
-    public void execute(PriorityQueue<AbstractEvent> events, TreeMap<DoubleWrapper, Set<LeftEndpointEvent>> status, Map<Edge, Set<Edge>> intersections) {
+    public void execute(PriorityQueue<AbstractEvent> events, TreeMap<DoubleWrapper, Set<LeftEndpointEvent>> status, Map<Integer, Set<Edge>> intersections) {
         // Do a range search on the tree map.
         Map<DoubleWrapper, Set<LeftEndpointEvent>> range = status.subMap(new DoubleWrapper(p.y), new DoubleWrapper(upper.y));
 
         // We have potential intersections with all elements in the tree.
         List<LeftEndpointEvent> targets = range.values().stream().collect(ArrayList::new, List::addAll, List::addAll);
         targets.stream().filter(t -> e.doIntersect(t.e)).forEach(t -> {
-            Set<Edge> set = intersections.getOrDefault(e, new TreeSet<>());
+            Set<Edge> set = intersections.getOrDefault(e.getId(), new TreeSet<>());
             set.add(t.e);
-            intersections.putIfAbsent(e, set);
+            intersections.putIfAbsent(e.getId(), set);
 
-            Set<Edge> set2 = intersections.getOrDefault(t.e, new TreeSet<>());
+            Set<Edge> set2 = intersections.getOrDefault(t.e.getId(), new TreeSet<>());
             set2.add(e);
-            intersections.putIfAbsent(t.e, set2);
+            intersections.putIfAbsent(t.e.getId(), set2);
         });
     }
 }

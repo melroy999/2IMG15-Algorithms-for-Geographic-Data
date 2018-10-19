@@ -21,7 +21,7 @@ public class LeftEndpointEvent extends AbstractEvent {
      * @param intersections The set of currently found intersections.
      */
     @Override
-    public void execute(PriorityQueue<AbstractEvent> events, TreeMap<DoubleWrapper, Set<LeftEndpointEvent>> status, Map<Edge, Set<Edge>> intersections) {
+    public void execute(PriorityQueue<AbstractEvent> events, TreeMap<DoubleWrapper, Set<LeftEndpointEvent>> status, Map<Integer, Set<Edge>> intersections) {
         // Insert the line segment into the status.
         DoubleWrapper key = new DoubleWrapper(p.y);
         Set<LeftEndpointEvent> entries = status.getOrDefault(key, new TreeSet<>());

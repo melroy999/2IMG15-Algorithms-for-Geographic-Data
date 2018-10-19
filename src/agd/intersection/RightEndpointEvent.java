@@ -21,7 +21,7 @@ public class RightEndpointEvent extends AbstractEvent {
      * @param intersections The set of currently found intersections.
      */
     @Override
-    public void execute(PriorityQueue<AbstractEvent> events, TreeMap<DoubleWrapper, Set<LeftEndpointEvent>> status, Map<Edge, Set<Edge>> intersections) {
+    public void execute(PriorityQueue<AbstractEvent> events, TreeMap<DoubleWrapper, Set<LeftEndpointEvent>> status, Map<Integer, Set<Edge>> intersections) {
         // We simply have to remove the edge from the status.
         DoubleWrapper key = new DoubleWrapper(p.y);
         Set<LeftEndpointEvent> entries = status.getOrDefault(key, new TreeSet<>());
@@ -31,13 +31,13 @@ public class RightEndpointEvent extends AbstractEvent {
 
         // Does the entry set still contain edges? In that case, we have overlaps with all those edges.
         for(LeftEndpointEvent e : entries) {
-            Set<Edge> set = intersections.getOrDefault(leftEndpointEvent.e, new TreeSet<>());
+            Set<Edge> set = intersections.getOrDefault(leftEndpointEvent.e.getId(), new TreeSet<>());
             set.add(e.e);
-            intersections.putIfAbsent(leftEndpointEvent.e, set);
+            intersections.putIfAbsent(leftEndpointEvent.e.getId(), set);
 
-            Set<Edge> set2 = intersections.getOrDefault(e.e, new TreeSet<>());
+            Set<Edge> set2 = intersections.getOrDefault(e.e.getId(), new TreeSet<>());
             set2.add(leftEndpointEvent.e);
-            intersections.putIfAbsent(e.e, set2);
+            intersections.putIfAbsent(e.e.getId(), set2);
         }
     }
 }

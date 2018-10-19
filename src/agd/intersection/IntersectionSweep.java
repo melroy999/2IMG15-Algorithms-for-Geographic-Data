@@ -9,41 +9,13 @@ import java.util.*;
  */
 public class IntersectionSweep {
 
-    public static TreeMap<Edge, Set<Edge>> findIntersections(Edge... edges) {
-        TreeMap<Edge, Set<Edge>> intersections = new TreeMap<>();
+    public static TreeMap<Integer, Set<Edge>> findIntersections(Edge... edges) {
+        TreeMap<Integer, Set<Edge>> intersections = new TreeMap<>();
         findIntersections(intersections, edges);
         return intersections;
     }
 
-    public static TreeMap<Edge, Set<Edge>> findIntersectionsBF(Edge... edges) {
-        TreeMap<Edge, Set<Edge>> intersections = new TreeMap<>();
-
-        List<Edge> edgeCollection = new ArrayList<>();
-        Arrays.stream(edges).forEach(e -> edgeCollection.addAll(e.toList()));
-
-        for(int i = 0; i < intersections.size(); i++) {
-            Edge target = edgeCollection.get(i);
-
-            for(int j = 1; j < intersections.size() - 1; j++) {
-                Edge conflict = edgeCollection.get((i + j) % edgeCollection.size());
-
-                // Do the edges have an overlap?
-                if(target.doIntersect(conflict) || conflict.doIntersect(target)) {
-                    Set<Edge> set = intersections.getOrDefault(target, new TreeSet<>());
-                    set.add(conflict);
-                    intersections.putIfAbsent(target, set);
-
-                    Set<Edge> set2 = intersections.getOrDefault(conflict, new TreeSet<>());
-                    set2.add(target);
-                    intersections.putIfAbsent(conflict, set2);
-                }
-            }
-        }
-
-        return intersections;
-    }
-
-    private static void findIntersections(Map<Edge, Set<Edge>> intersections, Edge... edges) {
+    private static void findIntersections(Map<Integer, Set<Edge>> intersections, Edge... edges) {
         // The queue of events.
         PriorityQueue<AbstractEvent> events = new PriorityQueue<>();
 
@@ -58,26 +30,26 @@ public class IntersectionSweep {
 
         // Keep the vertical line events with the same y-value.
         PriorityQueue<VerticalLineEvent> verticalLines = new PriorityQueue<>();
-        double lastY = -Double.MAX_VALUE;
+        double lastX = -Double.MAX_VALUE;
 
         // Keep taking events from the event queue until it is empty.
         while(!events.isEmpty()) {
             AbstractEvent currentEvent = events.poll();
             currentEvent.execute(events, status, intersections);
 
-            if(currentEvent instanceof VerticalLineEvent) {
-                // Has the y-value changed?
-                if(Math.abs(lastY - currentEvent.p.y) < 1e-4) {
-                    // Check if the vertical lines have overlaps.
-                    findVerticalOverlaps(verticalLines, intersections);
-                }
+            // Has the x value changed? If so, flush the intersections in the vertical lines list.
+            if(Math.abs(lastX - currentEvent.p.x) > 0) {
+                // Check if the vertical lines have overlaps.
+                findVerticalOverlaps(verticalLines, intersections);
+            }
 
+            if(currentEvent instanceof VerticalLineEvent) {
                 // Add the event to the priority queue.
                 verticalLines.add((VerticalLineEvent) currentEvent);
             }
 
             // Set the new y.
-            lastY = currentEvent.p.y;
+            lastX = currentEvent.p.x;
         }
 
         // Do a final overlap check.
@@ -85,7 +57,7 @@ public class IntersectionSweep {
     }
 
     @SuppressWarnings("Duplicates")
-    private static void findVerticalOverlaps(PriorityQueue<VerticalLineEvent> verticalLines, Map<Edge, Set<Edge>> intersections) {
+    private static void findVerticalOverlaps(PriorityQueue<VerticalLineEvent> verticalLines, Map<Integer, Set<Edge>> intersections) {
         List<VerticalLineEvent> lines = new ArrayList<>(verticalLines);
 
         // Check if the vertical lines have overlaps.
@@ -101,13 +73,13 @@ public class IntersectionSweep {
                 } else {
                     // They overlap, if they have the same direction.
                     if(e1.e.getDirection() == e2.e.getDirection()) {
-                        Set<Edge> set = intersections.getOrDefault(e1.e, new TreeSet<>());
+                        Set<Edge> set = intersections.getOrDefault(e1.e.getId(), new TreeSet<>());
                         set.add(e2.e);
-                        intersections.putIfAbsent(e1.e, set);
+                        intersections.putIfAbsent(e1.e.getId(), set);
 
-                        Set<Edge> set2 = intersections.getOrDefault(e2.e, new TreeSet<>());
+                        Set<Edge> set2 = intersections.getOrDefault(e2.e.getId(), new TreeSet<>());
                         set2.add(e1.e);
-                        intersections.putIfAbsent(e2.e, set2);
+                        intersections.putIfAbsent(e2.e.getId(), set2);
                     }
                 }
             }

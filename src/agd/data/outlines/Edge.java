@@ -367,7 +367,7 @@ public class Edge implements Iterable<Edge>, Comparable<Edge> {
 
     @Override
     public String toString() {
-        return "" + origin + "-" + direction + "->" + (next == null ? "null" : next.origin.toString());
+        return id + " " + origin + "-" + direction + "->" + (next == null ? "null" : next.origin.toString());
     }
 
     /**

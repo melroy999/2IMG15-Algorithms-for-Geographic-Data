@@ -157,8 +157,7 @@ public class ComplexOutlineMergeSolver extends AbstractSolver {
         points.set(p.i, HalfGridPoint.make(placement, p));
 
         return true;
-//
-//
+
 //        // Merge the outlines that are in conflict when placing the rectangle in the foremost outline.
 //        AbstractOutline source = intersectingOutlines.get(0);
 //        intersectingOutlines = firstConflicts.stream().map(OutlineRectangle::getOutline).distinct().collect(Collectors.toList());
@@ -175,7 +174,7 @@ public class ComplexOutlineMergeSolver extends AbstractSolver {
 //
 //        outlines.add(source);
 //
-//         Next, we postpone the insertion of the point.
+//        // Next, we postpone the insertion of the point.
 //        return false;
     }
 

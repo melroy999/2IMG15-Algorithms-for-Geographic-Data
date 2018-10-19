@@ -33,7 +33,7 @@ public abstract class AbstractEvent implements Comparable<AbstractEvent> {
      * @param status The status of the sweep line.
      * @param intersections The set of currently found intersections.
      */
-    public abstract void execute(PriorityQueue<AbstractEvent> events, TreeMap<DoubleWrapper, Set<LeftEndpointEvent>> status, Map<Edge, Set<Edge>> intersections);
+    public abstract void execute(PriorityQueue<AbstractEvent> events, TreeMap<DoubleWrapper, Set<LeftEndpointEvent>> status, Map<Integer, Set<Edge>> intersections);
 
     @Override
     public int compareTo(AbstractEvent o) {
@@ -58,6 +58,6 @@ public abstract class AbstractEvent implements Comparable<AbstractEvent> {
      * The different types of events that may occur.
      */
     public enum EventType {
-        RightEndpoint, VerticalLine, LeftEndpoint
+        LeftEndpoint, VerticalLine, RightEndpoint
     }
 }
