@@ -8,7 +8,6 @@ import agd.data.output.HalfGridPoint;
 import agd.data.util.OutlineDimensions;
 import agd.data.util.QuadTreeNode;
 import agd.math.Point2d;
-import javafx.util.Pair;
 
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
@@ -34,74 +33,13 @@ public class ComplexOutlineMergeSolver extends AbstractSolver {
     @SuppressWarnings("Duplicates")
     public void solve(ProblemInstance instance, ArrayList<HalfGridPoint> points, SortingOptions option) {
         // Find the centre of mass.
-        Point2d centre = new Point2d();
-        for(WeightedPoint p : instance.getPoints()) {
-            centre = centre.add(p.c);
-        }
-        centre = centre.scale(1d / instance.getPoints().size());
-
-        // Initialize the array of points to hold null for every entry.
-        for(int i = 0; i < instance.getPoints().size(); i++) {
-            points.add(null);
-        }
-        Point2d c = centre;
+        Point2d centre = getCentreAndInit(instance, points);
 
         // Find the distance between the centre point and all of the points, and sort on distance.
-        Comparator<WeightedPoint> comparator;
-        switch (option) {
-            case CENTROID:
-                comparator = getCentroidComparator(centre);
-                break;
-            case CORNER:
-                comparator = getCornerPointComparator(centre);
-                break;
-            case CLOSEST_POINT:
-                comparator = getBorderPointComparator(centre);
-                break;
-            case FURTHEST:
-                comparator = getFurthestPointComparator(centre);
-                break;
-            case NONE:
-                comparator = (a1, a2) -> 0;
-                break;
-            case SIZE_ASC:
-                comparator = Comparator.comparingInt(a -> a.w);
-                break;
-            case SIZE_DESC:
-                comparator = (a1, a2) -> -Integer.compare(a1.w, a2.w);
-                break;
-            case X:
-                comparator = Comparator.comparingDouble(a -> a.x);
-                break;
-            case Y:
-                comparator = Comparator.comparingDouble(a -> a.y);
-                break;
-            case ROTATION:
-                comparator = getRotationalComparator(centre);
-                break;
-            case MAX_BASED:
-                comparator = Comparator.comparingDouble(a -> Math.max(Math.abs(a.x - c.x), Math.abs(a.y - c.y)));
-                break;
-            case MIN_BASED:
-                comparator = Comparator.comparingDouble(a -> Math.min(Math.abs(a.x - c.x), Math.abs(a.y - c.y)));
-                break;
-            case MANHATTAN_CENTROID:
-            default:
-                comparator = getManhattanCentroidComparator(centre);
-                break;
-        }
+        Comparator<WeightedPoint> comparator = getPointComparator(option, centre);
 
         // Create a quadtree in which we will check for overlapping rectangles.
-        int width = instance.max_x - instance.min_x;
-        int height = instance.max_y - instance.min_y;
-        QuadTreeNode<OutlineRectangle> tree = new QuadTreeNode<>(
-                new Rectangle(
-                        instance.min_x - 20 * width,
-                        instance.min_y - 20 * height,
-                        41 * width,
-                        41 * height
-                )
-        );
+        QuadTreeNode<OutlineRectangle> tree = initializeQuadTree(instance);
 
         // The list of outlines that have been generated.
         Set<AbstractOutline> outlines = new HashSet<>();
@@ -197,28 +135,6 @@ public class ComplexOutlineMergeSolver extends AbstractSolver {
         return false;
     }
 
-    private void printSolution(Set<AbstractOutline> outlines) {
-
-        // Print the entire solution.
-        StringBuilder result = new StringBuilder();
-        result.append("\\resizebox{\\textwidth}{!}{% <------ Don't forget this %\n");
-        result.append("\\begin{tikzpicture}[x=5mm, y=5mm, baseline, trim left]\n");
-        result.append("\\tikz {\n");
-
-        for(AbstractOutline outline : outlines) {
-            // Combine everything into one figure.
-            result.append(outline.toTikzCode()).append("\n");
-        }
-
-        result.append("}\n");
-        result.append("\\end{tikzpicture}\n");
-        result.append("}");
-
-        StringSelection selection = new StringSelection(result.toString());
-        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-        clipboard.setContents(selection, selection);
-    }
-
     private static ComplexOutline merge(AbstractOutline o1, AbstractOutline o2) {
         OutlineDimensions d1 = o1.getDimensions();
         OutlineDimensions d2 = o2.getDimensions();
@@ -252,129 +168,5 @@ public class ComplexOutlineMergeSolver extends AbstractSolver {
             // Convert the outline to a square.
             return new ComplexOutline(rectangle, rectangles);
         }
-    }
-
-    /**
-     * Convert the preferred placement of a weighted point to a outline rectangle.
-     *
-     * @param p The chosen placement for the center point.
-     * @return An outline rectangle with the point c at the center.
-     */
-    protected static OutlineRectangle getOutlineRectangle(Point2d p, WeightedPoint o) {
-        return new OutlineRectangle(
-                (int) Math.round(p.x - 0.5 * o.w),
-                (int) Math.round(p.y - 0.5 * o.w),
-                o.w,
-                o
-        );
-    }
-
-    /**
-     * Convert the preferred placement of a weighted point to a outline rectangle.
-     *
-     * @param p The chosen placement for the center point.
-     * @return An outline rectangle with the point c at the center.
-     */
-    protected static OutlineRectangle getOutlineRectangle(Point2d p, WeightedPoint o, boolean includeBorders) {
-        return new OutlineRectangle(
-                (int) Math.round(p.x - 0.5 * o.w),
-                (int) Math.round(p.y - 0.5 * o.w),
-                o.w,
-                o,
-                includeBorders
-        );
-    }
-
-    private static Comparator<WeightedPoint> getRotationalComparator(final Point2d c) {
-        return Comparator.comparingDouble(a -> getAngleDegree(c, a));
-    }
-
-    private static double getAngleDegree(Point2d origin, Point2d target) {
-        double n = 270 - (Math.atan2(origin.y - target.y, origin.x - target.x)) * 180 / Math.PI;
-        return n % 360;
-    }
-
-    protected static Comparator<WeightedPoint> getCentroidComparator(final Point2d c) {
-        return Comparator.comparingDouble(p -> p.distance2(c));
-    }
-
-    protected static Comparator<WeightedPoint> getManhattanCentroidComparator(final Point2d c) {
-        return Comparator.comparingDouble(p -> p.manhattan(c));
-    }
-
-    protected static Comparator<WeightedPoint> getCornerPointComparator(final Point2d c) {
-        return Comparator.comparingDouble(p -> getClosestCornerPoint(p, c).distance2(c));
-    }
-
-    protected static Comparator<WeightedPoint> getBorderPointComparator(final Point2d c) {
-        return Comparator.comparingDouble(p -> getClosestPointOnBorder(p, c).distance2(c));
-    }
-
-    protected static Comparator<WeightedPoint> getFurthestPointComparator(final Point2d c) {
-        return Comparator.comparingDouble(p -> getFurthestCornerPoint(p, c).distance2(c));
-    }
-
-    private static Point2d getClosestCornerPoint(WeightedPoint p, final Point2d c) {
-        double hw = 0.5 * p.w;
-        Point2d[] points = new Point2d[] {
-                new Point2d(p.x + hw, p.y + hw),
-                new Point2d(p.x - hw, p.y + hw),
-                new Point2d(p.x + hw, p.y - hw),
-                new Point2d(p.x - hw, p.y - hw)
-        };
-
-        double min = Double.MAX_VALUE;
-        Point2d best = null;
-
-        for(Point2d q : points) {
-            double distance = c.distance2(q);
-            if(distance < min) {
-                min = distance;
-                best = q;
-            }
-        }
-
-        return best;
-    }
-
-    private static Point2d getFurthestCornerPoint(WeightedPoint p, final Point2d c) {
-        double hw = 0.5 * p.w;
-        Point2d[] points = new Point2d[] {
-                new Point2d(p.x + hw, p.y + hw),
-                new Point2d(p.x - hw, p.y + hw),
-                new Point2d(p.x + hw, p.y - hw),
-                new Point2d(p.x - hw, p.y - hw)
-        };
-
-        double max = -Double.MAX_VALUE;
-        Point2d best = null;
-
-        for(Point2d q : points) {
-            double distance = c.distance2(q);
-            if(distance > max) {
-                max = distance;
-                best = q;
-            }
-        }
-
-        return best;
-    }
-
-    private static Point2d getClosestPointOnBorder(WeightedPoint p, final Point2d c) {
-        OutlineRectangle r = getOutlineRectangle(p.c, p);
-
-        double min = Double.MAX_VALUE;
-        Point2d best = null;
-
-        for(Edge e : r.createOutline(Edge.Direction.LEFT)) {
-            Point2d q = e.project(c);
-            double distance = c.distance2(q);
-            if(distance < min) {
-                min = distance;
-                best = q;
-            }
-        }
-
-        return best;
     }
 }
