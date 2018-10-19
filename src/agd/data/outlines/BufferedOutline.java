@@ -52,7 +52,9 @@ public class BufferedOutline extends AbstractOutline {
             }
         }
 
-        if(i != 0) System.out.println("Found " + i + " intersections in our output, with a total of " + itot + " intersections in this run.");
+        if(i != 0) {
+            System.out.println("Found " + i + " intersections in our output, with a total of " + itot + " intersections in this run.");
+        }
     }
 
     /**
@@ -102,6 +104,17 @@ public class BufferedOutline extends AbstractOutline {
         assert last != null;
         last.setNext(first);
 
+        // Make sure that we have no two consecutive edges in the same direction.
+        Edge current = first;
+        while(current.getNext() != first) {
+            if(current.getDirection() == current.getNext().getDirection()) {
+                // Merge.
+                current.setNext(current.getNext().getNext());
+            } else {
+                current = current.getNext();
+            }
+        }
+
         // Return the first edge that we have set.
         return first;
     }
@@ -128,9 +141,10 @@ public class BufferedOutline extends AbstractOutline {
     }
 
     private void sanitizeImproved() {
+
         // Which intersections do we have?
-        TreeMap<Integer, Set<Edge>> intersectionMapping = IntersectionSweep.findIntersections(getEdge());
-        TreeMap<Integer, Set<Edge>> intersectionMapping2 = IntersectionSweep.findIntersectionsBF(getEdge());
+        TreeMap<Integer, Set<Edge>> intersectionMapping2 = IntersectionSweep.findIntersections(getEdge());
+        TreeMap<Integer, Set<Edge>> intersectionMapping = IntersectionSweep.findIntersectionsBF(getEdge());
 
         if(intersectionMapping.size() != intersectionMapping2.size()) {
             System.out.println("Imbalance " + intersectionMapping.size() + ", " + intersectionMapping2.size());

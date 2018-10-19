@@ -168,7 +168,7 @@ public abstract class AbstractOutline implements Iterable<Edge> {
             latexNodes.add(String.format(LATEX_POINT, e.getId(), e.getOrigin().x, e.getOrigin().y));
             latexEdges.append("(v").append(e.getId()).append(") -- ");
         }
-        latexEdges.append("cycle;\n");
+        latexEdges.append("(v").append(edge.getId()).append(");\n");
 
         // Draw the rectangles.
         List<String> latexRectangles = new ArrayList<>();
