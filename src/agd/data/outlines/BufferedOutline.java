@@ -32,6 +32,27 @@ public class BufferedOutline extends AbstractOutline {
         setEdge(createOutline(outline, w));
         maxId = getEdge().getPrevious().getId();
         sanitizeImproved();
+        validate();
+    }
+
+    static int itot = 0;
+
+    private void validate() {
+        int i = 0;
+
+        // Check if we have any intersections, the brute force way.
+        for(Edge e1 : this) {
+            for(Edge e2 : e1.getNext()) {
+                if(e1 == e2) break;
+
+                if(e1.doIntersect(e2)) {
+                    i++;
+                    itot++;
+                }
+            }
+        }
+
+        if(i != 0) System.out.println("Found " + i + " intersections in our output, with a total of " + itot + " intersections in this run.");
     }
 
     /**
@@ -59,6 +80,15 @@ public class BufferedOutline extends AbstractOutline {
             Edge bufferedEdge = new Edge(p, e.getDirection());
 
             if(last != null) {
+                // Wait a second, is the direction of the previous edge still correct if we take this as the next?
+                Direction dir = Direction.getDirection(last.getOrigin(), p);
+                if(dir != last.getDirection()) {
+                    // We have to remake the previous edge.
+                    Edge prev = new Edge(last.getOrigin(), dir);
+                    prev.setPrevious(last.getPrevious());
+                    last = prev;
+                }
+
                 last.setNext(bufferedEdge);
             }
             last = bufferedEdge;
@@ -100,6 +130,11 @@ public class BufferedOutline extends AbstractOutline {
     private void sanitizeImproved() {
         // Which intersections do we have?
         TreeMap<Integer, Set<Edge>> intersectionMapping = IntersectionSweep.findIntersections(getEdge());
+        TreeMap<Integer, Set<Edge>> intersectionMapping2 = IntersectionSweep.findIntersectionsBF(getEdge());
+
+        if(intersectionMapping.size() != intersectionMapping2.size()) {
+            System.out.println("Imbalance " + intersectionMapping.size() + ", " + intersectionMapping2.size());
+        }
 
         // A mapping in which we track all the ids that have changed.
         TreeMap<Integer, Integer> castMap = new TreeMap<>();
@@ -110,7 +145,6 @@ public class BufferedOutline extends AbstractOutline {
 
             // Does this edge have intersections in the intersection list?
             // If it does not, continue. Otherwise, resolve the intersection and continue.
-
             if(intersectionMapping.containsKey(targetId)) {
                 Set<Edge> intersections = intersectionMapping.get(targetId);
 

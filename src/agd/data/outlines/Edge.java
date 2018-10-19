@@ -438,6 +438,20 @@ public class Edge implements Iterable<Edge>, Comparable<Edge> {
             this.isHorizontal = isHorizontal;
         }
 
+        public static Direction getDirection(Point2d p1, Point2d p2) {
+            if(p1.x < p2.x) {
+                return RIGHT;
+            } else if(p1.x > p2.x) {
+                return LEFT;
+            } else {
+                if(p1.y < p2.y) {
+                    return UP;
+                } else {
+                    return DOWN;
+                }
+            }
+        }
+
         /**
          * Get the offset directional vector associated with the direction.
          *

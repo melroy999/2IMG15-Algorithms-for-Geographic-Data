@@ -9,7 +9,7 @@ public class RightEndpointEvent extends AbstractEvent {
     private final LeftEndpointEvent leftEndpointEvent;
 
     public RightEndpointEvent(Edge e, LeftEndpointEvent event) {
-        super(e.getDirection() == Edge.Direction.LEFT || e.getDirection() == Edge.Direction.DOWN ? e.getOrigin() : e.getTarget(), EventType.RightEndpoint);
+        super(e.getDirection() == Edge.Direction.LEFT ? e.getOrigin() : e.getTarget(), EventType.RightEndpoint);
         this.leftEndpointEvent = event;
     }
 

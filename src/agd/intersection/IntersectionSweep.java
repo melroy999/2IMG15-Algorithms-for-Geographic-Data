@@ -15,6 +15,32 @@ public class IntersectionSweep {
         return intersections;
     }
 
+    public static TreeMap<Integer, Set<Edge>> findIntersectionsBF(Edge... edges) {
+        TreeMap<Integer, Set<Edge>> intersections = new TreeMap<>();
+
+        List<Edge> edgeList = new ArrayList<>();
+        Arrays.stream(edges).forEach(e -> edgeList.addAll(e.toList()));
+
+        for(int i = 0; i < edgeList.size(); i++) {
+            Edge e1 = edgeList.get(i);
+            for(int j = 1; j < edgeList.size() - 1; j++) {
+                Edge e2 = edgeList.get((i + j) % edgeList.size());
+
+                if(e1.doIntersect(e2) || e2.doIntersect(e1)) {
+                    Set<Edge> set = intersections.getOrDefault(e1.getId(), new TreeSet<>());
+                    set.add(e2);
+                    intersections.putIfAbsent(e1.getId(), set);
+
+                    Set<Edge> set2 = intersections.getOrDefault(e2.getId(), new TreeSet<>());
+                    set2.add(e1);
+                    intersections.putIfAbsent(e2.getId(), set2);
+                }
+            }
+        }
+
+        return intersections;
+    }
+
     private static void findIntersections(Map<Integer, Set<Edge>> intersections, Edge... edges) {
         // The queue of events.
         PriorityQueue<AbstractEvent> events = new PriorityQueue<>();

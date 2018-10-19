@@ -22,8 +22,6 @@ class IntersectionSweepTest {
         OutlineRectangle r2 = new OutlineRectangle(1, 1, 3, p);
         SimpleOutline o2 = new SimpleOutline(r2);
 
-        TreeMap<Integer, Set<Edge>> intersections = IntersectionSweep.findIntersections(o1.getEdge(), o2.getEdge());
-
         List<Edge> edges = new ArrayList<>();
         edges.addAll(o1.getEdge().toList());
         edges.addAll(o2.getEdge().toList());
@@ -31,11 +29,27 @@ class IntersectionSweepTest {
         Map<Integer, Edge> toEdge = new HashMap<>();
         edges.forEach(e -> toEdge.put(e.getId(), e));
 
+        System.out.println("Sweepline intersections:");
+        TreeMap<Integer, Set<Edge>> intersections = IntersectionSweep.findIntersections(o1.getEdge(), o2.getEdge());
+
         for(Map.Entry<Integer, Set<Edge>> entries : intersections.entrySet()) {
             System.out.print(toEdge.get(entries.getKey()) + " intersects with: ");
             entries.getValue().forEach(v -> System.out.print(toEdge.get(v.getId()) + " "));
             System.out.println();
         }
+
+        System.out.println();
+
+        System.out.println("Bruteforce intersections:");
+        intersections = IntersectionSweep.findIntersectionsBF(o1.getEdge(), o2.getEdge());
+
+        for(Map.Entry<Integer, Set<Edge>> entries : intersections.entrySet()) {
+            System.out.print(toEdge.get(entries.getKey()) + " intersects with: ");
+            entries.getValue().forEach(v -> System.out.print(toEdge.get(v.getId()) + " "));
+            System.out.println();
+        }
+
+        System.out.println();
 
         AbstractSolver.printSolution(new HashSet<>(Arrays.asList(o1, o2)));
     }

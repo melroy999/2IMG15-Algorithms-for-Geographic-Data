@@ -13,8 +13,13 @@ public class VerticalLineEvent extends AbstractEvent {
     public final Edge e;
 
     public VerticalLineEvent(Edge e) {
-        super(e.getOrigin().y <= e.getTarget().y ? e.getOrigin() : e.getTarget(), EventType.VerticalLine);
-        upper = e.getOrigin().y <= e.getTarget().y ? e.getTarget() : e.getOrigin();
+        super(e.getDirection() == Edge.Direction.UP ? e.getOrigin() : e.getTarget(), EventType.VerticalLine);
+        upper = e.getDirection() == Edge.Direction.DOWN ? e.getOrigin() : e.getTarget();
+
+        if(p.y > upper.y) {
+            System.out.println("HOW!");
+        }
+
         this.e = e;
     }
 
@@ -27,6 +32,10 @@ public class VerticalLineEvent extends AbstractEvent {
      */
     @Override
     public void execute(PriorityQueue<AbstractEvent> events, TreeMap<DoubleWrapper, Set<LeftEndpointEvent>> status, Map<Integer, Set<Edge>> intersections) {
+        if(p.y > upper.y) {
+            System.out.println("HOW!");
+        }
+
         // Do a range search on the tree map.
         Map<DoubleWrapper, Set<LeftEndpointEvent>> range = status.subMap(new DoubleWrapper(p.y), new DoubleWrapper(upper.y));
 
