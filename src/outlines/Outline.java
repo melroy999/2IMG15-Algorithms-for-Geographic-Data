@@ -1,18 +1,43 @@
-package agd.solver;
+package outlines;
 
 import agd.data.outlines.OutlineRectangle;
+import agd.math.Point2d;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.PriorityQueue;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
-public class OutlineTest {
+public class Outline {
 
-    public static void createOutline(TreeSet<OutlineRectangle> rectangles) {
-        createOutlineHorizontal(rectangles);
-        createOutlineVertical(rectangles);
+    public static List<Edge> createOutline(TreeSet<OutlineRectangle> rectangles) {
+        List<Edge> edges = new ArrayList<>();
+        createOutlineHorizontal(rectangles, edges);
+        createOutlineVertical(rectangles, edges);
+        return edges;
     }
 
-    public static void createOutlineHorizontal(TreeSet<OutlineRectangle> rectangles) {
+    public static List<Edge> createOutline(TreeSet<OutlineRectangle> rectangles, double weight) {
+        // First, grow all the outlines. We know that doubling the weight will always give an integer.
+        // Thus, we multiply our entire plane such that the problem stays in the integer plane.
+        int iWeight = (int) Math.round(2 * weight);
+
+        // Increase the size of the plane, and create the buffered rectangles.
+        TreeSet<OutlineRectangle> bRectangles = new TreeSet<>();
+        for(OutlineRectangle rectangle : rectangles) {
+            bRectangles.add(BufferedRectangle.getRectangle(rectangle, iWeight));
+        }
+
+        List<Edge> bEdges = new ArrayList<>();
+        createOutlineHorizontal(bRectangles, bEdges);
+        createOutlineVertical(bRectangles, bEdges);
+
+        // Translate the edges back to the original positions.
+        return bEdges.stream().map(Edge::rescale).collect(Collectors.toList());
+    }
+
+    private static void createOutlineHorizontal(TreeSet<OutlineRectangle> rectangles, List<Edge> edges) {
         // Since the collection is a tree set, we know that the rectangles are already sorted on x succeeded y.
         PriorityQueue<AbstractEvent> events = new PriorityQueue<>();
         rectangles.forEach(r -> {
@@ -37,7 +62,7 @@ public class OutlineTest {
                 // The x-value has changed. We have to flush the edges that we have found.
                 TreeSet<Interval> intervals = flush(starting, ending, active);
                 for(Interval i : intervals) {
-                    System.out.println("\\draw[red] (" + i.start + ", " + v + ") -- (" + i.end  + ", " + v + ");");
+                    edges.add(new Edge(new Point2d(i.start, v), new Point2d(i.end, v)));
                 }
 
                 // Clear the current starting and ending states.
@@ -61,11 +86,11 @@ public class OutlineTest {
         // Flush the remaining edges.
         TreeSet<Interval> intervals = flush(starting, ending, active);
         for(Interval i : intervals) {
-            System.out.println("\\draw[red] (" + i.start + ", " + v + ") -- (" + i.end + ", " + v + ");");
+            edges.add(new Edge(new Point2d(i.start, v), new Point2d(i.end, v)));
         }
     }
 
-    public static void createOutlineVertical(TreeSet<OutlineRectangle> rectangles) {
+    private static void createOutlineVertical(TreeSet<OutlineRectangle> rectangles, List<Edge> edges) {
         // Since the collection is a tree set, we know that the rectangles are already sorted on x succeeded y.
         PriorityQueue<AbstractEvent> events = new PriorityQueue<>();
         rectangles.forEach(r -> {
@@ -90,7 +115,7 @@ public class OutlineTest {
                 // The x-value has changed. We have to flush the edges that we have found.
                 TreeSet<Interval> intervals = flush(starting, ending, active);
                 for(Interval i : intervals) {
-                    System.out.println("\\draw[red] (" + v + ", " + i.start + ") -- (" + v + ", " + i.end + ");");
+                    edges.add(new Edge(new Point2d(v, i.start), new Point2d(v, i.end)));
                 }
 
                 // Clear the current starting and ending states.
@@ -114,7 +139,7 @@ public class OutlineTest {
         // Flush the remaining edges.
         TreeSet<Interval> intervals = flush(starting, ending, active);
         for(Interval i : intervals) {
-            System.out.println("\\draw[red] (" + v + ", " + i.start + ") -- (" + v + ", " + i.end + ");");
+            edges.add(new Edge(new Point2d(v, i.start), new Point2d(v, i.end)));
         }
     }
 
@@ -169,7 +194,7 @@ public class OutlineTest {
         return result;
     }
 
-    static TreeSet<Interval> setMinus(TreeSet<Interval> source, TreeSet<Interval> minus) {
+    public static TreeSet<Interval> setMinus(TreeSet<Interval> source, TreeSet<Interval> minus) {
         TreeSet<Interval> result = new TreeSet<>();
         if(source.isEmpty()) return result;
         if(minus.isEmpty()) return new TreeSet<>(source);
