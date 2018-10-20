@@ -1,6 +1,5 @@
 package outlines;
 
-import agd.data.outlines.OutlineRectangle;
 import agd.math.Point2d;
 
 import java.util.ArrayList;
@@ -10,6 +9,55 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 public class Outline {
+    // The id of the outline.
+    private static int ID_COUNTER = 0;
+    protected final int id = ID_COUNTER++;
+
+    // The rectangles within this outline.
+    private TreeSet<OutlineRectangle> rectangles = new TreeSet<>();
+
+    public Outline(OutlineRectangle rectangle) {
+        insert(rectangle);
+    }
+
+    public void insert(OutlineRectangle rectangle) {
+        rectangles.add(rectangle);
+        rectangle.setOutline(this);
+    }
+
+    public void merge(Outline... outlines) {
+        // Merge the other outlines into this outline.
+        for(Outline outline : outlines) {
+            rectangles.addAll(outline.rectangles);
+            outline.rectangles.forEach(r -> r.setOutline(this));
+        }
+    }
+
+    /**
+     * Project the point p onto the outline and find the position that has the smallest Euclidean distance.
+     *
+     * @param p The point to find the closest position on the outline to.
+     * @return A point on the line segments of the outline such that the distance is minimal.
+     */
+    public Point2d projectAndSelect(Point2d p, double weight) {
+        // For each of the edges, find the best position and the associated score.
+        double min = Double.MAX_VALUE;
+        Point2d position = null;
+
+        // Find the edges for the buffered outline.
+        List<Edge> edges = createOutline(rectangles, weight);
+
+        for(Edge e : edges) {
+            Point2d projection = e.project(p);
+            double distance = projection.distance2(p);
+            if(distance < min) {
+                position = projection;
+                min = distance;
+            }
+        }
+
+        return position;
+    }
 
     public static List<Edge> createOutline(TreeSet<OutlineRectangle> rectangles) {
         List<Edge> edges = new ArrayList<>();
@@ -245,6 +293,10 @@ public class Outline {
         return result;
     }
 
+    public TreeSet<OutlineRectangle> getRectangles() {
+        return rectangles;
+    }
+
     public static abstract class AbstractEvent implements Comparable<AbstractEvent> {
         // The integer value at which the event should be triggered.
         private final int v;
@@ -328,5 +380,20 @@ public class Outline {
                     ", id=" + id +
                     '}';
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Outline o2 = (Outline) o;
+
+        return id == o2.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return id;
     }
 }

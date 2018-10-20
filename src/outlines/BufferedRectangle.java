@@ -1,8 +1,5 @@
 package outlines;
 
-import agd.data.outlines.OutlineRectangle;
-import agd.data.util.EntryRectangle;
-
 import java.awt.*;
 
 public class BufferedRectangle extends OutlineRectangle {

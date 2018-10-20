@@ -1,8 +1,6 @@
 package agd.data.outlines;
 
-import agd.intersection.IntersectionSweep;
 import agd.math.Point2d;
-import agd.overlap.OverlapSweep;
 
 import java.util.*;
 
@@ -135,77 +133,6 @@ public class BufferedOutline extends AbstractOutline {
 
             target.setNext(newEdge);
             newEdge.setNext(conflict.getNext());
-        }
-    }
-
-    private void sanitizeImproved() {
-
-        if(this.id == 220) {
-            System.out.println();
-        }
-
-        // Which overlaps do we have?
-        TreeMap<Integer, Set<Edge>> overlapMapping = OverlapSweep.findOverlaps(getEdge());
-
-        for(Edge target : this) {
-            // Get the true id of the target.
-            int targetId = target.getId();
-
-            // Does this edge have intersections in the intersection list?
-            // If it does not, continue. Otherwise, resolve the intersection and continue.
-            if(overlapMapping.containsKey(targetId)) {
-                Set<Edge> overlap = overlapMapping.get(targetId);
-
-                // Find the intersection that is applicable first by comparing the ids of the edges.
-                for(Edge conflict : overlap) {
-                    if(conflict.getId() > targetId) {
-                        // We have found the edge that follows this edge immediately.
-                        resolveIntersection(target, conflict, null);
-                        break;
-                    }
-                }
-            }
-        }
-
-        // Which intersections do we have?
-        TreeMap<Integer, Set<Edge>> intersectionMapping = IntersectionSweep.findIntersections(getEdge());
-
-        // A mapping in which we track all the ids that have changed.
-        TreeMap<Integer, Integer> castMap = new TreeMap<>();
-
-        if(this.id == 220) {
-            System.out.println();
-        }
-
-        for(Edge target : this) {
-            // Get the true id of the target.
-            int targetId = castMap.getOrDefault(target.getId(), target.getId());
-
-            // Does this edge have intersections in the intersection list?
-            // If it does not, continue. Otherwise, resolve the intersection and continue.
-            if(intersectionMapping.containsKey(targetId)) {
-                Set<Edge> intersections = intersectionMapping.get(targetId);
-
-                // Find the intersection that is applicable first by comparing the ids of the edges.
-                for(Edge conflict : intersections) {
-                    if(conflict.getId() > targetId) {
-                        // We have found the edge that follows this edge immediately.
-                        resolveIntersection(target, conflict, castMap);
-                        break;
-                    }
-                }
-            }
-        }
-
-        // Make sure that we have no two consecutive edges in the same direction.
-        Edge current = getEdge();
-        while(current.getNext() != getEdge()) {
-            if(current.getDirection() == current.getNext().getDirection()) {
-                // Merge.
-                current.setNext(current.getNext().getNext());
-            } else {
-                current = current.getNext();
-            }
         }
     }
 

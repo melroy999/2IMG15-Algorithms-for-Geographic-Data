@@ -88,75 +88,75 @@ class OutlineTest {
         result.forEach(System.out::println);
     }
 
-    @Test
-    void constructOutline() {
-        TreeSet<OutlineRectangle> rectangles = new TreeSet<>();
-        rectangles.add(new OutlineRectangle(0, 1, 2, p));
-        rectangles.add(new OutlineRectangle(0, 3, 1, p));
-        rectangles.add(new OutlineRectangle(1, 3, 1, p));
-        rectangles.add(new OutlineRectangle(0, 4, 2, p));
-        rectangles.add(new OutlineRectangle(2, 0, 4, p));
-        rectangles.add(new OutlineRectangle(4, 4, 2, p));
-        rectangles.add(new OutlineRectangle(4, 8, 3, p));
-        rectangles.add(new OutlineRectangle(7, 10, 1, p));
-        rectangles.add(new OutlineRectangle(7, 6, 4, p));
-        rectangles.add(new OutlineRectangle(6, 2, 4, p));
-        rectangles.add(new OutlineRectangle(8, 10, 4, p));
-        rectangles.add(new OutlineRectangle(8, 14, 4, p));
-        rectangles.add(new OutlineRectangle(12, 2, 1, p));
-        rectangles.add(new OutlineRectangle(11, 3, 4, p));
-        rectangles.add(new OutlineRectangle(12, 7, 4, p));
-        rectangles.add(new OutlineRectangle(12, 11, 1, p));
-        rectangles.add(new OutlineRectangle(13, 11, 2, p));
-        rectangles.add(new OutlineRectangle(15, 12, 1, p));
-        rectangles.add(new OutlineRectangle(15, 5, 2, p));
-        rectangles.add(new OutlineRectangle(17, 5, 3, p));
-        rectangles.add(new OutlineRectangle(17, 3, 2, p));
-        rectangles.add(new OutlineRectangle(20, 7, 1, p));
-
-        rectangles.add(new OutlineRectangle(-1, 13, 2, p));
-        rectangles.add(new OutlineRectangle(1, 12, 2, p));
-        rectangles.add(new OutlineRectangle(1, 14, 1, p));
-
-        rectangles.forEach(r -> System.out.println("\\draw (" + r.x + ", " + r.y + ") rectangle (" + (r.x + r.width) + ", " + (r.y + r.height) + ");"));
-
-        List<Edge> edges = Outline.createOutline(rectangles);
-        edges.forEach(System.out::println);
-    }
-
-    @Test
-    void constructOutlineBuffered() {
-        TreeSet<OutlineRectangle> rectangles = new TreeSet<>();
-        rectangles.add(new OutlineRectangle(0, 1, 2, p));
-        rectangles.add(new OutlineRectangle(0, 3, 1, p));
-        rectangles.add(new OutlineRectangle(1, 3, 1, p));
-        rectangles.add(new OutlineRectangle(0, 4, 2, p));
-        rectangles.add(new OutlineRectangle(2, 0, 4, p));
-        rectangles.add(new OutlineRectangle(4, 4, 2, p));
-        rectangles.add(new OutlineRectangle(4, 8, 3, p));
-        rectangles.add(new OutlineRectangle(7, 10, 1, p));
-        rectangles.add(new OutlineRectangle(7, 6, 4, p));
-        rectangles.add(new OutlineRectangle(6, 2, 4, p));
-        rectangles.add(new OutlineRectangle(8, 10, 4, p));
-        rectangles.add(new OutlineRectangle(8, 14, 4, p));
-        rectangles.add(new OutlineRectangle(12, 2, 1, p));
-        rectangles.add(new OutlineRectangle(11, 3, 4, p));
-        rectangles.add(new OutlineRectangle(12, 7, 4, p));
-        rectangles.add(new OutlineRectangle(12, 11, 1, p));
-        rectangles.add(new OutlineRectangle(13, 11, 2, p));
-        rectangles.add(new OutlineRectangle(15, 12, 1, p));
-        rectangles.add(new OutlineRectangle(15, 5, 2, p));
-        rectangles.add(new OutlineRectangle(17, 5, 3, p));
-        rectangles.add(new OutlineRectangle(17, 3, 2, p));
-        rectangles.add(new OutlineRectangle(20, 7, 1, p));
-
-        rectangles.add(new OutlineRectangle(-1, 13, 2, p));
-        rectangles.add(new OutlineRectangle(1, 12, 2, p));
-        rectangles.add(new OutlineRectangle(1, 14, 1, p));
-
-        rectangles.forEach(r -> System.out.println("\\draw (" + r.x + ", " + r.y + ") rectangle (" + (r.x + r.width) + ", " + (r.y + r.height) + ");"));
-
-        List<Edge> edges = Outline.createOutline(rectangles, 1.5);
-        edges.forEach(System.out::println);
-    }
+//    @Test
+//    void constructOutline() {
+//        TreeSet<OutlineRectangle> rectangles = new TreeSet<>();
+//        rectangles.add(new OutlineRectangle(0, 1, 2, p));
+//        rectangles.add(new OutlineRectangle(0, 3, 1, p));
+//        rectangles.add(new OutlineRectangle(1, 3, 1, p));
+//        rectangles.add(new OutlineRectangle(0, 4, 2, p));
+//        rectangles.add(new OutlineRectangle(2, 0, 4, p));
+//        rectangles.add(new OutlineRectangle(4, 4, 2, p));
+//        rectangles.add(new OutlineRectangle(4, 8, 3, p));
+//        rectangles.add(new OutlineRectangle(7, 10, 1, p));
+//        rectangles.add(new OutlineRectangle(7, 6, 4, p));
+//        rectangles.add(new OutlineRectangle(6, 2, 4, p));
+//        rectangles.add(new OutlineRectangle(8, 10, 4, p));
+//        rectangles.add(new OutlineRectangle(8, 14, 4, p));
+//        rectangles.add(new OutlineRectangle(12, 2, 1, p));
+//        rectangles.add(new OutlineRectangle(11, 3, 4, p));
+//        rectangles.add(new OutlineRectangle(12, 7, 4, p));
+//        rectangles.add(new OutlineRectangle(12, 11, 1, p));
+//        rectangles.add(new OutlineRectangle(13, 11, 2, p));
+//        rectangles.add(new OutlineRectangle(15, 12, 1, p));
+//        rectangles.add(new OutlineRectangle(15, 5, 2, p));
+//        rectangles.add(new OutlineRectangle(17, 5, 3, p));
+//        rectangles.add(new OutlineRectangle(17, 3, 2, p));
+//        rectangles.add(new OutlineRectangle(20, 7, 1, p));
+//
+//        rectangles.add(new OutlineRectangle(-1, 13, 2, p));
+//        rectangles.add(new OutlineRectangle(1, 12, 2, p));
+//        rectangles.add(new OutlineRectangle(1, 14, 1, p));
+//
+//        rectangles.forEach(r -> System.out.println("\\draw (" + r.x + ", " + r.y + ") rectangle (" + (r.x + r.width) + ", " + (r.y + r.height) + ");"));
+//
+//        List<Edge> edges = Outline.createOutline(rectangles);
+//        edges.forEach(System.out::println);
+//    }
+//
+//    @Test
+//    void constructOutlineBuffered() {
+//        TreeSet<OutlineRectangle> rectangles = new TreeSet<>();
+//        rectangles.add(new OutlineRectangle(0, 1, 2, p));
+//        rectangles.add(new OutlineRectangle(0, 3, 1, p));
+//        rectangles.add(new OutlineRectangle(1, 3, 1, p));
+//        rectangles.add(new OutlineRectangle(0, 4, 2, p));
+//        rectangles.add(new OutlineRectangle(2, 0, 4, p));
+//        rectangles.add(new OutlineRectangle(4, 4, 2, p));
+//        rectangles.add(new OutlineRectangle(4, 8, 3, p));
+//        rectangles.add(new OutlineRectangle(7, 10, 1, p));
+//        rectangles.add(new OutlineRectangle(7, 6, 4, p));
+//        rectangles.add(new OutlineRectangle(6, 2, 4, p));
+//        rectangles.add(new OutlineRectangle(8, 10, 4, p));
+//        rectangles.add(new OutlineRectangle(8, 14, 4, p));
+//        rectangles.add(new OutlineRectangle(12, 2, 1, p));
+//        rectangles.add(new OutlineRectangle(11, 3, 4, p));
+//        rectangles.add(new OutlineRectangle(12, 7, 4, p));
+//        rectangles.add(new OutlineRectangle(12, 11, 1, p));
+//        rectangles.add(new OutlineRectangle(13, 11, 2, p));
+//        rectangles.add(new OutlineRectangle(15, 12, 1, p));
+//        rectangles.add(new OutlineRectangle(15, 5, 2, p));
+//        rectangles.add(new OutlineRectangle(17, 5, 3, p));
+//        rectangles.add(new OutlineRectangle(17, 3, 2, p));
+//        rectangles.add(new OutlineRectangle(20, 7, 1, p));
+//
+//        rectangles.add(new OutlineRectangle(-1, 13, 2, p));
+//        rectangles.add(new OutlineRectangle(1, 12, 2, p));
+//        rectangles.add(new OutlineRectangle(1, 14, 1, p));
+//
+//        rectangles.forEach(r -> System.out.println("\\draw (" + r.x + ", " + r.y + ") rectangle (" + (r.x + r.width) + ", " + (r.y + r.height) + ");"));
+//
+//        List<Edge> edges = Outline.createOutline(rectangles, 1.5);
+//        edges.forEach(System.out::println);
+//    }
 }

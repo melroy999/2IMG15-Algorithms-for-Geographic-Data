@@ -26,7 +26,9 @@ public class ProblemSolution {
         this.instance = instance;
 
         // Populate the points list.
+        long startTime = System.currentTimeMillis();
         solver.solve(instance, points);
+        System.out.println("Running time: " + ((System.currentTimeMillis() - startTime) / 1000.0) + " seconds.");
     }
 
     /**

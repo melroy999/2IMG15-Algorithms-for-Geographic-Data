@@ -5,6 +5,7 @@ import agd.file.FileHandler;
 import agd.gui.GUI;
 import agd.data.input.ProblemInstance;
 import agd.solver.ComplexOutlineMergeSolver;
+import agd.solver.OutlineMergeSolver;
 import agd.solver.SimpleOutlineMergeSolver;
 import agd.solver.SimpleSweep;
 
@@ -46,6 +47,9 @@ public class Core {
         } else if(option == GUI.SolverOptions.SimpleOutlines) {
             System.out.println("Solver: SimpleOutline(" + gui.sortSelector.getSelectedItem() + ", " + gui.binarySearchCheckBox.isSelected() + ") solving " + instance.id);
             this.solution = new ProblemSolution(instance, new SimpleOutlineMergeSolver());
+        } else if(option == GUI.SolverOptions.Outlines) {
+            System.out.println("Solver: Outline(" + gui.sortSelector.getSelectedItem() + ", " + gui.binarySearchCheckBox.isSelected() + ") solving " + instance.id);
+            this.solution = new ProblemSolution(instance, new OutlineMergeSolver());
         } else {
             System.out.println("Solver: ComplexOutline(" + gui.sortSelector.getSelectedItem() + ") solving " + instance.id);
             this.solution = new ProblemSolution(instance, new ComplexOutlineMergeSolver());
