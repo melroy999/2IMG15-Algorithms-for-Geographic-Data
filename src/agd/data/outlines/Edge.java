@@ -2,6 +2,7 @@ package agd.data.outlines;
 
 import agd.math.Point2d;
 
+import java.awt.geom.Dimension2D;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -18,7 +19,7 @@ public class Edge implements Iterable<Edge>, Comparable<Edge> {
     private final Point2d origin;
 
     // The direction of the edge.
-    private final Direction direction;
+    private Direction direction;
 
     // Points to the previous and next edges.
     private Edge next, previous;
@@ -88,6 +89,12 @@ public class Edge implements Iterable<Edge>, Comparable<Edge> {
     public void setPrevious(Edge previous) {
         this.previous = previous;
         previous.next = this;
+
+        // Is the direction still valid?
+        Direction dir = Direction.getDirection(previous.origin, origin);
+        if(dir != previous.direction && previous.length() > 1e-4) {
+            previous.direction = dir;
+        }
     }
 
     /**
@@ -107,6 +114,12 @@ public class Edge implements Iterable<Edge>, Comparable<Edge> {
     public void setNext(Edge next) {
         this.next = next;
         next.previous = this;
+
+        // Is the direction still valid?
+        Direction dir = Direction.getDirection(origin, next.origin);
+        if(dir != direction && length() > 1e-4) {
+            direction = dir;
+        }
     }
 
     /**
@@ -135,8 +148,11 @@ public class Edge implements Iterable<Edge>, Comparable<Edge> {
         double ymin = Math.min(getOrigin().y, getTarget().y);
         double ymax = Math.max(getOrigin().y, getTarget().y);
 
+        // Make sure that the point is a half-width point. I.e., round to the nearest half.
+        Point2d target = new Point2d(Math.max(xmin, Math.min(xmax, p.x)), Math.max(ymin, Math.min(ymax, p.y)));
+
         // Project the point.
-        return new Point2d(Math.max(xmin, Math.min(xmax, p.x)), Math.max(ymin, Math.min(ymax, p.y)));
+        return new Point2d(Math.round(target.x * 2) / 2.0, Math.round(target.y * 2) / 2.0);
     }
 
     /**

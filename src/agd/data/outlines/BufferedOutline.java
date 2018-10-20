@@ -2,6 +2,7 @@ package agd.data.outlines;
 
 import agd.intersection.IntersectionSweep;
 import agd.math.Point2d;
+import agd.overlap.OverlapSweep;
 
 import java.util.*;
 
@@ -23,13 +24,14 @@ public class BufferedOutline extends AbstractOutline {
      */
     public BufferedOutline(SimpleOutline outline, double w) {
         super(outline.getRectangles());
-        setEdge(createOutline(outline, w));
+        setEdge(createOutline(outline, w + 0.01));
         maxId = getEdge().getPrevious().getId();
     }
 
     public BufferedOutline(ComplexOutline outline, double w) {
         super(outline.getRectangles());
-        setEdge(createOutline(outline, w));
+
+        setEdge(createOutline(outline, w + 0.01));
         maxId = getEdge().getPrevious().getId();
         sanitizeImproved();
         validate();
@@ -39,6 +41,7 @@ public class BufferedOutline extends AbstractOutline {
 
     private void validate() {
         int i = 0;
+        int j = 0;
 
         // Check if we have any intersections, the brute force way.
         for(Edge e1 : this) {
@@ -48,12 +51,15 @@ public class BufferedOutline extends AbstractOutline {
                 if(e1.doIntersect(e2)) {
                     i++;
                     itot++;
+
+                    if(e1.getDirection() != e2.getDirection()) j++;
                 }
+
             }
         }
 
         if(i != 0) {
-            System.out.println("Found " + i + " intersections in our output, with a total of " + itot + " intersections in this run.");
+            System.out.println("Found " + i + " intersections or overlaps in our output, with a total of " + itot + " intersections in this run.");
         }
     }
 
@@ -82,15 +88,7 @@ public class BufferedOutline extends AbstractOutline {
             Edge bufferedEdge = new Edge(p, e.getDirection());
 
             if(last != null) {
-                // Wait a second, is the direction of the previous edge still correct if we take this as the next?
-                Direction dir = Direction.getDirection(last.getOrigin(), p);
-                if(dir != last.getDirection()) {
-                    // We have to remake the previous edge.
-                    Edge prev = new Edge(last.getOrigin(), dir);
-                    prev.setPrevious(last.getPrevious());
-                    last = prev;
-                }
-
+                // The direction of the edge should be validated in the set next.
                 last.setNext(bufferedEdge);
             }
             last = bufferedEdge;
@@ -123,7 +121,7 @@ public class BufferedOutline extends AbstractOutline {
         if(target.getDirection() == conflict.getDirection()) {
 
             // We should extend the current edge.
-            target.setNext(conflict.getNext());
+            target.setNext(conflict);
 
         } else {
             // We have a normal intersection with an intersection point.
@@ -142,16 +140,42 @@ public class BufferedOutline extends AbstractOutline {
 
     private void sanitizeImproved() {
 
-        // Which intersections do we have?
-        TreeMap<Integer, Set<Edge>> intersectionMapping2 = IntersectionSweep.findIntersections(getEdge());
-        TreeMap<Integer, Set<Edge>> intersectionMapping = IntersectionSweep.findIntersectionsBF(getEdge());
-
-        if(intersectionMapping.size() != intersectionMapping2.size()) {
-            System.out.println("Imbalance " + intersectionMapping.size() + ", " + intersectionMapping2.size());
+        if(this.id == 220) {
+            System.out.println();
         }
+
+        // Which overlaps do we have?
+        TreeMap<Integer, Set<Edge>> overlapMapping = OverlapSweep.findOverlaps(getEdge());
+
+        for(Edge target : this) {
+            // Get the true id of the target.
+            int targetId = target.getId();
+
+            // Does this edge have intersections in the intersection list?
+            // If it does not, continue. Otherwise, resolve the intersection and continue.
+            if(overlapMapping.containsKey(targetId)) {
+                Set<Edge> overlap = overlapMapping.get(targetId);
+
+                // Find the intersection that is applicable first by comparing the ids of the edges.
+                for(Edge conflict : overlap) {
+                    if(conflict.getId() > targetId) {
+                        // We have found the edge that follows this edge immediately.
+                        resolveIntersection(target, conflict, null);
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Which intersections do we have?
+        TreeMap<Integer, Set<Edge>> intersectionMapping = IntersectionSweep.findIntersections(getEdge());
 
         // A mapping in which we track all the ids that have changed.
         TreeMap<Integer, Integer> castMap = new TreeMap<>();
+
+        if(this.id == 220) {
+            System.out.println();
+        }
 
         for(Edge target : this) {
             // Get the true id of the target.
@@ -167,13 +191,20 @@ public class BufferedOutline extends AbstractOutline {
                     if(conflict.getId() > targetId) {
                         // We have found the edge that follows this edge immediately.
                         resolveIntersection(target, conflict, castMap);
-
-                        // Which kind of intersection did we have? If it was an intersection, break; otherwise continue.
-                        if(target.getDirection() != conflict.getDirection()) {
-                            break;
-                        }
+                        break;
                     }
                 }
+            }
+        }
+
+        // Make sure that we have no two consecutive edges in the same direction.
+        Edge current = getEdge();
+        while(current.getNext() != getEdge()) {
+            if(current.getDirection() == current.getNext().getDirection()) {
+                // Merge.
+                current.setNext(current.getNext().getNext());
+            } else {
+                current = current.getNext();
             }
         }
     }

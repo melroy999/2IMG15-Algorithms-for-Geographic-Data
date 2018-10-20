@@ -24,7 +24,7 @@ public abstract class AbstractOutline implements Iterable<Edge> {
 
     // The id of the outline.
     private static int ID_COUNTER = 0;
-    private final int id = ID_COUNTER++;
+    protected final int id = ID_COUNTER++;
 
     /**
      * Create a new outline.

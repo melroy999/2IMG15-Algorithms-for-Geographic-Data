@@ -28,16 +28,5 @@ public class RightEndpointEvent extends AbstractEvent {
 
         // Remove the edge from the status.
         entries.remove(leftEndpointEvent);
-
-        // Does the entry set still contain edges? In that case, we have overlaps with all those edges.
-        for(LeftEndpointEvent e : entries) {
-            Set<Edge> set = intersections.getOrDefault(leftEndpointEvent.e.getId(), new TreeSet<>());
-            set.add(e.e);
-            intersections.putIfAbsent(leftEndpointEvent.e.getId(), set);
-
-            Set<Edge> set2 = intersections.getOrDefault(e.e.getId(), new TreeSet<>());
-            set2.add(leftEndpointEvent.e);
-            intersections.putIfAbsent(e.e.getId(), set2);
-        }
     }
 }
