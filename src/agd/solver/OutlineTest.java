@@ -2,13 +2,70 @@ package agd.solver;
 
 import agd.data.outlines.OutlineRectangle;
 
-import java.util.Iterator;
-import java.util.List;
 import java.util.PriorityQueue;
 import java.util.TreeSet;
 
 public class OutlineTest {
+
     public static void createOutline(TreeSet<OutlineRectangle> rectangles) {
+        createOutlineHorizontal(rectangles);
+        createOutlineVertical(rectangles);
+    }
+
+    public static void createOutlineHorizontal(TreeSet<OutlineRectangle> rectangles) {
+        // Since the collection is a tree set, we know that the rectangles are already sorted on x succeeded y.
+        PriorityQueue<AbstractEvent> events = new PriorityQueue<>();
+        rectangles.forEach(r -> {
+            Interval i = new Interval(r.x, r.x + r.width);
+            events.add(new StartEvent(r.y, i));
+            events.add(new EndEvent(r.y + r.height, i));
+        });
+
+        // Get the x-value that we start at.
+        int v = rectangles.first().x;
+
+        // The line segments that start and end at the current x-value. Also keep the ones that are active.
+        TreeSet<Interval> starting = new TreeSet<>();
+        TreeSet<Interval> ending = new TreeSet<>();
+        TreeSet<Interval> active = new TreeSet<>();
+
+        while(!events.isEmpty()) {
+            // Find the current event.
+            AbstractEvent event = events.poll();
+
+            if(event.v != v) {
+                // The x-value has changed. We have to flush the edges that we have found.
+                TreeSet<Interval> intervals = flush(starting, ending, active);
+                for(Interval i : intervals) {
+                    System.out.println("\\draw[red] (" + i.start + ", " + v + ") -- (" + i.end  + ", " + v + ");");
+                }
+
+                // Clear the current starting and ending states.
+                starting.clear();
+                ending.clear();
+
+                // Set the new x.
+                v = event.v;
+            }
+
+            // Check which type of event we have encountered and add the value to the corresponding list.
+            if(event instanceof StartEvent) {
+                starting.add(event.i);
+                active.add(event.i);
+            } else {
+                ending.add(event.i);
+                active.remove(event.i);
+            }
+        }
+
+        // Flush the remaining edges.
+        TreeSet<Interval> intervals = flush(starting, ending, active);
+        for(Interval i : intervals) {
+            System.out.println("\\draw[red] (" + i.start + ", " + v + ") -- (" + i.end + ", " + v + ");");
+        }
+    }
+
+    public static void createOutlineVertical(TreeSet<OutlineRectangle> rectangles) {
         // Since the collection is a tree set, we know that the rectangles are already sorted on x succeeded y.
         PriorityQueue<AbstractEvent> events = new PriorityQueue<>();
         rectangles.forEach(r -> {
@@ -31,7 +88,10 @@ public class OutlineTest {
 
             if(event.v != v) {
                 // The x-value has changed. We have to flush the edges that we have found.
-
+                TreeSet<Interval> intervals = flush(starting, ending, active);
+                for(Interval i : intervals) {
+                    System.out.println("\\draw[red] (" + v + ", " + i.start + ") -- (" + v + ", " + i.end + ");");
+                }
 
                 // Clear the current starting and ending states.
                 starting.clear();
@@ -50,19 +110,36 @@ public class OutlineTest {
                 active.remove(event.i);
             }
         }
+
+        // Flush the remaining edges.
+        TreeSet<Interval> intervals = flush(starting, ending, active);
+        for(Interval i : intervals) {
+            System.out.println("\\draw[red] (" + v + ", " + i.start + ") -- (" + v + ", " + i.end + ");");
+        }
     }
 
-    public static void flush(TreeSet<Interval> starting, TreeSet<Interval> ending, TreeSet<Interval> active) {
+
+
+    public static TreeSet<Interval> flush(TreeSet<Interval> starting, TreeSet<Interval> ending, TreeSet<Interval> active) {
         // Merge consecutive intervals.
         TreeSet<Interval> startingMerged = merge(starting);
         TreeSet<Interval> endingMerged = merge(ending);
         TreeSet<Interval> activeMerged = merge(active);
 
         // Find the ending line segments that are not overshadowed by the currently active line segments.
+        TreeSet<Interval> finals = setMinus(endingMerged, activeMerged);
 
         // Find the starting line segments that are not overshadowed by
         // the currently active line segments minus the starting line segments.
+        TreeSet<Interval> fullActive = new TreeSet<>(active);
+        fullActive.removeAll(starting);
+        fullActive.addAll(ending);
+        TreeSet<Interval> fullActiveMerged = merge(fullActive);
+        TreeSet<Interval> starters = setMinus(startingMerged, fullActiveMerged);
 
+        // Merge the results.
+        finals.addAll(starters);
+        return finals;
     }
 
     private static TreeSet<Interval> merge(TreeSet<Interval> intervals) {
@@ -223,6 +300,7 @@ public class OutlineTest {
             return "Interval{" +
                     "start=" + start +
                     ", end=" + end +
+                    ", id=" + id +
                     '}';
         }
     }
