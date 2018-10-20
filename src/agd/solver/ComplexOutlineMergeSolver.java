@@ -83,6 +83,8 @@ public class ComplexOutlineMergeSolver extends AbstractSolver {
 
             // Find the neighboring outlines. Insert the rectangle in the first of them, and merge the others.
             List<AbstractOutline> intersectingOutlines = query.stream().map(OutlineRectangle::getOutline).distinct().collect(Collectors.toList());
+            intersectingOutlines.sort((a, b) -> -Integer.compare(a.getRectangles().size(), b.getRectangles().size()));
+
             ((ComplexOutline) intersectingOutlines.get(0)).insert(rectangle);
 
             // Do the merging, using only the edges on our inserted rectangle as targets.

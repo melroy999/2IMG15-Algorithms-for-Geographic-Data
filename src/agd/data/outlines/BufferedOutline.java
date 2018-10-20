@@ -24,16 +24,16 @@ public class BufferedOutline extends AbstractOutline {
      */
     public BufferedOutline(SimpleOutline outline, double w) {
         super(outline.getRectangles());
-        setEdge(createOutline(outline, w + 0.01));
+        setEdge(createOutline(outline, w));
         maxId = getEdge().getPrevious().getId();
     }
 
     public BufferedOutline(ComplexOutline outline, double w) {
         super(outline.getRectangles());
 
-        setEdge(createOutline(outline, w + 0.01));
+        setEdge(createOutline(outline, w));
         maxId = getEdge().getPrevious().getId();
-        sanitizeImproved();
+        sanitize();
         validate();
     }
 

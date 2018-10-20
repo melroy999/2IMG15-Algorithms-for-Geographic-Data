@@ -203,6 +203,8 @@ public class SimpleOutlineMergeSolver extends AbstractSolver {
         rectangles.addAll(o2.getRectangles());
 
         if(d1.contains(d2) || d2.contains(d1)) {
+            // One of the outlines is contained entirely within the bounding box of the other.
+
             return new SimpleOutline(rectangle, rectangles);
         } else if(d1.intersects(d2)) {
 //            System.out.println("Intersection.");
