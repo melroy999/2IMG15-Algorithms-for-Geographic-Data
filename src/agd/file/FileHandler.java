@@ -48,8 +48,12 @@ public class FileHandler {
     public void batchResolutionFile(File input, File output) {
         try {
             ZipFile zip = new ZipFile(input);
-
             Enumeration<? extends ZipEntry> entries = zip.entries();
+
+            // The results for each entry in csv format.
+            FileWriter writer = new FileWriter("F:\\OneDrive - TU Eindhoven\\2IMG15 Geographic data\\results\\data.csv");
+            writer.append("sep=;\n");
+            writer.append("id; d; s;\n");
 
             // Iterate over all the entries.
             while(entries.hasMoreElements()){
@@ -57,35 +61,35 @@ public class FileHandler {
 
                 if(entry.getName().endsWith(".txt")) {
 
-                    double min = Double.MAX_VALUE;
-                    ProblemSolution solution = null;
+                    try (Scanner scanner = new Scanner(new InputStreamReader(zip.getInputStream(entry)))) {
 
+                        long start = System.currentTimeMillis();
 
-                    for (SimpleOutlineMergeSolver.SortingOptions option : SimpleOutlineMergeSolver.SortingOptions.values()) {
-                        try (Scanner scanner = new Scanner(new InputStreamReader(zip.getInputStream(entry)))) {
+                        // Notify the core that we have a new problem to solve.
+                        core.solveProblemInstance(ProblemInstance.readInstance(scanner));
 
-                            core.gui.sortSelector.setSelectedItem(option);
+                        double s = (System.currentTimeMillis() - start) / 1000.0;
 
-                            // Notify the core that we have a new problem to solve.
-                            core.solveProblemInstance(ProblemInstance.readInstance(scanner));
+                        String name = entry.getName().substring(0, entry.getName().lastIndexOf('.'));
+                        writer.append(name);
+                        writer.append(";");
+                        writer.append(String.valueOf(core.solution.getTotalError()));
+                        writer.append(";");
+                        writer.append(String.valueOf(s));
+                        writer.append(";\n");
 
-                            if (min > core.solution.getTotalError()) {
-                                min = core.solution.getTotalError();
-                                solution = core.solution;
-                            }
-
-                        } catch(FileNotFoundException | NoSuchElementException e){
-                            e.printStackTrace();
-                        }
+                    } catch(FileNotFoundException | NoSuchElementException e){
+                        e.printStackTrace();
                     }
 
-                    if (solution != null) {
-                        System.out.println(solution.getTotalError());
-                        core.solution = solution;
+                    if (core.solution != null) {
                         exportFile(new File(output, entry.getName()));
                     }
                 }
             }
+
+            writer.flush();
+            writer.close();
 
         } catch (IOException e) {
             e.printStackTrace();

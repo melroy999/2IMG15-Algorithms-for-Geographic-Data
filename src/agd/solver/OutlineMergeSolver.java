@@ -81,7 +81,7 @@ public class OutlineMergeSolver extends AbstractSolver {
     private static boolean insertExistingOutline(QuadTreeNode<OutlineRectangle> tree, Set<Outline> outlines, List<OutlineRectangle> intersections, WeightedPoint p, ArrayList<HalfGridPoint> points) {
         // Which distinct outlines do we intersect with? Sort them on rectangle size in increasing order.
         List<Outline> intersectingOutlines = intersections.stream().map(OutlineRectangle::getOutline).distinct().collect(Collectors.toList());
-        intersectingOutlines.sort(Comparator.comparingInt(o -> o.getRectangles().size()));
+        intersectingOutlines.sort(Comparator.comparingInt(a -> a.getRectangles().size()));
 
         List<OutlineRectangle> firstConflicts = null;
 

@@ -80,7 +80,7 @@ public class GUI {
             if(status == JFileChooser.APPROVE_OPTION) {
                 File selectedFile = fc2.getSelectedFile();
 
-                File outputFolder = new File("C:\\Users\\s139037\\Desktop\\Outputs");
+                File outputFolder = new File("F:\\OneDrive - TU Eindhoven\\2IMG15 Geographic data\\results\\files");
                 core.fileHandler.batchResolutionFile(selectedFile, outputFolder);
             }
         });
