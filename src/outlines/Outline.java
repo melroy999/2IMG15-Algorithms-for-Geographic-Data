@@ -2,10 +2,7 @@ package outlines;
 
 import agd.math.Point2d;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.PriorityQueue;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Outline {
@@ -59,13 +56,6 @@ public class Outline {
         return position;
     }
 
-    public static List<Edge> createOutline(TreeSet<OutlineRectangle> rectangles) {
-        List<Edge> edges = new ArrayList<>();
-        createOutlineHorizontal(rectangles, edges);
-        createOutlineVertical(rectangles, edges);
-        return edges;
-    }
-
     public static List<Edge> createOutline(TreeSet<OutlineRectangle> rectangles, double weight) {
         // First, grow all the outlines. We know that doubling the weight will always give an integer.
         // Thus, we multiply our entire plane such that the problem stays in the integer plane.
@@ -87,19 +77,20 @@ public class Outline {
 
     private static void createOutlineHorizontal(TreeSet<OutlineRectangle> rectangles, List<Edge> edges) {
         // Since the collection is a tree set, we know that the rectangles are already sorted on x succeeded y.
-        PriorityQueue<AbstractEvent> events = new PriorityQueue<>();
-        rectangles.forEach(r -> {
+        LinkedList<AbstractEvent> events = new LinkedList<>();
+        for(OutlineRectangle r : rectangles) {
             Interval i = new Interval(r.x, r.x + r.width);
             events.add(new StartEvent(r.y, i));
             events.add(new EndEvent(r.y + r.height, i));
-        });
+        }
+        Collections.sort(events);
 
         // Get the x-value that we start at.
-        int v = rectangles.first().x;
+        int v = rectangles.first().y;
 
         // The line segments that start and end at the current x-value. Also keep the ones that are active.
-        TreeSet<Interval> starting = new TreeSet<>();
-        TreeSet<Interval> ending = new TreeSet<>();
+        List<Interval> starting = new ArrayList<>();
+        List<Interval> ending = new ArrayList<>();
         TreeSet<Interval> active = new TreeSet<>();
 
         while(!events.isEmpty()) {
@@ -108,7 +99,7 @@ public class Outline {
 
             if(event.v != v) {
                 // The x-value has changed. We have to flush the edges that we have found.
-                TreeSet<Interval> intervals = flush(starting, ending, active);
+                List<Interval> intervals = flush(starting, ending, active);
                 for(Interval i : intervals) {
                     edges.add(new Edge(new Point2d(i.start, v), new Point2d(i.end, v)));
                 }
@@ -132,7 +123,7 @@ public class Outline {
         }
 
         // Flush the remaining edges.
-        TreeSet<Interval> intervals = flush(starting, ending, active);
+        List<Interval> intervals = flush(starting, ending, active);
         for(Interval i : intervals) {
             edges.add(new Edge(new Point2d(i.start, v), new Point2d(i.end, v)));
         }
@@ -140,19 +131,20 @@ public class Outline {
 
     private static void createOutlineVertical(TreeSet<OutlineRectangle> rectangles, List<Edge> edges) {
         // Since the collection is a tree set, we know that the rectangles are already sorted on x succeeded y.
-        PriorityQueue<AbstractEvent> events = new PriorityQueue<>();
-        rectangles.forEach(r -> {
+        LinkedList<AbstractEvent> events = new LinkedList<>();
+        for(OutlineRectangle r : rectangles) {
             Interval i = new Interval(r.y, r.y + r.height);
             events.add(new StartEvent(r.x, i));
             events.add(new EndEvent(r.x + r.width, i));
-        });
+        }
+        Collections.sort(events);
 
         // Get the x-value that we start at.
         int v = rectangles.first().x;
 
         // The line segments that start and end at the current x-value. Also keep the ones that are active.
-        TreeSet<Interval> starting = new TreeSet<>();
-        TreeSet<Interval> ending = new TreeSet<>();
+        List<Interval> starting = new ArrayList<>();
+        List<Interval> ending = new ArrayList<>();
         TreeSet<Interval> active = new TreeSet<>();
 
         while(!events.isEmpty()) {
@@ -161,7 +153,7 @@ public class Outline {
 
             if(event.v != v) {
                 // The x-value has changed. We have to flush the edges that we have found.
-                TreeSet<Interval> intervals = flush(starting, ending, active);
+                List<Interval> intervals = flush(starting, ending, active);
                 for(Interval i : intervals) {
                     edges.add(new Edge(new Point2d(v, i.start), new Point2d(v, i.end)));
                 }
@@ -185,43 +177,41 @@ public class Outline {
         }
 
         // Flush the remaining edges.
-        TreeSet<Interval> intervals = flush(starting, ending, active);
+        List<Interval> intervals = flush(starting, ending, active);
         for(Interval i : intervals) {
             edges.add(new Edge(new Point2d(v, i.start), new Point2d(v, i.end)));
         }
     }
 
-
-
-    public static TreeSet<Interval> flush(TreeSet<Interval> starting, TreeSet<Interval> ending, TreeSet<Interval> active) {
+    private static List<Interval> flush(List<Interval> starting, List<Interval> ending, TreeSet<Interval> active) {
         // Merge consecutive intervals.
-        TreeSet<Interval> startingMerged = merge(starting);
-        TreeSet<Interval> endingMerged = merge(ending);
-        TreeSet<Interval> activeMerged = merge(active);
+        List<Interval> startingMerged = merge(starting);
+        List<Interval> endingMerged = merge(ending);
+        List<Interval> activeMerged = merge(active);
 
         // Find the ending line segments that are not overshadowed by the currently active line segments.
-        TreeSet<Interval> finals = setMinus(endingMerged, activeMerged);
+        List<Interval> finals = setMinus(endingMerged, activeMerged);
 
         // Find the starting line segments that are not overshadowed by
         // the currently active line segments minus the starting line segments.
         TreeSet<Interval> fullActive = new TreeSet<>(active);
         fullActive.removeAll(starting);
         fullActive.addAll(ending);
-        TreeSet<Interval> fullActiveMerged = merge(fullActive);
-        TreeSet<Interval> starters = setMinus(startingMerged, fullActiveMerged);
+        List<Interval> fullActiveMerged = merge(fullActive);
+        List<Interval> starters = setMinus(startingMerged, fullActiveMerged);
 
         // Merge the results.
         finals.addAll(starters);
         return finals;
     }
 
-    private static TreeSet<Interval> merge(TreeSet<Interval> intervals) {
-        TreeSet<Interval> result = new TreeSet<>();
+    private static List<Interval> merge(Collection<Interval> intervals) {
+        List<Interval> result = new ArrayList<>();
         if(intervals.isEmpty()) return result;
 
         // Merge consecutive intervals.
-        int min = intervals.first().start;
-        int max = intervals.first().end;
+        int min = intervals.iterator().next().start;
+        int max = intervals.iterator().next().end;
 
         for(Interval interval : intervals) {
             if(max < interval.start) {
@@ -242,13 +232,14 @@ public class Outline {
         return result;
     }
 
-    public static TreeSet<Interval> setMinus(TreeSet<Interval> source, TreeSet<Interval> minus) {
-        TreeSet<Interval> result = new TreeSet<>();
+    public static List<Interval> setMinus(List<Interval> source, List<Interval> minus) {
+        List<Interval> result = new ArrayList<>();
         if(source.isEmpty()) return result;
-        if(minus.isEmpty()) return new TreeSet<>(source);
+        if(minus.isEmpty()) return new ArrayList<>(source);
 
         // The current minus interval.
-        Interval sub = minus.first();
+        Interval sub = minus.get(0);
+        int subi = 1;
 
         // We assume that both sets have been merged.
         a1: for(Interval i : source) {
@@ -284,7 +275,11 @@ public class Outline {
                         continue a1;
                     } else {
                         // Continue to the next sub.
-                        sub = minus.higher(sub);
+                        if(subi < minus.size()) {
+                            sub = minus.get(subi++);
+                        } else {
+                            sub = null;
+                        }
                     }
                 }
             }

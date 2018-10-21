@@ -62,6 +62,8 @@ public class OutlineMergeSolver extends AbstractSolver {
                 insertNewOutline(tree, outlines, rectangle, p, points);
             }
         }
+
+        System.out.println(outlines.size());
     }
 
     private static void insertNewOutline(QuadTreeNode<OutlineRectangle> tree, Set<Outline> outlines, OutlineRectangle rectangle, WeightedPoint p, ArrayList<HalfGridPoint> points) {
