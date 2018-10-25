@@ -159,6 +159,7 @@ public class Outline {
                 }
 
                 // Clear the current starting and ending states.
+                active.addAll(starting);
                 starting.clear();
                 ending.clear();
 
@@ -169,7 +170,6 @@ public class Outline {
             // Check which type of event we have encountered and add the value to the corresponding list.
             if(event instanceof StartEvent) {
                 starting.add(event.i);
-                active.add(event.i);
             } else {
                 ending.add(event.i);
                 active.remove(event.i);
@@ -191,14 +191,7 @@ public class Outline {
 
         // Find the ending line segments that are not overshadowed by the currently active line segments.
         List<Interval> finals = setMinus(endingMerged, activeMerged);
-
-        // Find the starting line segments that are not overshadowed by
-        // the currently active line segments minus the starting line segments.
-        TreeSet<Interval> fullActive = new TreeSet<>(active);
-        fullActive.removeAll(starting);
-        fullActive.addAll(ending);
-        List<Interval> fullActiveMerged = merge(fullActive);
-        List<Interval> starters = setMinus(startingMerged, fullActiveMerged);
+        List<Interval> starters = setMinus(startingMerged, activeMerged);
 
         // Merge the results.
         finals.addAll(starters);
