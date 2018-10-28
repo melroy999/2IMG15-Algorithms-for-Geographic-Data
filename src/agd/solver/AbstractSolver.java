@@ -63,7 +63,7 @@ public abstract class AbstractSolver {
             case FURTHEST:
                 return getFurthestPointComparator(c);
             case NONE:
-                return (a1, a2) -> 0;
+                return Comparator.comparingInt(a -> a.i);
             case SIZE_ASC:
                 return Comparator.comparingInt(a -> a.w);
             case SIZE_DESC:

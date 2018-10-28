@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class SimpleOutlineMergeSolver extends AbstractSolver {
-    private static boolean binarySearch = false;
 
     /**
      * Solve the given problem instance.
@@ -29,7 +28,6 @@ public class SimpleOutlineMergeSolver extends AbstractSolver {
     @Override
     public void solve(ProblemInstance instance, ArrayList<HalfGridPoint> points) {
         Core core = Core.getCore();
-        binarySearch = core.gui.binarySearchCheckBox.isSelected();
 
         solve(instance, points, (SortingOptions) core.gui.sortSelector.getSelectedItem());
     }
@@ -108,28 +106,12 @@ public class SimpleOutlineMergeSolver extends AbstractSolver {
             }
 
             if(conflicts.isEmpty()) {
-                Pair<Point2d, OutlineRectangle> closestPlacement = findCloserPlacement(placement, result, p, tree);
+                // We can freely add the selected position.
+                ((SimpleOutline) outline).insert(result);
+                tree.insert(result);
 
-                if(binarySearch) {
-                    if(closestPlacement.getKey().distance2(placement) < 1e-4) {
-                        // We haven't found a better position, add it to the outline.
-                        ((SimpleOutline) outline).insert(closestPlacement.getValue());
-                    } else {
-                        // Create a new outline.
-                        outlines.add(new SimpleOutline(closestPlacement.getValue()));
-                    }
-
-                    tree.insert(closestPlacement.getValue());
-                    points.set(p.i, HalfGridPoint.make(closestPlacement.getKey(), p));
-                } else {
-
-                    // We can freely add the selected position.
-                    ((SimpleOutline) outline).insert(result);
-                    tree.insert(result);
-
-                    // Add the chosen rectangle to the tree and result.
-                    points.set(p.i, HalfGridPoint.make(placement, p));
-                }
+                // Add the chosen rectangle to the tree and result.
+                points.set(p.i, HalfGridPoint.make(placement, p));
 
                 return true;
             }

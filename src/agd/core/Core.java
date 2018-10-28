@@ -45,10 +45,10 @@ public class Core {
             System.out.println("Solver: SimpleSweep solving " + instance.id);
             this.solution = new ProblemSolution(instance, new SimpleSweep());
         } else if(option == GUI.SolverOptions.SimpleOutlines) {
-            System.out.println("Solver: SimpleOutline(" + gui.sortSelector.getSelectedItem() + ", " + gui.binarySearchCheckBox.isSelected() + ") solving " + instance.id);
+            System.out.println("Solver: SimpleOutline(" + gui.sortSelector.getSelectedItem() + ") solving " + instance.id);
             this.solution = new ProblemSolution(instance, new SimpleOutlineMergeSolver());
         } else if(option == GUI.SolverOptions.Outlines) {
-            System.out.println("Solver: Outline(" + gui.sortSelector.getSelectedItem() + ", " + gui.binarySearchCheckBox.isSelected() + ") solving " + instance.id);
+            System.out.println("Solver: Outline(" + gui.sortSelector.getSelectedItem() + ") solving " + instance.id);
             this.solution = new ProblemSolution(instance, new OutlineMergeSolver());
         } else {
             System.out.println("Solver: ComplexOutline(" + gui.sortSelector.getSelectedItem() + ") solving " + instance.id);

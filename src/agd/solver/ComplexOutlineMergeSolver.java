@@ -131,7 +131,6 @@ public class ComplexOutlineMergeSolver extends AbstractSolver {
                 firstConflicts = conflicts;
             }
 
-            // TODO We disable merging for now.
             if(conflicts.isEmpty()) {
 
                 // We can freely add the selected position.
@@ -145,39 +144,23 @@ public class ComplexOutlineMergeSolver extends AbstractSolver {
             }
         }
 
-        ComplexOutline outline = (ComplexOutline) intersectingOutlines.get(0);
-        BufferedOutline bOutline = new BufferedOutline(outline, 0.5 * p.w);
-        Point2d placement = bOutline.projectAndSelect(p);
-        OutlineRectangle result = getOutlineRectangle(placement, p, false);
+        // Merge the outlines that are in conflict when placing the rectangle in the foremost outline.
+        AbstractOutline source = intersectingOutlines.get(0);
+        intersectingOutlines = firstConflicts.stream().map(OutlineRectangle::getOutline).distinct().collect(Collectors.toList());
 
-        // For now, we do not merge.
-        // We can freely add the selected position.
-        outline.insert(result);
-        tree.insert(result);
+        outlines.remove(source);
 
-        // Add the chosen rectangle to the tree and result.
-        points.set(p.i, HalfGridPoint.make(placement, p));
+        // We have been unable to place the point without causing conflicts. We have to merge outlines.
+        for(AbstractOutline outline : intersectingOutlines) {
+            // Merge all the intersecting outlines.
+            source = merge(source, outline);
+            outlines.remove(outline);
+        }
 
-        return true;
+        outlines.add(source);
 
-//        // Merge the outlines that are in conflict when placing the rectangle in the foremost outline.
-//        AbstractOutline source = intersectingOutlines.get(0);
-//        intersectingOutlines = firstConflicts.stream().map(OutlineRectangle::getOutline).distinct().collect(Collectors.toList());
-//
-//        outlines.remove(source);
-//
-//        // We have been unable to place the point without causing conflicts. We have to merge outlines.
-//        for(AbstractOutline outline : intersectingOutlines) {
-//            // Merge all the intersecting outlines.
-//            source = merge(source, outline);
-//            outlines.remove(outline);
-//            break;
-//        }
-//
-//        outlines.add(source);
-//
-//        // Next, we postpone the insertion of the point.
-//        return false;
+        // Next, we postpone the insertion of the point.
+        return false;
     }
 
     private static ComplexOutline merge(AbstractOutline o1, AbstractOutline o2) {
