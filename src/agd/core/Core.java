@@ -4,10 +4,7 @@ import agd.data.output.ProblemSolution;
 import agd.file.FileHandler;
 import agd.gui.GUI;
 import agd.data.input.ProblemInstance;
-import agd.solver.ComplexOutlineMergeSolver;
-import agd.solver.OutlineMergeSolver;
-import agd.solver.SimpleOutlineMergeSolver;
-import agd.solver.SimpleSweep;
+import agd.solver.*;
 
 public class Core {
     // The singleton instance of the core.
@@ -44,7 +41,11 @@ public class Core {
         if(option == GUI.SolverOptions.SimpleSweep) {
             System.out.println("Solver: SimpleSweep solving " + instance.id);
             this.solution = new ProblemSolution(instance, new SimpleSweep());
-        } else if(option == GUI.SolverOptions.SimpleOutlines) {
+        } else if (option == GUI.SolverOptions.DualSweep) {
+            System.out.println("Solver: DualSweep solving " + instance.id);
+            this.solution = new ProblemSolution(instance, new DualSweep());
+        }
+        else if(option == GUI.SolverOptions.SimpleOutlines) {
             System.out.println("Solver: SimpleOutline(" + gui.sortSelector.getSelectedItem() + ") solving " + instance.id);
             this.solution = new ProblemSolution(instance, new SimpleOutlineMergeSolver());
         } else if(option == GUI.SolverOptions.Outlines) {

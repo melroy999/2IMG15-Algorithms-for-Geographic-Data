@@ -135,7 +135,7 @@ public class GUI {
     }
 
     public enum SolverOptions {
-        Outlines, SimpleOutlines, ComplexOutlines, SimpleSweep
+        Outlines, SimpleOutlines, ComplexOutlines, DualSweep, SimpleSweep
     }
 
     /**

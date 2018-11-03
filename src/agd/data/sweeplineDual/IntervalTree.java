@@ -1,7 +1,6 @@
-package agd.data.sweepline;
+package agd.data.sweeplineDual;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class IntervalTree {
 
@@ -14,9 +13,6 @@ public class IntervalTree {
     public void setRoot(Interval root) {
         this.root = root;
     }
-
-    // Needed functions: Add interval, check intersection
-    // Possibly needed functions: Remove interval, update interval
 
     /**
      * addInterval, function that adds a given interval to the tree
@@ -110,7 +106,8 @@ public class IntervalTree {
 
             // node with two children: Get the inorder successor (smallest in the right subtree)
             Interval successor = getLeft(tree.getRight());
-            tree.setDepth(successor.getDepth());
+            tree.setMaxDepth(successor.getMaxDepth());
+            tree.setMinDepth(successor.getMinDepth());
             tree.setEnd(successor.getEnd());
             tree.setStart(successor.getStart());
             tree.setId(successor.getId());

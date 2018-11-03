@@ -1,4 +1,4 @@
-package agd.data.sweepline;
+package agd.data.sweeplineDual;
 
 import agd.data.input.WeightedPoint;
 import agd.data.output.HalfGridPoint;
@@ -22,7 +22,7 @@ public class DeleteEvent extends AbstractEvent {
      */
     @Override
     public void execute(IntervalTree intervalTree, ArrayList<HalfGridPoint> points, PriorityQueue<AbstractEvent> events) {
-        Interval interval = new Interval(getP().y, (getP().y + getOwner().w), getP().x + getOwner().w, getOwner().i);
+        Interval interval = new Interval(getP().y, (getP().y + getOwner().w),getP().x, getP().x + getOwner().w, getOwner().i);
         intervalTree.setRoot(intervalTree.deleteInterval(intervalTree.getRoot(), interval));
     }
 }
