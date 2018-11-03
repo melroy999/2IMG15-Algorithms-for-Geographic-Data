@@ -29,9 +29,6 @@ public class SimpleSweep extends AbstractSolver {
         points.sort(new SortByX());
     }
 
-    //TODO: Split points in half and get both sweeps working together
-    //TODO: Problems, combination of max and min heap with sweep depending on order
-
     /**
      * Solve the given problem instance using a left to right sweep line.
      *
@@ -47,15 +44,7 @@ public class SimpleSweep extends AbstractSolver {
         IntervalTree intervalTreeRight = new IntervalTree();
         PriorityQueue<AbstractEvent> eventsRight = new PriorityQueue<>();
 
-        IntervalTree intervalTreeLeft = new IntervalTree();
         PriorityQueue<AbstractEvent> eventsLeft = new PriorityQueue<>(Collections.reverseOrder());
-
-        // Events: -Lower left region corner reached. Place square if possible or move to the right until possible to place
-        //          and add square corner coords to status
-        //         -Lower right region corner reached. Remove square corner coords from status
-//        for (HalfGridCorner p : eventPoints) {
-//            eventsRight.add(new PlaceEvent(new Point2i((int)p.point().x, (int) p.point().y ), p.o));
-//        }
 
         HalfGridCorner tempPoint;
         for (int i = 0; i < eventPoints.size(); i++) {
@@ -67,7 +56,6 @@ public class SimpleSweep extends AbstractSolver {
                 tempPoint = eventPoints.get(i);
                 eventsRight.add(new PlaceEvent(new Point2i((int) tempPoint.point().x, (int) tempPoint.point().y), tempPoint.o));
             }
-            //eventsLeft.add(eventsRight.poll());
         }
 
         // Get events from PQ using poll(), use .execute() on event

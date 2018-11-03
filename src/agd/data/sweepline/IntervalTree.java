@@ -15,9 +15,6 @@ public class IntervalTree {
         this.root = root;
     }
 
-    // Needed functions: Add interval, check intersection
-    // Possibly needed functions: Remove interval, update interval
-
     /**
      * addInterval, function that adds a given interval to the tree
      *
