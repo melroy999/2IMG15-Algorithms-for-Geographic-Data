@@ -44,8 +44,7 @@ public class Core {
         } else if (option == GUI.SolverOptions.DualSweep) {
             System.out.println("Solver: DualSweep solving " + instance.id);
             this.solution = new ProblemSolution(instance, new DualSweep());
-        }
-        else if(option == GUI.SolverOptions.SimpleOutlines) {
+        } else if(option == GUI.SolverOptions.SimpleOutlines) {
             System.out.println("Solver: SimpleOutline(" + gui.sortSelector.getSelectedItem() + ") solving " + instance.id);
             this.solution = new ProblemSolution(instance, new SimpleOutlineMergeSolver());
         } else if(option == GUI.SolverOptions.Outlines) {
