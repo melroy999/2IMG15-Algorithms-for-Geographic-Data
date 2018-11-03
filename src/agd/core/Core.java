@@ -4,7 +4,9 @@ import agd.data.output.ProblemSolution;
 import agd.file.FileHandler;
 import agd.gui.GUI;
 import agd.data.input.ProblemInstance;
-import agd.solver.OutlineSolver;
+import agd.solver.ComplexOutlineMergeSolver;
+import agd.solver.OutlineMergeSolver;
+import agd.solver.SimpleOutlineMergeSolver;
 import agd.solver.SimpleSweep;
 
 public class Core {
@@ -12,7 +14,7 @@ public class Core {
     private static Core core;
 
     // Reference to the GUI component.
-    private final GUI gui;
+    public final GUI gui;
 
     // The file handler used to import and save files.
     public final FileHandler fileHandler;
@@ -36,12 +38,27 @@ public class Core {
      */
     public void solveProblemInstance(ProblemInstance instance) {
         this.instance = instance;
-        this.solution = new ProblemSolution(instance, new SimpleSweep());
-//        this.solution = new ProblemSolution(instance, new OutlineSolver());
+
+        GUI.SolverOptions option = (GUI.SolverOptions) gui.solverSelector.getSelectedItem();
+
+        if(option == GUI.SolverOptions.SimpleSweep) {
+            System.out.println("Solver: SimpleSweep solving " + instance.id);
+            this.solution = new ProblemSolution(instance, new SimpleSweep());
+        } else if(option == GUI.SolverOptions.SimpleOutlines) {
+            System.out.println("Solver: SimpleOutline(" + gui.sortSelector.getSelectedItem() + ") solving " + instance.id);
+            this.solution = new ProblemSolution(instance, new SimpleOutlineMergeSolver());
+        } else if(option == GUI.SolverOptions.Outlines) {
+            System.out.println("Solver: Outline(" + gui.sortSelector.getSelectedItem() + ") solving " + instance.id);
+            this.solution = new ProblemSolution(instance, new OutlineMergeSolver());
+        } else {
+            System.out.println("Solver: ComplexOutline(" + gui.sortSelector.getSelectedItem() + ") solving " + instance.id);
+            this.solution = new ProblemSolution(instance, new ComplexOutlineMergeSolver());
+        }
 
         gui.redrawDisplayPanel();
         gui.setMinError();
         gui.setError();
+        System.out.println();
     }
 
     /**

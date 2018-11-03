@@ -26,7 +26,9 @@ public class ProblemSolution {
         this.instance = instance;
 
         // Populate the points list.
+        long startTime = System.currentTimeMillis();
         solver.solve(instance, points);
+        System.out.println("Running time: " + ((System.currentTimeMillis() - startTime) / 1000.0) + " seconds.");
     }
 
     /**
@@ -55,6 +57,8 @@ public class ProblemSolution {
     public Set<Integer> getInvalidPoints() {
         // A set of integers holding all points that have faulty placements.
         HashSet<Integer> errors = new HashSet<>();
+        HashSet<Integer> overlaps = new HashSet<>();
+
 
         for(HalfGridPoint p : points) {
             // First check if the coordinates are valid.
@@ -71,10 +75,14 @@ public class ProblemSolution {
             for(HalfGridPoint q : points) {
                 if(p.o.i != q.o.i && p.hasOverlap(q)) {
                     errors.add(p.o.i);
-                    System.out.println("Point " + p.o.i + " overlaps with " + q.o.i + ".");
+                    overlaps.add(p.o.i);
+//                    System.out.println("Point " + p.o.i + " overlaps with " + q.o.i + ".");
                 }
             }
         }
+
+        overlaps.forEach(System.out::println);
+        if(overlaps.size() > 0) System.out.println("We have " + overlaps.size() + " rectangles that overlap.");
 
         // Check whether each point is represented in the solution.
         List<WeightedPoint> originalPoints = instance.getPoints();

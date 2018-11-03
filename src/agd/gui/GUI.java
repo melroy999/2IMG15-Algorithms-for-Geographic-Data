@@ -1,12 +1,11 @@
 package agd.gui;
 
 import agd.core.Core;
+import agd.solver.AbstractSolver;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.Locale;
 
@@ -23,6 +22,7 @@ public class GUI {
     // A static file chooser, to avoid slow loading issues.
     private static JFileChooser fc = new JFileChooser(); //now declared globally
     private static JFileChooser fs = new JFileChooser(); //now declared globally
+    private static JFileChooser fc2 = new JFileChooser(); //now declared globally
 
     // Components of the GUI.
     private JPanel rootPanel;
@@ -34,6 +34,12 @@ public class GUI {
     private JButton saveFileButton;
     private JLabel minErrorLabel;
     private JLabel errorLabel;
+    public JCheckBox validateOutputCheckBox;
+    public JComboBox<SolverOptions> solverSelector;
+    public JComboBox<AbstractSolver.SortingOptions> sortSelector;
+    private JButton recalculateButton;
+    public JCheckBox binarySearchCheckBox;
+    private JButton loadZipButton;
 
     private GUI(Core core) {
         this.core = core;
@@ -41,6 +47,9 @@ public class GUI {
 
         fc.setDialogType(JFileChooser.OPEN_DIALOG);
         fc.setFileFilter(new FileNameExtensionFilter("text file", "txt"));
+
+        fc2.setDialogType(JFileChooser.OPEN_DIALOG);
+        fc2.setFileFilter(new FileNameExtensionFilter("zip file", "zip"));
 
         fs.setDialogType(JFileChooser.SAVE_DIALOG);
         fs.setSelectedFile(new File("output.txt"));
@@ -64,6 +73,25 @@ public class GUI {
                 core.fileHandler.exportFile(fc.getSelectedFile());
             }
         });
+
+        loadZipButton.addActionListener(e -> {
+            int status = fc2.showOpenDialog(rootPanel);
+
+            if(status == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = fc2.getSelectedFile();
+
+                File outputFolder = new File("F:\\OneDrive - TU Eindhoven\\2IMG15 Geographic data\\results\\files");
+                core.fileHandler.batchResolutionFile(selectedFile, outputFolder);
+            }
+        });
+
+        recalculateButton.addActionListener(e -> {
+                if(core.instance != null) {
+                    // Notify the core that we have a new problem to solve.
+                    core.solveProblemInstance(core.instance);
+                }
+            }
+        );
     }
 
     /**
@@ -106,16 +134,24 @@ public class GUI {
         return gui;
     }
 
+    public enum SolverOptions {
+        Outlines, SimpleOutlines, ComplexOutlines, SimpleSweep
+    }
+
     /**
      * Create the GUI components that are not automatically created.
      */
     private void createUIComponents() {
         // Obviously, we have to initialize our drawing panel.
         displayPanel = new DrawPanel(this);
+
+        solverSelector = new JComboBox<>(SolverOptions.values());
+        sortSelector = new JComboBox<>(AbstractSolver.SortingOptions.values());
     }
 
     public void setMinError() {
         if(core.solution != null) {
+            System.out.println("Minimum error: " + String.format(Locale.ROOT, "%.3f", core.solution.getMinimumError()));
             minErrorLabel.setText(String.format(Locale.ROOT, "%.3f", core.solution.getMinimumError()));
         } else {
             minErrorLabel.setText("0");
@@ -124,6 +160,7 @@ public class GUI {
 
     public void setError() {
         if(core.solution != null) {
+            System.out.println("Total error: " + String.format(Locale.ROOT, "%.3f", core.solution.getTotalError()));
             errorLabel.setText(String.format(Locale.ROOT, "%.3f", core.solution.getTotalError()));
         } else {
             errorLabel.setText("0");

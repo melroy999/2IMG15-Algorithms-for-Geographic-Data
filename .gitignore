@@ -4,6 +4,8 @@
 # Except for the following folders:
 !/src/
 !/tests/
+!/inputs/
+!/results/
 
 # Except for the following files:
 !.gitignore
